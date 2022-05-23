@@ -145,13 +145,6 @@ this.script_fight_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 
 	function startFight(_data)
 	{
-		// local properties = this.Const.Tactical.CombatInfo.getClone();
-		// local tile = this.World.getTile(this.World.worldToTile(_pos));
-		// local isAtUniqueLocation = false;
-		// properties.TerrainTemplate = this.Const.World.TerrainTacticalTemplate[tile.TacticalType];
-		// properties.Tile = tile;
-		// properties.InCombatAlready = false;
-		// properties.IsAttackingLocation = false;
 		local p = this.Const.Tactical.CombatInfo.getClone();
 		p.Tile = this.World.State.getPlayer().getTile();
 		p.TerrainTemplate = _data.Settings.Terrain;
@@ -161,7 +154,6 @@ this.script_fight_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 			p.LocationTemplate.Template[0] = _data.Settings.Map;
 			p.LocationTemplate.OwnedByFaction = this.Const.Faction.Enemy;
 		}
-		// local p = this.World.State.getLocalCombatProperties(this.World.State.getPlayer().getPos());
 		p.Entities = [];
 		p.CombatID = "ScriptedFight";
 		p.Music = this.Const.Music.OrcsTracks;
@@ -171,8 +163,7 @@ this.script_fight_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 		p.IsFogOfWarVisible = false;
 		p.IsUsingSetPlayers = !_data.Settings.UsePlayer;
 		p.WithoutPlayer <- !_data.Settings.UsePlayer;
-		
-		::ScriptFight.WithoutPlayer = !_data.Settings.UsePlayer;
+
 		foreach(spawnlist in _data.Player.Spawnlists)
 		{
 			this.Const.World.Common.addUnitsToCombat(p.Entities, this.Const.World.Spawn[spawnlist.ID], spawnlist.Resources.tointeger() , this.Const.Faction.PlayerAnimals);

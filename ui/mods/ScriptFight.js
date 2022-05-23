@@ -29,7 +29,7 @@ var ScriptFightScreen = function(_parent)
     this.mSettings = {
         Terrain : "",
         Map : "",
-        UsePlayer : true,
+        UsePlayer : false,
     }
 }
 
@@ -51,7 +51,7 @@ ScriptFightScreen.prototype.createDIV = function (_parentDiv)
     // create: dialog container
     var dialogLayout = $('<div class="script-fight-container-layout"/>');
     this.mContainer.append(dialogLayout);
-    this.mDialogContainer = dialogLayout.createDialog('Script Fight', null, null, false);
+    this.mDialogContainer = dialogLayout.createDialog('Custom Fight', null, null, false);
     this.mDialogContentContainer = this.mDialogContainer.findDialogContentContainer();
 
     // create footer button bar
@@ -61,7 +61,7 @@ ScriptFightScreen.prototype.createDIV = function (_parentDiv)
     // create: buttons
     var layout = $('<div class="l-ok-button"/>');
     footerButtonBar.append(layout);
-    var button = layout.createTextButton("Start scripted fight", function ()
+    var button = layout.createTextButton("Start custom fight", function ()
     {
         self.notifyBackendOkButtonPressed();
     }, 'scripted-fight-text-button', 4);
@@ -71,6 +71,13 @@ ScriptFightScreen.prototype.createDIV = function (_parentDiv)
     this.mNoButton = layout.createTextButton("Cancel", function ()
     {
         self.notifyBackendCancelButtonPressed();
+    }, 'scripted-fight-text-button', 4);
+
+    var layout = $('<div class="l-cancel-button"/>');
+    footerButtonBar.append(layout);
+    this.mResetButton = layout.createTextButton("Reset", function ()
+    {
+        self.initialiseValues();
     }, 'scripted-fight-text-button', 4);
 
     this.mIsVisible = false;
@@ -124,9 +131,9 @@ ScriptFightScreen.prototype.createSettingsDiv = function()
         increaseArea: '30%'
     });
     this.mUsePlayerCheck.on('ifChecked ifUnchecked', null, this, function (_event) {
-        self.mUsePlayer = $(this).prop("checked");
+        self.mSettings.UsePlayer = $(this).prop("checked")
     });
-    this.mUsePlayerCheck.iCheck('check');
+    this.mUsePlayerCheck.iCheck('uncheck');
     checkboxRow.append($('<label class="text-font-normal font-color-subtitle bool-checkbox-label" for="use-player-checkbox">Use Player</label>'))
 }
 
@@ -135,11 +142,14 @@ ScriptFightScreen.prototype.createArrayScrollContainer = function(_dialog, _div,
 {
     this.mPopupListContainer = _dialog.createList(2);
     var scrollContainer = this.mPopupListContainer.findListScrollContainer();
+    _dialog.prepend(this.createFilterBar(scrollContainer));
     MSU.iterateObject(_array, $.proxy(function(_key, _unit){
+        if(_unit == "") return
         var row = this.addRow(scrollContainer);
 
         var name = $('<div class="title-font-normal font-color-brother-name script-entry-label">' + _unit +  '</div>');
         row.append(name);
+
 
         var addButtonContainer = $('<div class="scripted-fight-text-button-layout"/>');
         var addButton = addButtonContainer.createTextButton("Choose", $.proxy(function(_button){
@@ -191,6 +201,7 @@ ScriptFightScreen.prototype.createAddUnitScrollContainer = function(_dialog, _si
     var self = this;
     this.mPopupListContainer = _dialog.createList(2);
     var scrollContainer = this.mPopupListContainer.findListScrollContainer();
+    _dialog.prepend(this.createFilterBar(scrollContainer));
     MSU.iterateObject(this.mData.AllUnits, $.proxy(function(_key, _unit){
         var row = this.addRow(scrollContainer, "unit-row");
         row.unit = _unit;
@@ -235,6 +246,7 @@ ScriptFightScreen.prototype.createAddSpawnlistScrollContainer = function(_dialog
     var self = this;
     this.mPopupListContainer = _dialog.createList(2);
     var scrollContainer = this.mPopupListContainer.findListScrollContainer();
+    _dialog.prepend(this.createFilterBar(scrollContainer));
     MSU.iterateObject(this.mData.AllSpawnlists, $.proxy(function(_key, _unit){
         var row = this.addRow(scrollContainer, "unit-row");
         row.unit = _unit;
@@ -286,6 +298,35 @@ ScriptFightScreen.prototype.createPopup = function(_name, _popupClass, _popupDia
     return result;
 }
 
+ScriptFightScreen.prototype.createFilterBar = function(_scrollContainer)
+{
+    var row = $('<div class="row filter-bar"/>');
+    var name = $('<div class="title-font-normal font-color-brother-name script-entry-label">Filter</div>');
+    row.append(name);
+    var filterLayout = $('<div class="string-input-container"/>');
+    row.append(filterLayout);
+    var filterInput = $('<input type="text" class="title-font-normal font-color-brother-name string-input"/>');
+    filterLayout.append(filterInput);
+    filterInput.on("keyup", function(_event){
+        var currentInput = $(this).val();
+        var rows = _scrollContainer.find(".row");
+        rows.each(function(_idx){
+            var label = $(this).find(".script-entry-label");
+            if (label.length == 0) return;
+            var labelText = $(label[0]).html();
+            if (labelText.toLowerCase().search(currentInput.toLowerCase()) == -1)
+            {
+                $(this).css("display", "none")
+            }
+            else
+            {
+                $(this).css("display", "flex")
+            }
+        })
+    })
+    return row;
+}
+
 ScriptFightScreen.prototype.addRow = function(_div, _classes)
 {
     var row = $('<div class="row"/>');
@@ -306,6 +347,18 @@ ScriptFightScreen.prototype.setData = function (_data)
 ScriptFightScreen.prototype.initialiseValues = function (_data)
 {  
     this.mTerrainButton.changeButtonText(this.mData.AllBaseTerrains[1]);
+    this.mSettings.Terrain = this.mData.AllBaseTerrains[1];
+
+    this.mMapButton.changeButtonText("");
+    this.mSettings.Map = "";
+
+    this.mUsePlayerCheck.iCheck('uncheck');
+    this.mSettings.UsePlayer = false;
+
+    this.mLeftSideSetupBox.spawnlistScrollContainer.empty();
+    this.mRightSideSetupBox.spawnlistScrollContainer.empty();
+    this.mLeftSideSetupBox.unitsScrollContainer.empty();
+    this.mRightSideSetupBox.unitsScrollContainer.empty();
     // this.mMapButton.html(this.mData.AllBaseTerrains[1]);
 };
 
@@ -343,7 +396,6 @@ ScriptFightScreen.prototype.gatherData = function()
 
     //     }
     // };
-    console.error(JSON.stringify(ret))
     return ret;
 }
 
