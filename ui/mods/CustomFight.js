@@ -29,7 +29,38 @@ var CustomFightScreen = function(_parent)
     this.mSettings = {
         Terrain : "",
         Map : "",
-        UsePlayer : false,
+        SpectatorMode : false,
+    }
+
+    this.mButtons = {
+        Pause : {
+            ID : "mPauseButton",
+            Paths : {
+                true : Asset.BUTTON_TOGGLE_HIGHLIGHT_BLOCKED_TILES_ENABLED,
+                false : Asset.BUTTON_TOGGLE_HIGHLIGHT_BLOCKED_TILES_DISABLED,
+            }
+        }, 
+        ManualTurns : {
+            ID : "mManualTurnsButton",
+            Paths : {
+                true : Asset.BUTTON_TOGGLE_HIGHLIGHT_BLOCKED_TILES_ENABLED,
+                false : Asset.BUTTON_TOGGLE_HIGHLIGHT_BLOCKED_TILES_DISABLED,
+            }
+        }, 
+        FOV : {
+            ID : "mFOVButton",
+            Paths : {
+                true : Asset.BUTTON_TOGGLE_HIGHLIGHT_BLOCKED_TILES_ENABLED,
+                false : Asset.BUTTON_TOGGLE_HIGHLIGHT_BLOCKED_TILES_DISABLED,
+            }
+        }, 
+        UnlockCamera : {
+            ID : "mUnlockCameraButton",
+            Paths : {
+                true : Asset.BUTTON_TOGGLE_HIGHLIGHT_BLOCKED_TILES_ENABLED,
+                false : Asset.BUTTON_TOGGLE_HIGHLIGHT_BLOCKED_TILES_DISABLED,
+            }
+        }, 
     }
 }
 
@@ -125,16 +156,16 @@ CustomFightScreen.prototype.createSettingsDiv = function()
     });
 
     var checkboxRow = this.addRow(this.mSettingsBox)
-    this.mUsePlayerCheck = checkboxRow.append($('<input type="checkbox" id="use-player-checkbox" />')).iCheck({
+    this.mSpectatorModeCheck = checkboxRow.append($('<input type="checkbox" id="use-player-checkbox" />')).iCheck({
         checkboxClass: 'icheckbox_flat-orange',
         radioClass: 'iradio_flat-orange',
         increaseArea: '30%'
     });
-    this.mUsePlayerCheck.on('ifChecked ifUnchecked', null, this, function (_event) {
-        self.mSettings.UsePlayer = $(this).prop("checked")
+    this.mSpectatorModeCheck.on('ifChecked ifUnchecked', null, this, function (_event) {
+        self.mSettings.SpectatorMode = $(this).prop("checked")
     });
-    this.mUsePlayerCheck.iCheck('uncheck');
-    checkboxRow.append($('<label class="text-font-normal font-color-subtitle bool-checkbox-label" for="use-player-checkbox">Use Player</label>'))
+    this.mSpectatorModeCheck.iCheck('uncheck');
+    checkboxRow.append($('<label class="text-font-normal font-color-subtitle bool-checkbox-label" for="use-player-checkbox">Spectator Mode</label>'))
 }
 
 // creates a generic popup that lists entries in an array
@@ -352,8 +383,8 @@ CustomFightScreen.prototype.initialiseValues = function (_data)
     this.mMapButton.changeButtonText("");
     this.mSettings.Map = "";
 
-    this.mUsePlayerCheck.iCheck('uncheck');
-    this.mSettings.UsePlayer = false;
+    this.mSpectatorModeCheck.iCheck('uncheck');
+    this.mSettings.SpectatorMode = false;
 
     this.mLeftSideSetupBox.spawnlistScrollContainer.empty();
     this.mRightSideSetupBox.spawnlistScrollContainer.empty();
@@ -375,7 +406,7 @@ CustomFightScreen.prototype.gatherData = function()
     //     Settings : {
     //         Terrain = "",
     //         Map = "",
-    //         UsePlayer = false,
+    //         SpectatorMode = false,
     //     },
     //     Player : {
     //         Spawnlists : [
@@ -421,6 +452,21 @@ CustomFightScreen.prototype.gatherUnits = function(_ret, _div)
     // ret.unitsScrollContainer
     // row.amount
 }
+
+CustomFightScreen.prototype.notifyBackendTopBarButtonPressed = function (_buttonType)
+{
+    if (this.mSQHandle !== null)
+    {
+        SQ.call(this.mSQHandle, 'onTopBarButtonPressed', _buttonType);
+    }
+};
+
+CustomFightScreen.prototype.setTopBarButtonState = function (_data)
+{
+    var button = this.mButtons[_data[0]];
+    var screenModule = Screens["TacticalScreen"].mTopbarOptionsModule
+    screenModule[button.ID].changeButtonImage(Path.GFX + button.Paths[_data[1].toString()]);
+};
 
 CustomFightScreen.prototype.notifyBackendOkButtonPressed = function ()
 {

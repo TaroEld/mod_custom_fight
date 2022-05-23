@@ -143,6 +143,74 @@ this.custom_fight_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 		this.startFight(_data);
 	}
 
+	function onTopBarButtonPressed(_buttonType)
+	{
+		switch(_buttonType)
+		{
+			case "Pause":
+				this.m.JSHandle.asyncCall("setTopBarButtonState", [_buttonType, this.onPausePressed()]);
+				break;
+
+			case "FOV":
+				this.m.JSHandle.asyncCall("setTopBarButtonState", [_buttonType, this.onFOVPressed()]);
+				break;
+
+			case "ManualTurns":
+			case "UnlockCamera":
+				local properties = this.Tactical.State.getStrategicProperties();
+				properties[_buttonType] = !properties[_buttonType];
+				this.Tactical.EventLog.log(_buttonType + " is now " + properties[_buttonType]);
+				this.m.JSHandle.asyncCall("setTopBarButtonState", [_buttonType, properties[_buttonType]]);
+				break;
+		}		
+	}
+
+	function onPausePressed()
+	{
+		local state = ::MSU.Utils.getState("tactical_state")
+		state.setPause(!state.m.IsGamePaused);
+		
+		if(state.m.IsGamePaused)
+		{
+			this.Tactical.EventLog.log("[color=#1e468f]Game is now paused.[/color]");
+		}
+		else
+		{
+			this.Tactical.EventLog.log("[color=#8f1e1e]Game is now unpaused.[/color]");
+		}
+		return state.m.IsGamePaused;
+	}
+
+	function onFOVPressed()
+	{
+		local state = ::MSU.Utils.getState("tactical_state");
+		state.m.IsFogOfWarVisible = !state.m.IsFogOfWarVisible;
+
+		if (state.m.IsFogOfWarVisible)
+		{
+			this.Tactical.fillVisibility(this.Const.Faction.Player, false);
+			local heroes = this.Tactical.Entities.getInstancesOfFaction(this.Const.Faction.Player);
+
+			foreach( i, hero in heroes )
+			{
+				hero.updateVisibilityForFaction();
+			}
+
+			if (this.Tactical.TurnSequenceBar.getActiveEntity() != null)
+			{
+				this.Tactical.TurnSequenceBar.getActiveEntity().updateVisibilityForFaction();
+			}
+			this.Tactical.EventLog.log("[color=#1e468f]FOV is now visible.[/color]");
+		}
+		else
+		{
+			this.Tactical.fillVisibility(this.Const.Faction.Player, true);
+			this.Tactical.EventLog.log("[color=#1e468f]FOV is no longer visible.[/color]");
+		}
+		return state.m.IsFogOfWarVisible;
+	}
+
+
 	function startFight(_data)
 	{
 		local p = this.Const.Tactical.CombatInfo.getClone();
@@ -160,9 +228,14 @@ this.custom_fight_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 		p.PlayerDeploymentType = this.Const.Tactical.DeploymentType.Line;
 		p.EnemyDeploymentType = this.Const.Tactical.DeploymentType.Line;
 		p.IsAutoAssigningBases = false;
-		p.IsFogOfWarVisible = false;
-		p.IsUsingSetPlayers = !_data.Settings.UsePlayer;
-		p.WithoutPlayer <- !_data.Settings.UsePlayer;
+		p.IsFogOfWarVisible = _data.Settings.SpectatorMode;
+
+		p.IsUsingSetPlayers = _data.Settings.SpectatorMode;
+		p.SpectatorMode <- _data.Settings.SpectatorMode;
+		p.UnlockCamera <- false;
+		p.ManualTurns <- false;
+		p.FOV <- true;
+		p.Pause <- false;
 
 		foreach(spawnlist in _data.Player.Spawnlists)
 		{

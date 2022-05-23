@@ -9,6 +9,8 @@
 {
 	::mods_registerJS("CustomFight.js");
 	::mods_registerCSS("CustomFight.css");
+	::mods_registerJS("CustomFight_TacticalScreenTopbarOptionsModule.js");
+	::mods_registerCSS("CustomFight_TacticalScreenTopbarOptionsModule.css");
 
 	::CustomFight.Mod <- ::MSU.Class.Mod(::CustomFight.ID, ::CustomFight.Version, ::CustomFight.Name); 
 	::CustomFight.Screen <- this.new("scripts/ui/screens/custom_fight_screen");
@@ -16,20 +18,18 @@
 	::CustomFight.Mod.Keybinds.addSQKeybind("toggleCustomFightScreen", "ctrl+p", ::MSU.Key.State.All,  ::CustomFight.Screen.toggle.bindenv(::CustomFight.Screen));
 	::CustomFight.Mod.Keybinds.addSQKeybind("initNextTurn", "f", ::MSU.Key.State.Tactical, function(){
 		this.Tactical.TurnSequenceBar.initNextTurn(true);
+		return true;
 	});
-	::CustomFight.Mod.Keybinds.addSQKeybind("togglePauseTactical", "p", ::MSU.Key.State.Tactical, function(){
-		local state = ::MSU.Utils.getState("tactical_state")
-		state.setPause(!state.m.IsGamePaused);
-		
-		if(state.m.IsGamePaused)
-		{
-			this.Tactical.EventLog.log("[color=#1e468f]Game is now paused.[/color]");
-		}
-		else
-		{
-			this.Tactical.EventLog.log("[color=#8f1e1e]Game is now unpaused.[/color]");
-		}
-	});
+	::CustomFight.Mod.Keybinds.addSQKeybind("togglePauseTactical", "p", ::MSU.Key.State.Tactical, function()
+	{
+		::CustomFight.Screen.onPausePressed();
+		return true;
+	})
+	::CustomFight.Mod.Keybinds.addSQKeybind("toggleFovTactical", "d", ::MSU.Key.State.Tactical, function()
+	{
+		::CustomFight.Screen.onFOVPressed();
+		return true;
+	})
 
 	::mods_hookNewObject("entity/tactical/tactical_entity_manager", function(o){
 		local checkCombatFinished = o.checkCombatFinished;
@@ -41,7 +41,7 @@
 				return checkCombatFinished(_forceFinish);
 			}
 
-			if (!("WithoutPlayer" in properties) || !properties.WithoutPlayer)
+			if (!("SpectatorMode" in properties) || !properties.SpectatorMode)
 			{
 				return checkCombatFinished(_forceFinish);
 			}
@@ -75,7 +75,7 @@
 		o.isInputAllowed = function()
 		{
 			local properties = this.Tactical.State.getStrategicProperties();
-			if ("WithoutPlayer" in properties && properties.WithoutPlayer)
+			if ("UnlockCamera" in properties && properties.UnlockCamera)
 			{
 				return true;
 			}
@@ -88,7 +88,7 @@
 		o.setInputLocked = function(_bool)
 		{
 			local properties = this.Tactical.State.getStrategicProperties();
-			if ("WithoutPlayer" in properties && properties.WithoutPlayer)
+			if ("UnlockCamera" in properties && properties.UnlockCamera)
 			{
 				return setInputLocked(false);
 			}
@@ -102,7 +102,7 @@
 		{
 			if (_force) return initNextTurn(_force);
 			local properties = this.Tactical.State.getStrategicProperties();
-			if ("WithoutPlayer" in properties && properties.WithoutPlayer)
+			if ("ManualTurns" in properties && properties.ManualTurns)
 			{
 				return;
 			}
