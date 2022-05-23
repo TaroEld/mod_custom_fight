@@ -10,11 +10,11 @@
  */
 "use strict";
 
-var ScriptFightScreen = function(_parent)
+var CustomFightScreen = function(_parent)
 {
     MSUUIScreen.call(this);
-    this.mModID = "mod_script_fight"
-    this.mID = "ScriptFightScreen";
+    this.mModID = "mod_custom_fight"
+    this.mID = "CustomFightScreen";
     this.mContainer = null;
     this.mDialogContainer = null;
     this.mDialogContentContainer = null;
@@ -33,23 +33,23 @@ var ScriptFightScreen = function(_parent)
     }
 }
 
-ScriptFightScreen.prototype = Object.create(MSUUIScreen.prototype);
-Object.defineProperty(ScriptFightScreen.prototype, 'constructor', {
-    value: ScriptFightScreen,
+CustomFightScreen.prototype = Object.create(MSUUIScreen.prototype);
+Object.defineProperty(CustomFightScreen.prototype, 'constructor', {
+    value: CustomFightScreen,
     enumerable: false,
     writable: true
 });
 
-ScriptFightScreen.prototype.createDIV = function (_parentDiv)
+CustomFightScreen.prototype.createDIV = function (_parentDiv)
 {
     var self = this;
 
     // create: containers (init hidden!)
-    this.mContainer = $('<div class="dialog-screen ui-control dialog-mod display-none opacity-none script-fight"/>');
+    this.mContainer = $('<div class="dialog-screen ui-control dialog-mod display-none opacity-none custom-fight"/>');
     _parentDiv.append(this.mContainer);
 
     // create: dialog container
-    var dialogLayout = $('<div class="script-fight-container-layout"/>');
+    var dialogLayout = $('<div class="custom-fight-container-layout"/>');
     this.mContainer.append(dialogLayout);
     this.mDialogContainer = dialogLayout.createDialog('Custom Fight', null, null, false);
     this.mDialogContentContainer = this.mDialogContainer.findDialogContentContainer();
@@ -64,41 +64,41 @@ ScriptFightScreen.prototype.createDIV = function (_parentDiv)
     var button = layout.createTextButton("Start custom fight", function ()
     {
         self.notifyBackendOkButtonPressed();
-    }, 'scripted-fight-text-button', 4);
+    }, 'custom-fight-text-button', 4);
     
     var layout = $('<div class="l-cancel-button"/>');
     footerButtonBar.append(layout);
     this.mNoButton = layout.createTextButton("Cancel", function ()
     {
         self.notifyBackendCancelButtonPressed();
-    }, 'scripted-fight-text-button', 4);
+    }, 'custom-fight-text-button', 4);
 
     var layout = $('<div class="l-cancel-button"/>');
     footerButtonBar.append(layout);
     this.mResetButton = layout.createTextButton("Reset", function ()
     {
         self.initialiseValues();
-    }, 'scripted-fight-text-button', 4);
+    }, 'custom-fight-text-button', 4);
 
     this.mIsVisible = false;
     this.createContentDiv();
 };
 
-ScriptFightScreen.prototype.destroyDIV = function ()
+CustomFightScreen.prototype.destroyDIV = function ()
 {    
     this.mContainer.empty();
     this.mContainer.remove();
     this.mContainer = null;
 };
 
-ScriptFightScreen.prototype.createContentDiv = function()
+CustomFightScreen.prototype.createContentDiv = function()
 {
     this.createSettingsDiv();
     this.mLeftSideSetupBox = this.createSideDiv("left-side");
     this.mRightSideSetupBox = this.createSideDiv("right-side");
 }
 
-ScriptFightScreen.prototype.createSettingsDiv = function()
+CustomFightScreen.prototype.createSettingsDiv = function()
 {
     var self = this;
     this.mSettingsBox = $('<div class="settings-box"/>');
@@ -109,13 +109,13 @@ ScriptFightScreen.prototype.createSettingsDiv = function()
     terrainRow.append($('<div class="title-font-normal font-color-brother-name label">Terrain</div>'));
     this.mTerrainButton = terrainRow.createTextButton("", $.proxy(function(_div){
        this.createArrayScrollContainer(this.createPopup('Choose Terrain','generic-popup', 'generic-popup-container'), _div, this.mData.AllBaseTerrains, "Terrain")
-    }, this), "scripted-fight-text-button", 4);
+    }, this), "custom-fight-text-button", 4);
 
     var mapRow = this.addRow(this.mSettingsBox);
     mapRow.append($('<div class="title-font-normal font-color-brother-name label">Map</div>'));
     this.mMapButton = mapRow.createTextButton("", $.proxy(function(_div){
        this.createArrayScrollContainer(this.createPopup('Choose Map','generic-popup', 'generic-popup-container'), _div, this.mData.AllLocationTerrains, "Map")
-    }, this), "scripted-fight-text-button", 4);
+    }, this), "custom-fight-text-button", 4);
     this.mMapButton.mousedown(function(_event){
         if(_event.which == 3)
         {
@@ -138,7 +138,7 @@ ScriptFightScreen.prototype.createSettingsDiv = function()
 }
 
 // creates a generic popup that lists entries in an array
-ScriptFightScreen.prototype.createArrayScrollContainer = function(_dialog, _div, _array, _setting)
+CustomFightScreen.prototype.createArrayScrollContainer = function(_dialog, _div, _array, _setting)
 {
     this.mPopupListContainer = _dialog.createList(2);
     var scrollContainer = this.mPopupListContainer.findListScrollContainer();
@@ -147,20 +147,20 @@ ScriptFightScreen.prototype.createArrayScrollContainer = function(_dialog, _div,
         if(_unit == "") return
         var row = this.addRow(scrollContainer);
 
-        var name = $('<div class="title-font-normal font-color-brother-name script-entry-label">' + _unit +  '</div>');
+        var name = $('<div class="title-font-normal font-color-brother-name custom-fight-entry-label">' + _unit +  '</div>');
         row.append(name);
 
 
-        var addButtonContainer = $('<div class="scripted-fight-text-button-layout"/>');
+        var addButtonContainer = $('<div class="custom-fight-text-button-layout"/>');
         var addButton = addButtonContainer.createTextButton("Choose", $.proxy(function(_button){
             _div.changeButtonText(_unit)
             this.mSettings[_setting] = _unit;
-        }, this), "scripted-fight-text-button", 4);
+        }, this), "custom-fight-text-button", 4);
         row.append(addButtonContainer);
     }, this))
 }
 
-ScriptFightScreen.prototype.createSideDiv = function(_side)
+CustomFightScreen.prototype.createSideDiv = function(_side)
 {
     var self = this;
     var ret = $('<div class="setup-box"/>');
@@ -182,21 +182,21 @@ ScriptFightScreen.prototype.createSideDiv = function(_side)
     ret.append(buttonBar);
     ret.buttons = {};
 
-    var layout = $('<div class="scripted-fight-text-button-layout"/>');
+    var layout = $('<div class="custom-fight-text-button-layout"/>');
     buttonBar.append(layout);
     ret.buttons.addUnitButton = layout.createTextButton("Add Unit", $.proxy(function(_div){
         this.createAddUnitScrollContainer(this.createPopup('Add Unit','generic-popup', 'generic-popup-container'), ret.unitsScrollContainer);
-    }, this), "scripted-fight-text-button", 4);
+    }, this), "custom-fight-text-button", 4);
 
-    layout = $('<div class="scripted-fight-text-button-layout"/>');
+    layout = $('<div class="custom-fight-text-button-layout"/>');
     buttonBar.append(layout);
     ret.buttons.addSpawnlistButton = layout.createTextButton("Add Spawnlist", $.proxy(function(_div){
         this.createAddSpawnlistScrollContainer(this.createPopup('Add Spawnlist','generic-popup', 'generic-popup-container'), ret.spawnlistScrollContainer);
-    }, this), "scripted-fight-text-button", 4);
+    }, this), "custom-fight-text-button", 4);
     return ret;
 }
 
-ScriptFightScreen.prototype.createAddUnitScrollContainer = function(_dialog, _side)
+CustomFightScreen.prototype.createAddUnitScrollContainer = function(_dialog, _side)
 {
     var self = this;
     this.mPopupListContainer = _dialog.createList(2);
@@ -206,24 +206,24 @@ ScriptFightScreen.prototype.createAddUnitScrollContainer = function(_dialog, _si
         var row = this.addRow(scrollContainer, "unit-row");
         row.unit = _unit;
 
-        var name = $('<div class="title-font-normal font-color-brother-name script-entry-label">' + _unit.Name +  '</div>');
+        var name = $('<div class="title-font-normal font-color-brother-name custom-fight-entry-label">' + _unit.Name +  '</div>');
         row.append(name);
 
-        var addButtonContainer = $('<div class="scripted-fight-text-button-layout"/>');
+        var addButtonContainer = $('<div class="custom-fight-text-button-layout"/>');
         var addButton = addButtonContainer.createTextButton("Add", $.proxy(function(_button){
             this.addUnitToBox(_unit, _side, _key);
-        }, self), "scripted-fight-text-button", 4);
+        }, self), "custom-fight-text-button", 4);
         row.append(addButtonContainer);
     }, this))
 }
 
-ScriptFightScreen.prototype.addUnitToBox = function(_unit, _side, _key)
+CustomFightScreen.prototype.addUnitToBox = function(_unit, _side, _key)
 {
     var row = this.addRow(_side);
     row.data("unitID", _key);
     row.data("unit", _unit);
 
-    var name = $('<div class="title-font-normal font-color-brother-name script-entry-label">' + _unit.Name +  '</div>');
+    var name = $('<div class="title-font-normal font-color-brother-name custom-fight-entry-label">' + _unit.Name +  '</div>');
     row.append(name);
 
     var amountInputLayout = $('<div class="string-input-container"/>');
@@ -241,7 +241,7 @@ ScriptFightScreen.prototype.addUnitToBox = function(_unit, _side, _key)
     }, 'delete-keybind-button', 2);
 }
 
-ScriptFightScreen.prototype.createAddSpawnlistScrollContainer = function(_dialog, _side)
+CustomFightScreen.prototype.createAddSpawnlistScrollContainer = function(_dialog, _side)
 {
     var self = this;
     this.mPopupListContainer = _dialog.createList(2);
@@ -251,24 +251,24 @@ ScriptFightScreen.prototype.createAddSpawnlistScrollContainer = function(_dialog
         var row = this.addRow(scrollContainer, "unit-row");
         row.unit = _unit;
 
-        var name = $('<div class="title-font-normal font-color-brother-name script-entry-label">' + _unit.id +  '</div>');
+        var name = $('<div class="title-font-normal font-color-brother-name custom-fight-entry-label">' + _unit.id +  '</div>');
         row.append(name);
 
-        var addButtonContainer = $('<div class="scripted-fight-text-button-layout"/>');
+        var addButtonContainer = $('<div class="custom-fight-text-button-layout"/>');
         var addButton = addButtonContainer.createTextButton("Add", $.proxy(function(_button){
             this.addSpawnlistToBox(_unit, _side);
-        }, self), "scripted-fight-text-button", 4);
+        }, self), "custom-fight-text-button", 4);
         row.append(addButtonContainer);
     }, this))
 }
 
-ScriptFightScreen.prototype.addSpawnlistToBox = function(_unit, _side)
+CustomFightScreen.prototype.addSpawnlistToBox = function(_unit, _side)
 {
     var row = this.addRow(_side);
     row.data("unitID", _unit.id);
     row.data("unit", _unit);
 
-    var name = $('<div class="title-font-normal font-color-brother-name script-entry-label">' + _unit.id +  '</div>');
+    var name = $('<div class="title-font-normal font-color-brother-name custom-fight-entry-label">' + _unit.id +  '</div>');
     row.append(name);
 
     var amountInputLayout = $('<div class="string-input-container"/>');
@@ -285,7 +285,7 @@ ScriptFightScreen.prototype.addSpawnlistToBox = function(_unit, _side)
     }, 'delete-keybind-button', 2);
 }
 
-ScriptFightScreen.prototype.createPopup = function(_name, _popupClass, _popupDialogContentClass)
+CustomFightScreen.prototype.createPopup = function(_name, _popupClass, _popupDialogContentClass)
 {
     var self = this;
     this.popup = this.mContainer.createPopupDialog(_name, "", null, _popupClass);
@@ -298,10 +298,10 @@ ScriptFightScreen.prototype.createPopup = function(_name, _popupClass, _popupDia
     return result;
 }
 
-ScriptFightScreen.prototype.createFilterBar = function(_scrollContainer)
+CustomFightScreen.prototype.createFilterBar = function(_scrollContainer)
 {
     var row = $('<div class="row filter-bar"/>');
-    var name = $('<div class="title-font-normal font-color-brother-name script-entry-label">Filter</div>');
+    var name = $('<div class="title-font-normal font-color-brother-name custom-fight-entry-label">Filter</div>');
     row.append(name);
     var filterLayout = $('<div class="string-input-container"/>');
     row.append(filterLayout);
@@ -311,7 +311,7 @@ ScriptFightScreen.prototype.createFilterBar = function(_scrollContainer)
         var currentInput = $(this).val();
         var rows = _scrollContainer.find(".row");
         rows.each(function(_idx){
-            var label = $(this).find(".script-entry-label");
+            var label = $(this).find(".custom-fight-entry-label");
             if (label.length == 0) return;
             var labelText = $(label[0]).html();
             if (labelText.toLowerCase().search(currentInput.toLowerCase()) == -1)
@@ -327,7 +327,7 @@ ScriptFightScreen.prototype.createFilterBar = function(_scrollContainer)
     return row;
 }
 
-ScriptFightScreen.prototype.addRow = function(_div, _classes)
+CustomFightScreen.prototype.addRow = function(_div, _classes)
 {
     var row = $('<div class="row"/>');
     _div.append(row);
@@ -338,13 +338,13 @@ ScriptFightScreen.prototype.addRow = function(_div, _classes)
     return row;
 }
 
-ScriptFightScreen.prototype.setData = function (_data)
+CustomFightScreen.prototype.setData = function (_data)
 {    
     this.mData = _data;
     this.initialiseValues();
 };
 
-ScriptFightScreen.prototype.initialiseValues = function (_data)
+CustomFightScreen.prototype.initialiseValues = function (_data)
 {  
     this.mTerrainButton.changeButtonText(this.mData.AllBaseTerrains[1]);
     this.mSettings.Terrain = this.mData.AllBaseTerrains[1];
@@ -362,7 +362,7 @@ ScriptFightScreen.prototype.initialiseValues = function (_data)
     // this.mMapButton.html(this.mData.AllBaseTerrains[1]);
 };
 
-ScriptFightScreen.prototype.gatherData = function()
+CustomFightScreen.prototype.gatherData = function()
 {
     var ret = {
         Settings : this.mSettings,
@@ -399,7 +399,7 @@ ScriptFightScreen.prototype.gatherData = function()
     return ret;
 }
 
-ScriptFightScreen.prototype.gatherUnits = function(_ret, _div)
+CustomFightScreen.prototype.gatherUnits = function(_ret, _div)
 {
     _ret.Spawnlists = [];
     _ret.Units = [];
@@ -422,7 +422,7 @@ ScriptFightScreen.prototype.gatherUnits = function(_ret, _div)
     // row.amount
 }
 
-ScriptFightScreen.prototype.notifyBackendOkButtonPressed = function ()
+CustomFightScreen.prototype.notifyBackendOkButtonPressed = function ()
 {
     if (this.mSQHandle !== null)
     {
@@ -430,7 +430,7 @@ ScriptFightScreen.prototype.notifyBackendOkButtonPressed = function ()
     }
 };
 
-ScriptFightScreen.prototype.notifyBackendCancelButtonPressed = function ()
+CustomFightScreen.prototype.notifyBackendCancelButtonPressed = function ()
 {
     if (this.mSQHandle !== null)
     {
@@ -438,5 +438,5 @@ ScriptFightScreen.prototype.notifyBackendCancelButtonPressed = function ()
     }
 };
 
-registerScreen("ScriptFightScreen", new ScriptFightScreen());
+registerScreen("CustomFightScreen", new CustomFightScreen());
 

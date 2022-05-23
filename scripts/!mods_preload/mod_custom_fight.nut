@@ -1,23 +1,23 @@
-::ScriptFight <- {
+::CustomFight <- {
 	ID = "mod_script_fight",
 	Name = "Script Fight",
 	Version = "1.0.0"
 }
-::mods_registerMod(::ScriptFight.ID, ::ScriptFight.Version)
+::mods_registerMod(::CustomFight.ID, ::CustomFight.Version)
 
-::mods_queue(::ScriptFight.ID, "mod_msu", function()
+::mods_queue(::CustomFight.ID, "mod_msu", function()
 {
-	::mods_registerJS("ScriptFight.js");
-	::mods_registerCSS("ScriptFight.css");
+	::mods_registerJS("CustomFight.js");
+	::mods_registerCSS("CustomFight.css");
 
-	::ScriptFight.Mod <- ::MSU.Class.Mod(::ScriptFight.ID, ::ScriptFight.Version, ::ScriptFight.Name); 
-	::ScriptFight.Screen <- this.new("scripts/ui/screens/script_fight_screen");
-	::MSU.UI.registerConnection(::ScriptFight.Screen);
-	::ScriptFight.Mod.Keybinds.addSQKeybind("toggleScriptFightScreen", "ctrl+p", ::MSU.Key.State.All,  ::ScriptFight.Screen.toggle.bindenv(::ScriptFight.Screen));
-	::ScriptFight.Mod.Keybinds.addSQKeybind("initNextTurn", "f", ::MSU.Key.State.Tactical, function(){
+	::CustomFight.Mod <- ::MSU.Class.Mod(::CustomFight.ID, ::CustomFight.Version, ::CustomFight.Name); 
+	::CustomFight.Screen <- this.new("scripts/ui/screens/custom_fight_screen");
+	::MSU.UI.registerConnection(::CustomFight.Screen);
+	::CustomFight.Mod.Keybinds.addSQKeybind("toggleCustomFightScreen", "ctrl+p", ::MSU.Key.State.All,  ::CustomFight.Screen.toggle.bindenv(::CustomFight.Screen));
+	::CustomFight.Mod.Keybinds.addSQKeybind("initNextTurn", "f", ::MSU.Key.State.Tactical, function(){
 		this.Tactical.TurnSequenceBar.initNextTurn(true);
 	});
-	::ScriptFight.Mod.Keybinds.addSQKeybind("togglePauseTactical", "p", ::MSU.Key.State.Tactical, function(){
+	::CustomFight.Mod.Keybinds.addSQKeybind("togglePauseTactical", "p", ::MSU.Key.State.Tactical, function(){
 		local state = ::MSU.Utils.getState("tactical_state")
 		state.setPause(!state.m.IsGamePaused);
 		
@@ -36,7 +36,7 @@
 		o.checkCombatFinished = function( _forceFinish = false )
 		{
 			local properties = this.Tactical.State.getStrategicProperties();
-			if (properties.CombatID != "ScriptedFight")
+			if (properties.CombatID != "CustomFight")
 			{
 				return checkCombatFinished(_forceFinish);
 			}

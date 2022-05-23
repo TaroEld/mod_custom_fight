@@ -1,6 +1,6 @@
-this.script_fight_screen <- ::inherit("scripts/mods/msu/ui_screen", {
+this.custom_fight_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 	m = {
-		ID = "ScriptFightScreen"
+		ID = "CustomFightScreen"
 	},
 	
 	function show()
@@ -13,7 +13,7 @@ this.script_fight_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 				activeState.setAutoPause(true);
 				activeState.m.MenuStack.push(function ()
 				{
-					::ScriptFight.Screen.hide();
+					::CustomFight.Screen.hide();
 					this.onShow();
 					this.setAutoPause(false);
 				});
@@ -22,7 +22,7 @@ this.script_fight_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 			case "main_menu_state":
 				activeState.m.MenuStack.push(function ()
 				{
-					::ScriptFight.Screen.hide();
+					::CustomFight.Screen.hide();
 					this.onShow();
 				});
 				break;
@@ -155,7 +155,7 @@ this.script_fight_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 			p.LocationTemplate.OwnedByFaction = this.Const.Faction.Enemy;
 		}
 		p.Entities = [];
-		p.CombatID = "ScriptedFight";
+		p.CombatID = "CustomFight";
 		p.Music = this.Const.Music.OrcsTracks;
 		p.PlayerDeploymentType = this.Const.Tactical.DeploymentType.Line;
 		p.EnemyDeploymentType = this.Const.Tactical.DeploymentType.Line;
