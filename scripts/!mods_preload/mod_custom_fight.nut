@@ -1,6 +1,6 @@
 ::CustomFight <- {
-	ID = "mod_script_fight",
-	Name = "Script Fight",
+	ID = "mod_custom_fight",
+	Name = "Custom Fight",
 	Version = "1.0.0"
 }
 ::mods_registerMod(::CustomFight.ID, ::CustomFight.Version)
@@ -30,6 +30,7 @@
 		::CustomFight.Screen.onFOVPressed();
 		return true;
 	})
+	::include("CustomFight/tooltips")
 
 	::mods_hookNewObject("entity/tactical/tactical_entity_manager", function(o){
 		local checkCombatFinished = o.checkCombatFinished;

@@ -264,7 +264,7 @@ this.custom_fight_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 
 				if (unit.Variant > 0)
 				{
-					if (!this.Const.DLC.Wildmen || this.Math.rand(1, 100) > unit.Variant)
+					if (!this.Const.DLC.Wildmen || (!t.Champion && this.Math.rand(1, 100) > unit.Variant))
 					{
 						unit.Variant = 0;
 					}
@@ -275,7 +275,7 @@ this.custom_fight_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 
 						if ("NameList" in t.Type)
 						{
-							unit.Name = this.generateName(t.Type.NameList) + (t.Type.TitleList != null ? " " + t.Type.TitleList[this.Math.rand(0, t.Type.TitleList.len() - 1)] : "");
+							unit.Name = ::Const.World.Common.generateName(t.Type.NameList) + (t.Type.TitleList != null ? " " + t.Type.TitleList[this.Math.rand(0, t.Type.TitleList.len() - 1)] : "");
 						}
 					}
 				}

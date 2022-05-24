@@ -30,6 +30,7 @@ var CustomFightScreen = function(_parent)
         Terrain : "",
         Map : "",
         SpectatorMode : false,
+        ChopDownTrees : false,
     }
 
     this.mButtons = {
@@ -92,10 +93,11 @@ CustomFightScreen.prototype.createDIV = function (_parentDiv)
     // create: buttons
     var layout = $('<div class="l-ok-button"/>');
     footerButtonBar.append(layout);
-    var button = layout.createTextButton("Start custom fight", function ()
+    this.mStartButton = layout.createTextButton("Start custom fight", function ()
     {
         self.notifyBackendOkButtonPressed();
     }, 'custom-fight-text-button', 4);
+    this.mStartButton.bindTooltip({ contentType: 'ui-element', elementId: "CustomFight.Screen.Main.Start"});
     
     var layout = $('<div class="l-cancel-button"/>');
     footerButtonBar.append(layout);
@@ -103,6 +105,7 @@ CustomFightScreen.prototype.createDIV = function (_parentDiv)
     {
         self.notifyBackendCancelButtonPressed();
     }, 'custom-fight-text-button', 4);
+    this.mNoButton.bindTooltip({ contentType: 'ui-element', elementId: "CustomFight.Screen.Main.Cancel"});
 
     var layout = $('<div class="l-cancel-button"/>');
     footerButtonBar.append(layout);
@@ -110,6 +113,7 @@ CustomFightScreen.prototype.createDIV = function (_parentDiv)
     {
         self.initialiseValues();
     }, 'custom-fight-text-button', 4);
+    this.mResetButton.bindTooltip({ contentType: 'ui-element', elementId: "CustomFight.Screen.Main.Reset"});
 
     this.mIsVisible = false;
     this.createContentDiv();
@@ -125,8 +129,8 @@ CustomFightScreen.prototype.destroyDIV = function ()
 CustomFightScreen.prototype.createContentDiv = function()
 {
     this.createSettingsDiv();
-    this.mLeftSideSetupBox = this.createSideDiv("left-side");
-    this.mRightSideSetupBox = this.createSideDiv("right-side");
+    this.mLeftSideSetupBox = this.createSideDiv("left-side", "Allies");
+    this.mRightSideSetupBox = this.createSideDiv("right-side", "Enemies");
 }
 
 CustomFightScreen.prototype.createSettingsDiv = function()
@@ -134,16 +138,17 @@ CustomFightScreen.prototype.createSettingsDiv = function()
     var self = this;
     this.mSettingsBox = $('<div class="settings-box"/>');
     this.mDialogContentContainer.append(this.mSettingsBox);
-    this.addRow(this.mSettingsBox).append($('<div class="title-font-normal font-color-brother-name label">Settings</div>'));
+    this.addRow(this.mSettingsBox).append(this.getTextDiv("Settings", "label"));
 
     var terrainRow = this.addRow(this.mSettingsBox);
-    terrainRow.append($('<div class="title-font-normal font-color-brother-name label">Terrain</div>'));
+    terrainRow.append(this.getTextDiv("Terrain", "label"));
     this.mTerrainButton = terrainRow.createTextButton("", $.proxy(function(_div){
        this.createArrayScrollContainer(this.createPopup('Choose Terrain','generic-popup', 'generic-popup-container'), _div, this.mData.AllBaseTerrains, "Terrain")
     }, this), "custom-fight-text-button", 4);
+    this.mTerrainButton.bindTooltip({ contentType: 'ui-element', elementId: "CustomFight.Screen.Settings.Terrain"});
 
     var mapRow = this.addRow(this.mSettingsBox);
-    mapRow.append($('<div class="title-font-normal font-color-brother-name label">Map</div>'));
+    mapRow.append(this.getTextDiv("Map", "label"));
     this.mMapButton = mapRow.createTextButton("", $.proxy(function(_div){
        this.createArrayScrollContainer(this.createPopup('Choose Map','generic-popup', 'generic-popup-container'), _div, this.mData.AllLocationTerrains, "Map")
     }, this), "custom-fight-text-button", 4);
@@ -154,18 +159,26 @@ CustomFightScreen.prototype.createSettingsDiv = function()
             self.mSettings.Map = "";
         }
     });
+    this.mMapButton.bindTooltip({ contentType: 'ui-element', elementId: "CustomFight.Screen.Settings.Map"});
 
-    var checkboxRow = this.addRow(this.mSettingsBox)
-    this.mSpectatorModeCheck = checkboxRow.append($('<input type="checkbox" id="use-player-checkbox" />')).iCheck({
-        checkboxClass: 'icheckbox_flat-orange',
-        radioClass: 'iradio_flat-orange',
-        increaseArea: '30%'
-    });
-    this.mSpectatorModeCheck.on('ifChecked ifUnchecked', null, this, function (_event) {
-        self.mSettings.SpectatorMode = $(this).prop("checked")
-    });
-    this.mSpectatorModeCheck.iCheck('uncheck');
-    checkboxRow.append($('<label class="text-font-normal font-color-subtitle bool-checkbox-label" for="use-player-checkbox">Spectator Mode</label>'))
+    var addCheckboxSetting = $.proxy(function(_id, _settingKey, _default, _name)
+    {
+        var checkboxRow = this.addRow(this.mSettingsBox);
+        var checkbox = checkboxRow.append($('<input type="checkbox" id="' + _id + '" />')).iCheck({
+            checkboxClass: 'icheckbox_flat-orange',
+            radioClass: 'iradio_flat-orange',
+            increaseArea: '30%'
+        });
+        checkbox.on('ifChecked ifUnchecked', null, this, function (_event) {
+            self.mSettings[_settingKey] = $(this).prop("checked")
+        });
+        checkbox.iCheck(_default);
+        checkboxRow.append($('<label class="text-font-normal font-color-subtitle bool-checkbox-label" for="' + _id + '">' + _name + '</label>'))
+        return checkbox;
+    }, this)
+
+    this.mSpectatorModeCheck = addCheckboxSetting("use-player-checkbox", "SpectatorMode", "uncheck", "Spectator Mode")
+    this.mChopDownTreesCheck = addCheckboxSetting("chop-down-trees-checkbox", "ChopDownTrees", "uncheck", "Chop down trees");
 }
 
 // creates a generic popup that lists entries in an array
@@ -191,21 +204,33 @@ CustomFightScreen.prototype.createArrayScrollContainer = function(_dialog, _div,
     }, this))
 }
 
-CustomFightScreen.prototype.createSideDiv = function(_side)
+CustomFightScreen.prototype.createSideDiv = function(_side, _name)
 {
     var self = this;
     var ret = $('<div class="setup-box"/>');
     this.mDialogContentContainer.append(ret);
     ret.addClass(_side);
+    this.addRow(ret).append(this.getTextDiv(_name, "box-title"));
+
     var spawnlistBox = $('<div class="spawnlist-box"/>');
-    spawnlistBox.append($('<div class="title-font-normal font-color-brother-name box-subtitle"> Spawnlist </div>'))
     ret.append(spawnlistBox);
+    this.addRow(spawnlistBox).append(this.getTextDiv("Spawnlist", "box-subtitle"));
+    
+    var listHeader = this.addRow(spawnlistBox, "unit-box-list-headers")
+    listHeader.append(this.getTextDiv("Type"))
+    listHeader.append(this.getTextDiv("Resources", "string-input-container"))
+
     var spawnlistBoxList = spawnlistBox.createList(2);
     ret.spawnlistScrollContainer = spawnlistBoxList.findListScrollContainer();
 
     var unitsBox = $('<div class="units-box"/>');
-    unitsBox.append($('<div class="title-font-normal font-color-brother-name box-subtitle"> Units </div>'))
+    unitsBox.append(this.getTextDiv("Units", "box-subtitle"))
     ret.append(unitsBox);
+    var listHeader = this.addRow(unitsBox)
+    listHeader.append(this.getTextDiv("Type"))
+    listHeader.append(this.getTextDiv("Amount", "string-input-container"))
+    listHeader.append(this.getTextDiv("Champion"))
+
     var unitsBoxList = unitsBox.createList(2);
     ret.unitsScrollContainer = unitsBoxList.findListScrollContainer();
 
@@ -218,12 +243,14 @@ CustomFightScreen.prototype.createSideDiv = function(_side)
     ret.buttons.addUnitButton = layout.createTextButton("Add Unit", $.proxy(function(_div){
         this.createAddUnitScrollContainer(this.createPopup('Add Unit','generic-popup', 'generic-popup-container'), ret.unitsScrollContainer);
     }, this), "custom-fight-text-button", 4);
+    ret.buttons.addUnitButton.bindTooltip({ contentType: 'ui-element', elementId: "CustomFight.Screen.Units.Main.Add"});
 
     layout = $('<div class="custom-fight-text-button-layout"/>');
     buttonBar.append(layout);
     ret.buttons.addSpawnlistButton = layout.createTextButton("Add Spawnlist", $.proxy(function(_div){
         this.createAddSpawnlistScrollContainer(this.createPopup('Add Spawnlist','generic-popup', 'generic-popup-container'), ret.spawnlistScrollContainer);
     }, this), "custom-fight-text-button", 4);
+    ret.buttons.addSpawnlistButton.bindTooltip({ contentType: 'ui-element', elementId: "CustomFight.Screen.Spawnlist.Main.Add"});
     return ret;
 }
 
@@ -233,9 +260,9 @@ CustomFightScreen.prototype.createAddUnitScrollContainer = function(_dialog, _si
     this.mPopupListContainer = _dialog.createList(2);
     var scrollContainer = this.mPopupListContainer.findListScrollContainer();
     _dialog.prepend(this.createFilterBar(scrollContainer));
+
     MSU.iterateObject(this.mData.AllUnits, $.proxy(function(_key, _unit){
         var row = this.addRow(scrollContainer, "unit-row");
-        row.unit = _unit;
 
         var name = $('<div class="title-font-normal font-color-brother-name custom-fight-entry-label">' + _unit.Name +  '</div>');
         row.append(name);
@@ -244,6 +271,8 @@ CustomFightScreen.prototype.createAddUnitScrollContainer = function(_dialog, _si
         var addButton = addButtonContainer.createTextButton("Add", $.proxy(function(_button){
             this.addUnitToBox(_unit, _side, _key);
         }, self), "custom-fight-text-button", 4);
+        addButton.bindTooltip({ contentType: 'ui-element', elementId: "CustomFight.Screen.Units.Main.Add"});
+
         row.append(addButtonContainer);
     }, this))
 }
@@ -256,13 +285,24 @@ CustomFightScreen.prototype.addUnitToBox = function(_unit, _side, _key)
 
     var name = $('<div class="title-font-normal font-color-brother-name custom-fight-entry-label">' + _unit.Name +  '</div>');
     row.append(name);
+    name.bindTooltip({ contentType: 'ui-element', elementId: "CustomFight.Screen.Units.Main.Type"});
 
     var amountInputLayout = $('<div class="string-input-container"/>');
     row.append(amountInputLayout);
     var amountInput = $('<input type="text" class="title-font-normal font-color-brother-name string-input"/>');
     amountInputLayout.append(amountInput);
     amountInput.val(1);
-    row.amount = amountInput;
+    row.data("amount", amountInput);
+    amountInput.bindTooltip({ contentType: 'ui-element', elementId: "CustomFight.Screen.Units.Main.Amount"});
+
+    var championCheckbox = row.append($('<input type="checkbox" id="use-player-checkbox" />')).iCheck({
+        checkboxClass: 'icheckbox_flat-orange',
+        radioClass: 'iradio_flat-orange',
+        increaseArea: '30%'
+    });
+    championCheckbox.iCheck('uncheck');
+    row.data("champion", championCheckbox);
+    championCheckbox.bindTooltip({ contentType: 'ui-element', elementId: "CustomFight.Screen.Units.Main.Champion"});
 
     var destroyButtonLayout = $('<div class="keybind-delete-button-container"/>');
     row.append(destroyButtonLayout);
@@ -270,9 +310,10 @@ CustomFightScreen.prototype.addUnitToBox = function(_unit, _side, _key)
     {
         row.remove();
     }, 'delete-keybind-button', 2);
+    destroyButton.bindTooltip({ contentType: 'ui-element', elementId: "CustomFight.Screen.Units.Main.Delete"});
 }
 
-CustomFightScreen.prototype.createAddSpawnlistScrollContainer = function(_dialog, _side)
+CustomFightScreen.prototype.createAddSpawnlistScrollContainer = function(_dialog, _boxDiv)
 {
     var self = this;
     this.mPopupListContainer = _dialog.createList(2);
@@ -280,33 +321,33 @@ CustomFightScreen.prototype.createAddSpawnlistScrollContainer = function(_dialog
     _dialog.prepend(this.createFilterBar(scrollContainer));
     MSU.iterateObject(this.mData.AllSpawnlists, $.proxy(function(_key, _unit){
         var row = this.addRow(scrollContainer, "unit-row");
-        row.unit = _unit;
-
         var name = $('<div class="title-font-normal font-color-brother-name custom-fight-entry-label">' + _unit.id +  '</div>');
         row.append(name);
-
         var addButtonContainer = $('<div class="custom-fight-text-button-layout"/>');
         var addButton = addButtonContainer.createTextButton("Add", $.proxy(function(_button){
-            this.addSpawnlistToBox(_unit, _side);
+            this.addSpawnlistToBox(_unit, _boxDiv);
         }, self), "custom-fight-text-button", 4);
         row.append(addButtonContainer);
     }, this))
 }
 
-CustomFightScreen.prototype.addSpawnlistToBox = function(_unit, _side)
+CustomFightScreen.prototype.addSpawnlistToBox = function(_unit, _boxDiv)
 {
-    var row = this.addRow(_side);
+    var row = this.addRow(_boxDiv);
     row.data("unitID", _unit.id);
     row.data("unit", _unit);
 
     var name = $('<div class="title-font-normal font-color-brother-name custom-fight-entry-label">' + _unit.id +  '</div>');
     row.append(name);
+    name.bindTooltip({ contentType: 'ui-element', elementId: "CustomFight.Screen.Spawnlist.Main.Type"});
 
     var amountInputLayout = $('<div class="string-input-container"/>');
     row.append(amountInputLayout);
     var amountInput = $('<input type="text" class="title-font-normal font-color-brother-name string-input"/>');
     amountInputLayout.append(amountInput);
     amountInput.val(100);
+    row.data("amount", amountInput);
+    amountInput.bindTooltip({ contentType: 'ui-element', elementId: "CustomFight.Screen.Spawnlist.Main.Resources"});
 
     var destroyButtonLayout = $('<div class="keybind-delete-button-container"/>');
     row.append(destroyButtonLayout);
@@ -314,6 +355,7 @@ CustomFightScreen.prototype.addSpawnlistToBox = function(_unit, _side)
     {
         row.remove();
     }, 'delete-keybind-button', 2);
+    destroyButton.bindTooltip({ contentType: 'ui-element', elementId: "CustomFight.Screen.Spawnlist.Main.Delete"});
 }
 
 CustomFightScreen.prototype.createPopup = function(_name, _popupClass, _popupDialogContentClass)
@@ -369,6 +411,14 @@ CustomFightScreen.prototype.addRow = function(_div, _classes)
     return row;
 }
 
+CustomFightScreen.prototype.getTextDiv = function(_text, _classes)
+{
+    var row = $('<div class="title-font-normal font-color-brother-name custom-fight-entry-label"></div>')
+    row.html(_text);
+    if(_classes != undefined && _classes != null) row.addClass(_classes);
+    return row;
+}
+
 CustomFightScreen.prototype.setData = function (_data)
 {    
     this.mData = _data;
@@ -386,12 +436,26 @@ CustomFightScreen.prototype.initialiseValues = function (_data)
     this.mSpectatorModeCheck.iCheck('uncheck');
     this.mSettings.SpectatorMode = false;
 
+    this.mChopDownTreesCheck.iCheck('uncheck');
+    this.mSettings.ChopDownTrees = false;
+
     this.mLeftSideSetupBox.spawnlistScrollContainer.empty();
     this.mRightSideSetupBox.spawnlistScrollContainer.empty();
     this.mLeftSideSetupBox.unitsScrollContainer.empty();
     this.mRightSideSetupBox.unitsScrollContainer.empty();
-    // this.mMapButton.html(this.mData.AllBaseTerrains[1]);
+
+    this.testThings()
 };
+
+CustomFightScreen.prototype.testThings = function ()
+{  
+    var randomProperty = function (obj) {
+        var keys = Object.keys(obj);
+        return obj[keys[ keys.length * Math.random() << 0]];
+    };
+    this.addSpawnlistToBox(randomProperty(this.mData.AllSpawnlists), this.mRightSideSetupBox.spawnlistScrollContainer)
+    this.addSpawnlistToBox(randomProperty(this.mData.AllSpawnlists), this.mLeftSideSetupBox.spawnlistScrollContainer)
+}
 
 CustomFightScreen.prototype.gatherData = function()
 {
@@ -438,7 +502,7 @@ CustomFightScreen.prototype.gatherUnits = function(_ret, _div)
     spawnlistRows.each(function(_idx){
         _ret.Spawnlists.push({
             ID : $(this).data("unitID"),
-            Resources : $(this).find("input").val()
+            Resources : $(this).data("amount").val()
         })
     })
 
@@ -446,7 +510,8 @@ CustomFightScreen.prototype.gatherUnits = function(_ret, _div)
     unitRows.each(function(_idx){
         _ret.Units.push({
             Type : $(this).data("unitID"),
-            Num : $(this).find("input").val()
+            Num : $(this).data("amount").val(),
+            Champion : $(this).data("champion").prop("checked")
         })
     })
     // ret.unitsScrollContainer
