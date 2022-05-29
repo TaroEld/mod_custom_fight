@@ -1,3 +1,15 @@
+.short-input,
+.short-input-container
+{
+    width: 10rem;
+    height: 4rem;
+}
+
+.short-input
+{
+    background-size: 10.0rem 4.0rem !important;
+    background-repeat: no-repeat;
+}
 
 .custom-fight-container-layout .ui-control.dialog
 {
@@ -68,6 +80,7 @@
 .settings-box .row .bool-checkbox-label
 {
     padding-left: 2rem;
+    padding-right: 2rem;
     font-size: 1.8rem;
     color: #d7b174;
     font-weight: normal;
@@ -93,7 +106,7 @@
     padding-top: 1rem;
     height: 5rem;
     width: 100%;
-    border: 1px solid red;
+    /*border: 1px solid red;*/
 }
 
 .setup-box .box-title
@@ -106,7 +119,7 @@
     font-size: 2.0rem;
 }
 
-.spawnlist-box
+.setup-box .spawnlist-box
 {
     width: 100%;
     height: 30%;
@@ -115,7 +128,7 @@
     /*border: 1px solid green;*/
 }
 
-.units-box
+.setup-box .units-box
 {
     width: 100%;
     height: 60%;
@@ -123,20 +136,31 @@
     /*border: 1px solid blue;*/
 }
 
-.spawnlist-box .list,
-.units-box .list
+.setup-box .spawnlist-box .list,
+.setup-box .units-box .list
 {
     height: 80%;
 }
 
-/*.spawnlist-box .unit-box-list-headers > div,
-.units-box .unit-box-list-headers > div
+.setup-box .spawnlist-box .delete-button-container,
+.setup-box .units-box .delete-button-container
 {
-    max-width: 25%;
-}*/
+    height: 4.3rem;
+    width: 9.8rem;
+    margin-left: auto;
+}
 
+.setup-box .units-box .bool-checkbox-label
+{
+    font-size: 1.8rem;
+    color: #d7b174;
+    font-weight: normal;
+    font-style : normal;
+    font-family: 'FreeUniversal-Regular';
+    border: 1px solid red;
+}
 
-.button-bar-box
+.setup-box .button-bar-box
 {
     width: 100%;
     height: 10%;
@@ -145,19 +169,12 @@
     /*border: 1px solid orange;*/
 }
 
-.custom-fight .custom-fight-text-button-layout
-{
-    width: 23rem;
-    height: 4rem;
-    /*border: 2px solid blue;*/
-}
-
+.custom-fight .custom-fight-text-button-layout,
 .custom-fight .custom-fight-text-button
 {
     width: 23rem;
     height: 4rem;
     line-height: 3.6rem;
-
     /*border: 2px solid blue;*/
 }
 
@@ -212,7 +229,7 @@
 
 .generic-popup-container .list
 {
-    border: 1px solid purple;
+    /*border: 1px solid purple;*/
     margin-top: 2rem;
 }
 
@@ -236,5 +253,5 @@
     padding-left: 1rem;
     display: flex;
 
-    border: 2px solid green;
+    /*border: 2px solid green;*/
 }

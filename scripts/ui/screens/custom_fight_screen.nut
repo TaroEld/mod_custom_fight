@@ -145,27 +145,24 @@ this.custom_fight_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 
 	function onTopBarButtonPressed(_buttonType)
 	{
+		// manual is true when the button was clicked instead of hotkey
 		switch(_buttonType)
 		{
 			case "Pause":
-				this.m.JSHandle.asyncCall("setTopBarButtonState", [_buttonType, this.onPausePressed()]);
+				this.onPausePressed(true);
 				break;
 
 			case "FOV":
-				this.m.JSHandle.asyncCall("setTopBarButtonState", [_buttonType, this.onFOVPressed()]);
+				this.onFOVPressed(true);
 				break;
 
-			case "ManualTurns":
-			case "UnlockCamera":
-				local properties = this.Tactical.State.getStrategicProperties();
-				properties[_buttonType] = !properties[_buttonType];
-				this.Tactical.EventLog.log(_buttonType + " is now " + properties[_buttonType]);
-				this.m.JSHandle.asyncCall("setTopBarButtonState", [_buttonType, properties[_buttonType]]);
+			default:
+				this.onGenericPressed(_buttonType, true)
 				break;
 		}		
 	}
 
-	function onPausePressed()
+	function onPausePressed(_manual = false)
 	{
 		local state = ::MSU.Utils.getState("tactical_state")
 		state.setPause(!state.m.IsGamePaused);
@@ -178,10 +175,11 @@ this.custom_fight_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 		{
 			this.Tactical.EventLog.log("[color=#8f1e1e]Game is now unpaused.[/color]");
 		}
+		this.m.JSHandle.asyncCall("setTopBarButtonState", ["Pause", state.m.IsGamePaused, _manual]);
 		return state.m.IsGamePaused;
 	}
 
-	function onFOVPressed()
+	function onFOVPressed(_manual = false)
 	{
 		local state = ::MSU.Utils.getState("tactical_state");
 		state.m.IsFogOfWarVisible = !state.m.IsFogOfWarVisible;
@@ -207,7 +205,16 @@ this.custom_fight_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 			this.Tactical.fillVisibility(this.Const.Faction.Player, true);
 			this.Tactical.EventLog.log("[color=#1e468f]FOV is no longer visible.[/color]");
 		}
+		this.m.JSHandle.asyncCall("setTopBarButtonState", ["FOV", state.m.IsFogOfWarVisible, _manual]);
 		return state.m.IsFogOfWarVisible;
+	}
+
+	function onGenericPressed(_buttonType, _manual = false)
+	{
+		local properties = this.Tactical.State.getStrategicProperties();
+		properties[_buttonType] = !properties[_buttonType];
+		this.Tactical.EventLog.log(_buttonType + " is now " + properties[_buttonType]);
+		this.m.JSHandle.asyncCall("setTopBarButtonState", [_buttonType, properties[_buttonType], _manual]);
 	}
 
 
@@ -215,6 +222,7 @@ this.custom_fight_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 	{
 		local p = this.Const.Tactical.CombatInfo.getClone();
 		p.Tile = this.World.State.getPlayer().getTile();
+		local noble
 		p.TerrainTemplate = _data.Settings.Terrain;
 		if(_data.Settings.Map != "")
 		{
@@ -232,21 +240,46 @@ this.custom_fight_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 
 		p.IsUsingSetPlayers = _data.Settings.SpectatorMode;
 		p.SpectatorMode <- _data.Settings.SpectatorMode;
+		p.StartEmptyMode <- _data.Settings.StartEmptyMode;
+		p.ControlAllies <- _data.Settings.ControlAllies;
 		p.UnlockCamera <- false;
 		p.ManualTurns <- false;
 		p.FOV <- true;
 		p.Pause <- false;
 
+		// Use noble factions so that noble units dont break when they look for banner
+		local nobleFactionAlly = this.World.FactionManager.getFactionsOfType(this.Const.FactionType.NobleHouse)[0];
+		local nobleFactionEnemy = this.World.FactionManager.getFactionsOfType(this.Const.FactionType.NobleHouse)[1];
+		p.NobleFactionAlly <- {
+			Ref = nobleFactionAlly,
+			Relation = nobleFactionAlly.m.PlayerRelation,
+			OtherFactionFriendly = nobleFactionAlly.isAlliedWith(nobleFactionEnemy.getID())
+		}
+		p.NobleFactionEnemy <- {
+			Ref = nobleFactionEnemy,
+			Relation = nobleFactionEnemy.m.PlayerRelation,
+			OtherFactionFriendly = nobleFactionEnemy.isAlliedWith(nobleFactionAlly.getID())
+		}
+		nobleFactionAlly.m.PlayerRelation = 100.0;
+		nobleFactionAlly.updatePlayerRelation();
+		nobleFactionAlly.removeAlly(nobleFactionEnemy.getID());
+		nobleFactionEnemy.m.PlayerRelation = 0.0;
+		nobleFactionEnemy.updatePlayerRelation();
+		nobleFactionEnemy.removeAlly(nobleFactionAlly.getID());
+
+
+
 		foreach(spawnlist in _data.Player.Spawnlists)
 		{
-			this.Const.World.Common.addUnitsToCombat(p.Entities, this.Const.World.Spawn[spawnlist.ID], spawnlist.Resources.tointeger() , this.Const.Faction.PlayerAnimals);
+			this.Const.World.Common.addUnitsToCombat(p.Entities, this.Const.World.Spawn[spawnlist.ID], spawnlist.Resources.tointeger() , nobleFactionAlly.getID());
 		}
 		foreach(spawnlist in _data.Enemy.Spawnlists)
 		{
-			this.Const.World.Common.addUnitsToCombat(p.Entities, this.Const.World.Spawn[spawnlist.ID], spawnlist.Resources.tointeger(), this.Const.Faction.Enemy);
+			this.Const.World.Common.addUnitsToCombat(p.Entities, this.Const.World.Spawn[spawnlist.ID], spawnlist.Resources.tointeger(), nobleFactionEnemy.getID());
 		}
-		this.addUnitsToCombat(_data.Player.Units, p.Entities, this.Const.Faction.PlayerAnimals);
-		this.addUnitsToCombat(_data.Enemy.Units, p.Entities, this.Const.Faction.Enemy);
+		local playerFaction = this.Const.Faction.PlayerAnimals;
+		this.addUnitsToCombat(_data.Player.Units, p.Entities, nobleFactionAlly.getID());
+		this.addUnitsToCombat(_data.Enemy.Units, p.Entities, nobleFactionEnemy.getID());
 		this.World.State.startScriptedCombat(p, false, false, true);
 	}
 

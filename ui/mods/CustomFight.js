@@ -31,36 +31,50 @@ var CustomFightScreen = function(_parent)
         Map : "",
         SpectatorMode : false,
         ChopDownTrees : false,
+        StartEmptyMode : false,
+        ControlAllies : false,
     }
 
     this.mButtons = {
         Pause : {
-            ID : "mPauseButton",
+            ID : "Pause",
+            Button : null,
+            Class : "l-spectator-button",  
             Paths : {
-                true : Asset.BUTTON_TOGGLE_HIGHLIGHT_BLOCKED_TILES_ENABLED,
-                false : Asset.BUTTON_TOGGLE_HIGHLIGHT_BLOCKED_TILES_DISABLED,
-            }
+                true : "mods/ui/buttons/pause_on.png",
+                false : "mods/ui/buttons/pause_off.png",
+            },
+            Tooltip : "CustomFight.Tactical.Topbar.Pause"
         }, 
         ManualTurns : {
-            ID : "mManualTurnsButton",
+            ID : "ManualTurns",
+            Button : null,
+            Class : "l-pause-button",
             Paths : {
-                true : Asset.BUTTON_TOGGLE_HIGHLIGHT_BLOCKED_TILES_ENABLED,
-                false : Asset.BUTTON_TOGGLE_HIGHLIGHT_BLOCKED_TILES_DISABLED,
-            }
+                true : "mods/ui/buttons/direct_control_on.png",
+                false : "mods/ui/buttons/direct_control_off.png",
+            },
+            Tooltip : "CustomFight.Tactical.Topbar.ManualTurns"
         }, 
         FOV : {
-            ID : "mFOVButton",
+            ID : "FOV",
+            Button : null,
+            Class : "l-fov-button",
             Paths : {
-                true : Asset.BUTTON_TOGGLE_HIGHLIGHT_BLOCKED_TILES_ENABLED,
-                false : Asset.BUTTON_TOGGLE_HIGHLIGHT_BLOCKED_TILES_DISABLED,
-            }
+                true : "mods/ui/buttons/fov_off.png",
+                false : "mods/ui/buttons/fov_on.png",
+            },
+            Tooltip : "CustomFight.Tactical.Topbar.FOV"
         }, 
         UnlockCamera : {
-            ID : "mUnlockCameraButton",
+            ID : "UnlockCamera",
+            Button : null,
+            Class : "l-camera-button",
             Paths : {
-                true : Asset.BUTTON_TOGGLE_HIGHLIGHT_BLOCKED_TILES_ENABLED,
-                false : Asset.BUTTON_TOGGLE_HIGHLIGHT_BLOCKED_TILES_DISABLED,
-            }
+                true : "mods/ui/buttons/camera_on.png",
+                false : "mods/ui/buttons/camera_off.png",
+            },
+            Tooltip : "CustomFight.Tactical.Topbar.UnlockCamera"
         }, 
     }
 }
@@ -170,6 +184,7 @@ CustomFightScreen.prototype.createSettingsDiv = function()
             increaseArea: '30%'
         });
         checkbox.on('ifChecked ifUnchecked', null, this, function (_event) {
+            console.error("toggled " + _settingKey + $(this).prop("checked"))
             self.mSettings[_settingKey] = $(this).prop("checked")
         });
         checkbox.iCheck(_default);
@@ -179,6 +194,7 @@ CustomFightScreen.prototype.createSettingsDiv = function()
 
     this.mSpectatorModeCheck = addCheckboxSetting("use-player-checkbox", "SpectatorMode", "uncheck", "Spectator Mode")
     this.mChopDownTreesCheck = addCheckboxSetting("chop-down-trees-checkbox", "ChopDownTrees", "uncheck", "Chop down trees");
+    this.mControlAlliesCheck = addCheckboxSetting("chop-down-trees-checkbox", "ControlAllies", "uncheck", "Control allies");
 }
 
 // creates a generic popup that lists entries in an array
@@ -218,7 +234,7 @@ CustomFightScreen.prototype.createSideDiv = function(_side, _name)
     
     var listHeader = this.addRow(spawnlistBox, "unit-box-list-headers")
     listHeader.append(this.getTextDiv("Type"))
-    listHeader.append(this.getTextDiv("Resources", "string-input-container"))
+    listHeader.append(this.getTextDiv("Resources", "short-input-container"))
 
     var spawnlistBoxList = spawnlistBox.createList(2);
     ret.spawnlistScrollContainer = spawnlistBoxList.findListScrollContainer();
@@ -228,7 +244,7 @@ CustomFightScreen.prototype.createSideDiv = function(_side, _name)
     ret.append(unitsBox);
     var listHeader = this.addRow(unitsBox)
     listHeader.append(this.getTextDiv("Type"))
-    listHeader.append(this.getTextDiv("Amount", "string-input-container"))
+    listHeader.append(this.getTextDiv("Amount", "short-input-container"))
     listHeader.append(this.getTextDiv("Champion"))
 
     var unitsBoxList = unitsBox.createList(2);
@@ -287,29 +303,29 @@ CustomFightScreen.prototype.addUnitToBox = function(_unit, _side, _key)
     row.append(name);
     name.bindTooltip({ contentType: 'ui-element', elementId: "CustomFight.Screen.Units.Main.Type"});
 
-    var amountInputLayout = $('<div class="string-input-container"/>');
+    var amountInputLayout = $('<div class="short-input-container"/>');
     row.append(amountInputLayout);
-    var amountInput = $('<input type="text" class="title-font-normal font-color-brother-name string-input"/>');
+    var amountInput = $('<input type="text" class="title-font-normal font-color-brother-name short-input"/>');
     amountInputLayout.append(amountInput);
     amountInput.val(1);
     row.data("amount", amountInput);
     amountInput.bindTooltip({ contentType: 'ui-element', elementId: "CustomFight.Screen.Units.Main.Amount"});
 
-    var championCheckbox = row.append($('<input type="checkbox" id="use-player-checkbox" />')).iCheck({
+    var checkbox = row.append($('<input type="checkbox" id="champion-checkbox"/>')).iCheck({
         checkboxClass: 'icheckbox_flat-orange',
         radioClass: 'iradio_flat-orange',
         increaseArea: '30%'
     });
-    championCheckbox.iCheck('uncheck');
-    row.data("champion", championCheckbox);
-    championCheckbox.bindTooltip({ contentType: 'ui-element', elementId: "CustomFight.Screen.Units.Main.Champion"});
+    row.data("champion", checkbox);
+    var label = row.append($('<label class="text-font-normal font-color-subtitle bool-checkbox-label" for="bool-checkbox-label">Champion</label>'))
 
-    var destroyButtonLayout = $('<div class="keybind-delete-button-container"/>');
+
+    var destroyButtonLayout = $('<div class="delete-button-container"/>');
     row.append(destroyButtonLayout);
     var destroyButton = destroyButtonLayout.createTextButton("Delete", function()
     {
         row.remove();
-    }, 'delete-keybind-button', 2);
+    }, '', 2);
     destroyButton.bindTooltip({ contentType: 'ui-element', elementId: "CustomFight.Screen.Units.Main.Delete"});
 }
 
@@ -337,24 +353,24 @@ CustomFightScreen.prototype.addSpawnlistToBox = function(_unit, _boxDiv)
     row.data("unitID", _unit.id);
     row.data("unit", _unit);
 
-    var name = $('<div class="title-font-normal font-color-brother-name custom-fight-entry-label">' + _unit.id +  '</div>');
+    var name = this.getTextDiv(_unit.id);
     row.append(name);
     name.bindTooltip({ contentType: 'ui-element', elementId: "CustomFight.Screen.Spawnlist.Main.Type"});
 
-    var amountInputLayout = $('<div class="string-input-container"/>');
+    var amountInputLayout = $('<div class="short-input-container"/>');
     row.append(amountInputLayout);
-    var amountInput = $('<input type="text" class="title-font-normal font-color-brother-name string-input"/>');
+    var amountInput = $('<input type="text" class="title-font-normal font-color-brother-name short-input"/>');
     amountInputLayout.append(amountInput);
     amountInput.val(100);
     row.data("amount", amountInput);
     amountInput.bindTooltip({ contentType: 'ui-element', elementId: "CustomFight.Screen.Spawnlist.Main.Resources"});
 
-    var destroyButtonLayout = $('<div class="keybind-delete-button-container"/>');
+    var destroyButtonLayout = $('<div class="delete-button-container"/>');
     row.append(destroyButtonLayout);
     var destroyButton = destroyButtonLayout.createTextButton("Delete", function()
     {
         row.remove();
-    }, 'delete-keybind-button', 2);
+    }, '', 2);
     destroyButton.bindTooltip({ contentType: 'ui-element', elementId: "CustomFight.Screen.Spawnlist.Main.Delete"});
 }
 
@@ -374,11 +390,11 @@ CustomFightScreen.prototype.createPopup = function(_name, _popupClass, _popupDia
 CustomFightScreen.prototype.createFilterBar = function(_scrollContainer)
 {
     var row = $('<div class="row filter-bar"/>');
-    var name = $('<div class="title-font-normal font-color-brother-name custom-fight-entry-label">Filter</div>');
+    var name = this.getTextDiv("Filter");
     row.append(name);
-    var filterLayout = $('<div class="string-input-container"/>');
+    var filterLayout = $('<div class="short-input-container"/>');
     row.append(filterLayout);
-    var filterInput = $('<input type="text" class="title-font-normal font-color-brother-name string-input"/>');
+    var filterInput = $('<input type="text" class="title-font-normal font-color-brother-name short-input"/>');
     filterLayout.append(filterInput);
     filterInput.on("keyup", function(_event){
         var currentInput = $(this).val();
@@ -461,43 +477,24 @@ CustomFightScreen.prototype.gatherData = function()
 {
     var ret = {
         Settings : this.mSettings,
-        Player : {},
-        Enemy : {},
+        Player : {
+            Spawnlists : [],
+            Units : [],
+        },
+        Enemy : {
+            Spawnlists : [],
+            Units : [],
+        },
     };
     this.gatherUnits(ret.Player, this.mLeftSideSetupBox);
     this.gatherUnits(ret.Enemy, this.mRightSideSetupBox);
-    // var ret = {
-    //     Settings : {
-    //         Terrain = "",
-    //         Map = "",
-    //         SpectatorMode = false,
-    //     },
-    //     Player : {
-    //         Spawnlists : [
-    //             {
-    //                 ID : "",
-    //                 Resources : 0
-    //             }
-    //         ],
-    //         Units : [
-    //             {
-    //                 ID : "",
-    //                 Amount : 0,
-    //                 Champion : false,
-    //             }
-    //         ]
-    //     },
-    //     Enemy : {
+    this.checkStartEmptyMode(ret);
 
-    //     }
-    // };
     return ret;
 }
 
 CustomFightScreen.prototype.gatherUnits = function(_ret, _div)
 {
-    _ret.Spawnlists = [];
-    _ret.Units = [];
     var spawnlistRows = _div.spawnlistScrollContainer.find(".row")
     spawnlistRows.each(function(_idx){
         _ret.Spawnlists.push({
@@ -518,6 +515,14 @@ CustomFightScreen.prototype.gatherUnits = function(_ret, _div)
     // row.amount
 }
 
+CustomFightScreen.prototype.checkStartEmptyMode = function(_ret)
+{
+    if (_ret.Player.Spawnlists.length == 0 && _ret.Player.Units.length == 0 && _ret.Enemy.Spawnlists.length == 0 && _ret.Enemy.Units.length == 0)
+    {
+        _ret.Settings.StartEmptyMode = true;
+    }
+}
+
 CustomFightScreen.prototype.notifyBackendTopBarButtonPressed = function (_buttonType)
 {
     if (this.mSQHandle !== null)
@@ -529,8 +534,9 @@ CustomFightScreen.prototype.notifyBackendTopBarButtonPressed = function (_button
 CustomFightScreen.prototype.setTopBarButtonState = function (_data)
 {
     var button = this.mButtons[_data[0]];
-    var screenModule = Screens["TacticalScreen"].mTopbarOptionsModule
-    screenModule[button.ID].changeButtonImage(Path.GFX + button.Paths[_data[1].toString()]);
+    button.Button.changeButtonImage(Path.GFX + button.Paths[_data[1].toString()]);
+    // if the button was clicked, refresh tooltip
+    if(_data[2]) button.Button.trigger('update-tooltip' + TooltipModuleIdentifier.KeyEvent.Namespace)
 };
 
 CustomFightScreen.prototype.notifyBackendOkButtonPressed = function ()

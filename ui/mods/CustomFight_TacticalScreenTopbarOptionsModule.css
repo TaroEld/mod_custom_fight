@@ -14,21 +14,17 @@
 .tactical-screen .topbar-options-module .l-spectator-button
 {
     left: -5rem;
-    border: 1px solid blue;
 }
 .tactical-screen .topbar-options-module .l-pause-button
 {
     left: -9rem;
-    border: 1px solid red;
 }
 .tactical-screen .topbar-options-module .l-fov-button
 {
     left: -13rem;
-    border: 1px solid green;
 }
 .tactical-screen .topbar-options-module .l-camera-button
 {
     left: -17rem;
-    border: 1px solid purple;
 }
 

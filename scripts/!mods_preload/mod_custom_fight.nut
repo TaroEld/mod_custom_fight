@@ -14,6 +14,7 @@
 
 	::CustomFight.Mod <- ::MSU.Class.Mod(::CustomFight.ID, ::CustomFight.Version, ::CustomFight.Name); 
 	::CustomFight.Screen <- this.new("scripts/ui/screens/custom_fight_screen");
+	::CustomFight.Const <- {};
 	::MSU.UI.registerConnection(::CustomFight.Screen);
 	::CustomFight.Mod.Keybinds.addSQKeybind("toggleCustomFightScreen", "ctrl+p", ::MSU.Key.State.All,  ::CustomFight.Screen.toggle.bindenv(::CustomFight.Screen));
 	::CustomFight.Mod.Keybinds.addSQKeybind("initNextTurn", "f", ::MSU.Key.State.Tactical, function(){
@@ -31,6 +32,7 @@
 		return true;
 	})
 	::include("CustomFight/tooltips")
+	::include("CustomFight/const/sprite_list")
 
 	::mods_hookNewObject("entity/tactical/tactical_entity_manager", function(o){
 		local checkCombatFinished = o.checkCombatFinished;
@@ -41,8 +43,12 @@
 			{
 				return checkCombatFinished(_forceFinish);
 			}
+			if (properties.StartEmptyMode)
+			{
+				return false;
+			}
 
-			if (!("SpectatorMode" in properties) || !properties.SpectatorMode)
+			if (!properties.SpectatorMode)
 			{
 				return checkCombatFinished(_forceFinish);
 			}
@@ -70,7 +76,48 @@
 				}
 			}
 		}
+
+		local setupEntity = o.setupEntity;
+		o.setupEntity = function(_e, _t)
+		{
+			setupEntity(_e, _t);
+			local properties = this.Tactical.State.getStrategicProperties();
+			if (properties.CombatID != "CustomFight") return;
+
+			if (_e.getFaction() != properties.NobleFactionAlly.Ref.getID()) return;
+			this.logInfo("past check")
+
+			// basically false turns them left for humans and right for beasts because rap pls
+			// so it's wrong for humans, but we rely on onFactionChanged to change them back
+			foreach(key in ::CustomFight.Const.SpriteList)
+			{
+				if (_e.hasSprite(key))
+				{
+					_e.getSprite(key).setHorizontalFlipping(true);
+				}
+			}
+			_e.onFactionChanged();
+
+			if (!properties.ControlAllies || _e.m.IsControlledByPlayer) return;
+
+			_e.setFaction(this.Const.Faction.Player);
+			_e.m.AIAgent = this.new("scripts/ai/tactical/player_agent");
+			_e.m.AIAgent.setActor(_e);
+			_e.m.IsControlledByPlayer = true;
+			_e.m.IsGuest <- true;
+			_e.isGuest <- function(){
+				return this.m.IsGuest;
+			}
+			
+			_e.onCombatStart <- function(){};
+
+			if("Tail" in _e.m)
+			{
+				_e.m.Tail.setFaction(this.Const.Faction.PlayerAnimals);
+			}
+		}
 	})
+
 	::mods_hookNewObject("camera/tactical_camera_director", function(o){
 		local isInputAllowed = o.isInputAllowed;
 		o.isInputAllowed = function()
@@ -94,6 +141,22 @@
 				return setInputLocked(false);
 			}
 			return setInputLocked(_bool);
+		}
+
+		local exitTactical = o.exitTactical;
+		o.exitTactical = function()
+		{
+			local properties = this.Tactical.State.getStrategicProperties();
+			if (properties.CombatID != "CustomFight") return exitTactical();
+
+
+			properties.NobleFactionAlly.Ref.m.PlayerRelation = properties.NobleFactionAlly.Relation;
+			properties.NobleFactionAlly.Ref.updatePlayerRelation();
+			if (properties.NobleFactionAlly.OtherFactionFriendly) properties.NobleFactionAlly.Ref.addAlly(properties.NobleFactionEnemy.Ref.getID())
+			properties.NobleFactionEnemy.Ref.m.PlayerRelation = properties.NobleFactionEnemy.Relation;
+			properties.NobleFactionEnemy.Ref.updatePlayerRelation();
+			if (properties.NobleFactionEnemy.OtherFactionFriendly) properties.NobleFactionAlly.Ref.addAlly(properties.NobleFactionAlly.Ref.getID())
+			return exitTactical();
 		}
 	})
 
