@@ -6,12 +6,12 @@ TacticalScreenTopbarOptionsModule.prototype.createDIV = function(_parentDiv)
     var buttons = Screens.CustomFightScreen.mButtons;
     var idx = -5;
     MSU.iterateObject(buttons, function(key, _button){
-        var layout = $('<div class="l-custom-fight-button"/>');
-        self.mContainer.append(layout);
-        layout.css("left", idx + "rem");
+        _button.Layout = $('<div class="l-custom-fight-button display-none"/>');
+        self.mContainer.append(_button.Layout);
+        _button.Layout.css("left", idx + "rem");
         idx = idx - 4;
         var gfx = Path.GFX + _button.Paths["false"];
-        _button.Button = layout.createImageButton(gfx, function ()
+        _button.Button = _button.Layout.createImageButton(gfx, function ()
         {
             Screens.CustomFightScreen.notifyBackendTopBarButtonPressed(key);
         }, '', 6);

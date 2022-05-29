@@ -156,6 +156,7 @@
 			properties.NobleFactionEnemy.Ref.m.PlayerRelation = properties.NobleFactionEnemy.Relation;
 			properties.NobleFactionEnemy.Ref.updatePlayerRelation();
 			if (properties.NobleFactionEnemy.OtherFactionFriendly) properties.NobleFactionAlly.Ref.addAlly(properties.NobleFactionAlly.Ref.getID())
+			
 			return exitTactical();
 		}
 	})
@@ -171,6 +172,16 @@
 				return;
 			}
 			return initNextTurn(_force);
+		}
+	})
+
+	::mods_hookNewObject("ui/screens/tactical/tactical_screen", function(o){
+		local connect = o.connect;
+		o.connect = function()
+		{
+			connect();
+			local properties = this.Tactical.State.getStrategicProperties();
+			if (properties.CombatID == "CustomFight") ::CustomFight.Screen.setTopBarButtonsDisplay(true);
 		}
 	})
 })

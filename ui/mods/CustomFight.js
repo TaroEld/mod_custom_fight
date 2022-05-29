@@ -39,6 +39,7 @@ var CustomFightScreen = function(_parent)
         Pause : {
             ID : "Pause",
             Button : null,
+            Layout : null,
             Paths : {
                 true : "mods/ui/buttons/pause_on.png",
                 false : "mods/ui/buttons/pause_off.png",
@@ -48,6 +49,7 @@ var CustomFightScreen = function(_parent)
         ManualTurns : {
             ID : "ManualTurns",
             Button : null,
+            Layout : null,
             Paths : {
                 true : "mods/ui/buttons/direct_control_on.png",
                 false : "mods/ui/buttons/direct_control_off.png",
@@ -57,6 +59,7 @@ var CustomFightScreen = function(_parent)
         FOV : {
             ID : "FOV",
             Button : null,
+            Layout : null,
             Paths : {
                 true : "mods/ui/buttons/fov_off.png",
                 false : "mods/ui/buttons/fov_on.png",
@@ -66,6 +69,7 @@ var CustomFightScreen = function(_parent)
         UnlockCamera : {
             ID : "UnlockCamera",
             Button : null,
+            Layout : null,
             Paths : {
                 true : "mods/ui/buttons/camera_on.png",
                 false : "mods/ui/buttons/camera_off.png",
@@ -75,6 +79,7 @@ var CustomFightScreen = function(_parent)
         FinishFight : {
             ID : "FinishFight",
             Button : null,
+            Layout : null,
             Paths : {
                 true : 'ui/skin/icon_cross.png',
                 false : 'ui/skin/icon_cross.png',
@@ -542,6 +547,13 @@ CustomFightScreen.prototype.setTopBarButtonState = function (_data)
     button.Button.changeButtonImage(Path.GFX + button.Paths[_data[1].toString()]);
     // if the button was clicked, refresh tooltip
     if(_data[2]) button.Button.trigger('update-tooltip' + TooltipModuleIdentifier.KeyEvent.Namespace)
+};
+
+CustomFightScreen.prototype.setTopBarButtonsDisplay = function (_bool)
+{
+    MSU.iterateObject(this.mButtons, function(_key, _button){
+        MSU.toggleDisplay(_button.Layout, _bool);
+    })
 };
 
 CustomFightScreen.prototype.notifyBackendOkButtonPressed = function ()

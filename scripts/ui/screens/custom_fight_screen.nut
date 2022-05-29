@@ -228,6 +228,10 @@ this.custom_fight_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 		this.m.JSHandle.asyncCall("setTopBarButtonState", [_buttonType, properties[_buttonType], _manual]);
 	}
 
+	function setTopBarButtonsDisplay(_bool)
+	{
+		this.m.JSHandle.asyncCall("setTopBarButtonsDisplay", _bool);
+	}
 
 	function startFight(_data)
 	{
