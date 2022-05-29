@@ -7,6 +7,7 @@ this.custom_fight_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 	{
 		local activeState = ::MSU.Utils.getActiveState();
 		activeState.onHide();
+		this.Cursor.setCursor(this.Const.UI.Cursor.Hand);
 		switch(activeState.ClassName)
 		{
 			case "world_state":
@@ -156,6 +157,10 @@ this.custom_fight_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 				this.onFOVPressed(true);
 				break;
 
+			case "FinishFight":
+				this.onFinishFightPressed()
+				break;
+
 			default:
 				this.onGenericPressed(_buttonType, true)
 				break;
@@ -207,6 +212,12 @@ this.custom_fight_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 		}
 		this.m.JSHandle.asyncCall("setTopBarButtonState", ["FOV", state.m.IsFogOfWarVisible, _manual]);
 		return state.m.IsFogOfWarVisible;
+	}
+
+	function onFinishFightPressed()
+	{
+		local state = ::MSU.Utils.getState("tactical_state");
+		state.exitTactical();
 	}
 
 	function onGenericPressed(_buttonType, _manual = false)
