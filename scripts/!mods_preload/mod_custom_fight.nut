@@ -85,7 +85,6 @@
 			if (properties.CombatID != "CustomFight") return;
 
 			if (_e.getFaction() != properties.NobleFactionAlly.Ref.getID()) return;
-			this.logInfo("past check")
 
 			// basically false turns them left for humans and right for beasts because rap pls
 			// so it's wrong for humans, but we rely on onFactionChanged to change them back
