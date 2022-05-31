@@ -1,13 +1,3 @@
-/*
- *  @Project:       Battle Brothers
- *  @Company:       Overhype Studios
- *
- *  @Copyright:     (c) Overhype Studios | 2013 - 2020
- * 
- *  @Author:        Overhype Studios
- *  @Date:          31.10.2017
- *  @Description:   World Town Screen JS
- */
 "use strict";
 
 var CustomFightSpawnScreen = function(_parent)
