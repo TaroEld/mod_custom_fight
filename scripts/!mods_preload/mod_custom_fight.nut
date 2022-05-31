@@ -13,14 +13,16 @@
 	::mods_registerCSS("CustomFightSpawnScreen.css");
 	::mods_registerJS("CustomFight_TacticalScreenTopbarOptionsModule.js");
 	::mods_registerCSS("CustomFight_TacticalScreenTopbarOptionsModule.css");
+	::include("CustomFight/custom_fight_setup")
 
 	::CustomFight.Mod <- ::MSU.Class.Mod(::CustomFight.ID, ::CustomFight.Version, ::CustomFight.Name); 
 	::CustomFight.Screen <- this.new("scripts/ui/screens/custom_fight_screen");
 	::CustomFight.SpawnScreen <- this.new("scripts/ui/screens/custom_fight_spawn_screen");
+	::CustomFight.Setup <- this.new("CustomFight/custom_fight_setup");
 	::CustomFight.Const <- {};
 	::MSU.UI.registerConnection(::CustomFight.Screen);
 	::MSU.UI.registerConnection(::CustomFight.SpawnScreen);
-	::CustomFight.Mod.Keybinds.addSQKeybind("toggleCustomFightScreen", "ctrl+p", ::MSU.Key.State.All,  ::CustomFight.Screen.toggle.bindenv(::CustomFight.Screen));
+	::CustomFight.Mod.Keybinds.addSQKeybind("toggleCustomFightScreen", "ctrl+s", ::MSU.Key.State.World,  ::CustomFight.Screen.toggle.bindenv(::CustomFight.Screen));
 	::CustomFight.Mod.Keybinds.addSQKeybind("toggleCustomFightSpawnScreen", "ctrl+s", ::MSU.Key.State.Tactical,  ::CustomFight.SpawnScreen.toggle.bindenv(::CustomFight.SpawnScreen));
 	::CustomFight.Mod.Keybinds.addSQKeybind("initNextTurn", "f", ::MSU.Key.State.Tactical, function(){
 		this.Tactical.TurnSequenceBar.initNextTurn(true);
@@ -36,6 +38,8 @@
 		::CustomFight.Screen.onFOVPressed();
 		return true;
 	})
+	local generalPage = ::CustomFight.Mod.ModSettings.addPage("General");
+	generalPage.addBooleanSetting("AllowSettings", false, "Allow Settings", "Allow the topbar buttons and the spawner screen to work in normal fights, outside of custom fights.");
 	::include("CustomFight/tooltips")
 	::include("CustomFight/const/sprite_list")
 
@@ -89,7 +93,7 @@
 			local properties = this.Tactical.State.getStrategicProperties();
 			if (properties.CombatID != "CustomFight") return;
 
-			if (_e.getFaction() != properties.NobleFactionAlly.Ref.getID()) return;
+			if (_e.getFaction() != properties.NobleFactionAlly.getID()) return;
 
 			// basically false turns them left for humans and right for beasts because rap pls
 			// so it's wrong for humans, but we rely on onFactionChanged to change them back
@@ -151,16 +155,11 @@
 		o.exitTactical = function()
 		{
 			local properties = this.Tactical.State.getStrategicProperties();
-			if (properties.CombatID != "CustomFight") return exitTactical();
-
-
-			properties.NobleFactionAlly.Ref.m.PlayerRelation = properties.NobleFactionAlly.Relation;
-			properties.NobleFactionAlly.Ref.updatePlayerRelation();
-			if (properties.NobleFactionAlly.OtherFactionFriendly) properties.NobleFactionAlly.Ref.addAlly(properties.NobleFactionEnemy.Ref.getID())
-			properties.NobleFactionEnemy.Ref.m.PlayerRelation = properties.NobleFactionEnemy.Relation;
-			properties.NobleFactionEnemy.Ref.updatePlayerRelation();
-			if (properties.NobleFactionEnemy.OtherFactionFriendly) properties.NobleFactionAlly.Ref.addAlly(properties.NobleFactionAlly.Ref.getID())
-			
+			if (!("NobleFactionAlly" in properties))  return exitTactical();
+			local factions = this.World.FactionManager.m.Factions;
+			local len = factions.len();
+			factions[len - 1] = null;
+			factions[len - 2] = null;			
 			return exitTactical();
 		}
 	})
@@ -185,7 +184,8 @@
 		{
 			connect();
 			local properties = this.Tactical.State.getStrategicProperties();
-			if (properties.CombatID == "CustomFight") ::CustomFight.Screen.setTopBarButtonsDisplay(true);
+			if (properties.CombatID == "CustomFight" || ::CustomFight.Mod.ModSettings.getSetting("AllowSettings").getValue() == true) 
+				::CustomFight.Screen.setTopBarButtonsDisplay(true);
 		}
 	})
 })

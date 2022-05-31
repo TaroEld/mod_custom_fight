@@ -50,7 +50,7 @@ this.custom_fight_spawn_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 	function queryData()
 	{
 		local ret = {
-			AllUnits = ::CustomFight.Screen.querySpawnlistMaster(),
+			AllUnits = ::CustomFight.Setup.querySpawnlistMaster(),
 		}
 		return ret;
 	}
@@ -62,10 +62,9 @@ this.custom_fight_spawn_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 
 		local tile = this.Tactical.getTile(this.Tactical.screenToTile(::Cursor.getX(), ::Cursor.getY()));
 		local properties = this.Tactical.State.getStrategicProperties();
+		if (!("NobleFactionAlly" in properties)) ::CustomFight.Setup.setupFactions(properties, true);
 
-		local allyFaction = properties.NobleFactionAlly.Ref;
-		local enemyFaction = properties.NobleFactionEnemy.Ref;
-		unit.Faction <- settings.Ally ? allyFaction.getID() : enemyFaction.getID();
+		unit.Faction <- settings.Ally ?  properties.NobleFactionAlly.getID() : properties.NobleFactionEnemy.getID();
 		unit.Name <- "";
 		unit.Champion <- settings.Champion;
 		unit.Variant <- settings.Champion ? this.Math.rand(1, 255) : 0;

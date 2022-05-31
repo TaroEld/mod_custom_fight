@@ -45,7 +45,6 @@
 {
     width: 100%;
     height: 80%;
-    border: 1px solid white;
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -71,6 +70,7 @@
 {
     width: 100%;
     height: 20%;
+    margin-top: 2rem;
 }
 .spawn-screen-settings-div > .row
 {

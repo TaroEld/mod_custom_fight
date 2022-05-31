@@ -30,6 +30,16 @@ CustomFightSpawnScreen.prototype.createDIV = function (_parentDiv)
     // create: containers (init hidden!)
     this.mContainer = $('<div class="dialog-screen ui-control display-none opacity-none custom-fight-spawn"/>');
     _parentDiv.append(this.mContainer);
+    this.mContainer.drag(function( ev, dd ){
+        var clamp = function(num, min, max){
+            return Math.min(Math.max(num, min), max);
+        }
+        
+          $( this ).css({
+             top: clamp(dd.offsetY, 0, $(document).height()),
+             left: clamp(dd.offsetX, 0, $(document).width())
+          });
+    });
 
     // create: dialog container
     var dialogLayout = $('<div class="custom-fight-spawn-container-layout"/>');
@@ -62,6 +72,12 @@ CustomFightSpawnScreen.prototype.createUnitsList = function()
     this.mUnitsContainer = this.mUnitsDiv.createList(2);
     this.mUnitsScrollContainer = this.mUnitsContainer.findListScrollContainer();
     this.mUnitsDiv.prepend(this.createFilterBar(this.mUnitsScrollContainer));
+    this.mUnitsDiv.hover(function(){
+        $(this).data('hover', 1);
+    },
+    function(){
+        $(this).data('hover', 0);
+    });
 }
 
 CustomFightSpawnScreen.prototype.fillUnitsList = function()
@@ -92,21 +108,21 @@ CustomFightSpawnScreen.prototype.createDragHandler = function(_row)
             imageLayer = imageLayer.clone();
             proxy = imageLayer;
         }
-        proxy.appendTo(document.body);
+        proxy.appendTo(screen);
         proxy.data('unit', data);
         proxy.css("position", "absolute")
         proxy.css("z-index", "99999")
         return proxy;
-    });
+    }, { distance: _row.width()});
 
     _row.drag(function(ev, dd)
     {
-        $(dd.proxy).css({ top: dd.offsetY, left: dd.offsetX });
+        $(dd.proxy).css({ top: dd.offsetY, left: dd.offsetX -10});
     })
 
     _row.drag("end", function(ev, dd)
     {
-        self.notifyBackendSpawnUnit(_row.data('unit'));
+        if (self.mUnitsDiv.data("hover") == 0) self.notifyBackendSpawnUnit(_row.data('unit'));
         var proxy = $(dd.proxy);
         proxy.remove();
     });

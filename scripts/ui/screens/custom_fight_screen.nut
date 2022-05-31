@@ -51,93 +51,25 @@ this.custom_fight_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 		{
 			return false
 		}
-
-		if (this.isVisible())
-		{
-			this.hide();
-		}
-		else
-		{
-			this.show();
-		}
+		this.isVisible() ? this.hide() : this.show();
 		return true;
 	}
 
 	function queryData()
 	{
 		local ret = {
-			AllUnits = this.querySpawnlistMaster(),
-			AllFactions =  this.queryFactions(),
-			AllSpawnlists = this.querySpawnlists(),
-			AllBaseTerrains = this.queryTerrains(),
-			AllLocationTerrains = this.queryTerrainLocations(),
-			Factions = {
-				ID = "",
-				Spawnlists = "",
-			}
-		}
-		return ret;
-	}
-
-	function querySpawnlistMaster()
-	{
-		// clone it
-		local ret = {};
-
-		foreach (id, unit in ::Const.World.Spawn.Troops)
-		{	
-			ret[id] <- clone unit;
-			ret[id].DisplayName <- ::Const.Strings.EntityName[unit.ID];
-			ret[id].Icon <- ::Const.EntityIcon[unit.ID];
-		}
-		return ret;
-	}
-
-	function queryFactions()
-	{
-		return clone ::Const.FactionType;
-	}
-
-	function querySpawnlists()
-	{
-		local ret = {};
-		foreach(id, list in ::Const.World.Spawn)
-		{
-			ret[id] <- {
-				id = id,
-				list = clone list
-			}
-		}
-		return ret;
-	}
-
-	function queryTerrains()
-	{
-		return clone ::Const.World.TerrainTacticalTemplate
-	}
-
-	function queryTerrainLocations()
-	{
-		local ret = [];
-		local locSplit, locFinal;
-		foreach(key in ::IO.enumerateFiles("scripts/mapgen/templates/tactical/locations"))
-		{
-			locSplit = split(key, "/");
-			locSplit = locSplit[locSplit.len()-1];
-			locSplit = split(locSplit, "_");
-			locFinal = locSplit.remove(0) + "." + locSplit.remove(0);
-			while(locSplit.len() > 0)
-			{
-				locFinal += "_" + locSplit.remove(0)
-			}
-			ret.push(locFinal);
+			AllUnits = ::CustomFight.Setup.querySpawnlistMaster(),
+			AllFactions =  ::CustomFight.Setup.queryFactions(),
+			AllSpawnlists = ::CustomFight.Setup.querySpawnlists(),
+			AllBaseTerrains = ::CustomFight.Setup.queryTerrains(),
+			AllLocationTerrains = ::CustomFight.Setup.queryTerrainLocations(),
 		}
 		return ret;
 	}
 
 	function onCancelButtonPressed()
 	{
-		this.hide()
+		this.hide();
 	}
 
 	function onOkButtonPressed(_data)
@@ -149,6 +81,10 @@ this.custom_fight_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 	function onTopBarButtonPressed(_buttonType)
 	{
 		// manual is true when the button was clicked instead of hotkey
+		local properties = this.Tactical.State.getStrategicProperties();
+		if (properties.CombatID != "CustomFight" && ::CustomFight.Mod.ModSettings.getSetting("AllowSettings").getValue() == false)
+			return
+
 		switch(_buttonType)
 		{
 			case "Pause":
@@ -265,74 +201,21 @@ this.custom_fight_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 		p.Pause <- false;
 
 		// Use noble factions so that noble units dont break when they look for banner
-		local nobleFactionAlly = this.World.FactionManager.getFactionsOfType(this.Const.FactionType.NobleHouse)[0];
-		local nobleFactionEnemy = this.World.FactionManager.getFactionsOfType(this.Const.FactionType.NobleHouse)[1];
-		p.NobleFactionAlly <- {
-			Ref = nobleFactionAlly,
-			Relation = nobleFactionAlly.m.PlayerRelation,
-			OtherFactionFriendly = nobleFactionAlly.isAlliedWith(nobleFactionEnemy.getID())
-		}
-		p.NobleFactionEnemy <- {
-			Ref = nobleFactionEnemy,
-			Relation = nobleFactionEnemy.m.PlayerRelation,
-			OtherFactionFriendly = nobleFactionEnemy.isAlliedWith(nobleFactionAlly.getID())
-		}
-		nobleFactionAlly.m.PlayerRelation = 100.0;
-		nobleFactionAlly.updatePlayerRelation();
-		nobleFactionAlly.removeAlly(nobleFactionEnemy.getID());
-		nobleFactionEnemy.m.PlayerRelation = 0.0;
-		nobleFactionEnemy.updatePlayerRelation();
-		nobleFactionEnemy.removeAlly(nobleFactionAlly.getID());
-
+		::CustomFight.Setup.setupFactions(p)
 
 
 		foreach(spawnlist in _data.Player.Spawnlists)
 		{
-			this.Const.World.Common.addUnitsToCombat(p.Entities, this.Const.World.Spawn[spawnlist.ID], spawnlist.Resources.tointeger() , nobleFactionAlly.getID());
+			this.Const.World.Common.addUnitsToCombat(p.Entities, this.Const.World.Spawn[spawnlist.ID], spawnlist.Resources.tointeger() , p.NobleFactionAlly.getID());
 		}
 		foreach(spawnlist in _data.Enemy.Spawnlists)
 		{
-			this.Const.World.Common.addUnitsToCombat(p.Entities, this.Const.World.Spawn[spawnlist.ID], spawnlist.Resources.tointeger(), nobleFactionEnemy.getID());
+			this.Const.World.Common.addUnitsToCombat(p.Entities, this.Const.World.Spawn[spawnlist.ID], spawnlist.Resources.tointeger(), p.NobleFactionEnemy.getID());
 		}
 		local playerFaction = this.Const.Faction.PlayerAnimals;
-		this.addUnitsToCombat(_data.Player.Units, p.Entities, nobleFactionAlly.getID());
-		this.addUnitsToCombat(_data.Enemy.Units, p.Entities, nobleFactionEnemy.getID());
+		::CustomFight.Setup.addUnitsToCombat(_data.Player.Units, p.Entities, p.NobleFactionAlly.getID());
+		::CustomFight.Setup.addUnitsToCombat(_data.Enemy.Units, p.Entities, p.NobleFactionEnemy.getID());
 		this.World.State.startScriptedCombat(p, false, false, true);
-	}
-
-	function addUnitsToCombat(_units, _into, _faction)
-	{
-		foreach( t in _units )
-		{
-			t.Type = ::Const.World.Spawn.Troops[t.Type];
-			t.Num = t.Num.tointeger();
-			for( local i = 0; i < t.Num; i++ )
-			{
-				local unit = clone t.Type;
-				unit.Faction <- _faction;
-				unit.Name <- "";
-
-				if (unit.Variant > 0)
-				{
-					if (!this.Const.DLC.Wildmen || (!t.Champion && this.Math.rand(1, 100) > unit.Variant))
-					{
-						unit.Variant = 0;
-					}
-					else
-					{
-						unit.Strength = this.Math.round(unit.Strength * 1.35);
-						unit.Variant = this.Math.rand(1, 255);
-
-						if ("NameList" in t.Type)
-						{
-							unit.Name = ::Const.World.Common.generateName(t.Type.NameList) + (t.Type.TitleList != null ? " " + t.Type.TitleList[this.Math.rand(0, t.Type.TitleList.len() - 1)] : "");
-						}
-					}
-				}
-
-				_into.push(unit);
-			}
-		}
 	}
 });
 
