@@ -19,13 +19,16 @@ var CustomFightScreen = function(_parent)
     this.mSettings = {
         Terrain : "",
         Map : "",
+        MusicTrack : "",
         SpectatorMode : false,
-        ChopDownTrees : false,
+        CutDownTrees : false,
         StartEmptyMode : false,
         ControlAllies : false,
+        IsFleeingProhibited : false,
+        Fortification : false,
     }
 
-    this.mButtons = {
+    this.mTopBarButtons = {
         Pause : {
             ID : "Pause",
             Button : null,
@@ -175,26 +178,53 @@ CustomFightScreen.prototype.createSettingsDiv = function()
     });
     this.mMapButton.bindTooltip({ contentType: 'ui-element', elementId: "CustomFight.Screen.Settings.Map"});
 
-    var addCheckboxSetting = $.proxy(function(_id, _settingKey, _default, _name)
+    var trackRow = this.addRow(this.mSettingsBox);
+    trackRow.append(this.getTextDiv("Music Track", "label"));
+    this.mTrackButton = trackRow.createTextButton("", $.proxy(function(_div){
+       this.createArrayScrollContainer(this.createPopup('Choose Music Track','generic-popup', 'generic-popup-container'), _div, this.mData.AllMusicTracks, "MusicTrack")
+    }, this), "custom-fight-text-button", 4);
+    this.mTrackButton.mousedown(function(_event){
+        if(_event.which == 3)
+        {
+            $(this).changeButtonText("");
+            self.mSettings.MusicTrack = "";
+        }
+    });
+    this.mTrackButton.bindTooltip({ contentType: 'ui-element', elementId: "CustomFight.Screen.Settings.Music"});
+
+    this.mSpectatorModeCheck = this.addCheckboxSetting(this.addRow(this.mSettingsBox), "use-player-checkbox", "SpectatorMode", "uncheck", "Spectator Mode")
+    this.mCutDownTreesCheck = this.addCheckboxSetting(this.addRow(this.mSettingsBox), "cut-down-trees-checkbox", "CutDownTrees", "uncheck", "Chop down trees");
+    this.mControlAlliesCheck = this.addCheckboxSetting(this.addRow(this.mSettingsBox), "control-allies-checkbox", "ControlAllies", "uncheck", "Control allies");
+    this.mIsFleeingProhibitedCheck = this.addCheckboxSetting(this.addRow(this.mSettingsBox), "fleeing-prohibited-checkbox", "IsFleeingProhibited", "uncheck", "Disallow fleeing");
+    this.mFortificationCheck = this.addCheckboxSetting(this.addRow(this.mSettingsBox), "fortification-checkbox", "Fortification", "uncheck", "Add fortification");
+}
+
+CustomFightScreen.prototype.addCheckboxSetting = function(_div, _id, _settingKey, _default, _name)
+{
+    var self = this
+    var checkboxContainer = $('<div class="checkbox-container"/>');
+    _div.append(checkboxContainer)
+    var checkbox = $('<input type="checkbox" id="' + _id + '" />').appendTo(checkboxContainer).iCheck({
+        checkboxClass: 'icheckbox_flat-orange',
+        radioClass: 'iradio_flat-orange',
+        increaseArea: '30%'
+    });
+
+    if(_settingKey != null)
     {
-        var checkboxRow = this.addRow(this.mSettingsBox);
-        var checkbox = $('<input type="checkbox" id="' + _id + '" />').appendTo(checkboxRow).iCheck({
-            checkboxClass: 'icheckbox_flat-orange',
-            radioClass: 'iradio_flat-orange',
-            increaseArea: '30%'
-        });
         checkbox.on('ifChecked ifUnchecked', null, this, function (_event) {
             console.error("toggled " + _settingKey + $(this).prop("checked"))
             self.mSettings[_settingKey] = $(this).prop("checked")
         });
-        checkbox.iCheck(_default);
-        checkboxRow.append($('<label class="text-font-normal font-color-subtitle bool-checkbox-label" for="' + _id + '">' + _name + '</label>'))
-        return checkbox;
-    }, this)
-
-    this.mSpectatorModeCheck = addCheckboxSetting("use-player-checkbox", "SpectatorMode", "uncheck", "Spectator Mode")
-    this.mChopDownTreesCheck = addCheckboxSetting("chop-down-trees-checkbox", "ChopDownTrees", "uncheck", "Chop down trees");
-    this.mControlAlliesCheck = addCheckboxSetting("chop-down-trees-checkbox", "ControlAllies", "uncheck", "Control allies");
+    }
+    checkbox.iCheck(_default);
+    var label = $('<label class="text-font-normal font-color-subtitle bool-checkbox-label" for="' + _id + '">' + _name + '</label>');
+    checkboxContainer.append(label)
+    label.click(function(){
+        checkbox.iCheck('toggle');
+    })
+    if(_settingKey != null) checkboxContainer.bindTooltip({ contentType: 'ui-element', elementId: "CustomFight.Screen.Settings." + _settingKey});
+    return checkbox;
 }
 
 // creates a generic popup that lists entries in an array
@@ -205,7 +235,7 @@ CustomFightScreen.prototype.createArrayScrollContainer = function(_dialog, _div,
     _dialog.prepend(this.createFilterBar(scrollContainer));
     MSU.iterateObject(_array, $.proxy(function(_key, _unit){
         if(_unit == "") return
-        var row = this.addRow(scrollContainer);
+        var row = this.addRow(scrollContainer, "", true);
 
         var name = $('<div class="title-font-normal font-color-brother-name custom-fight-entry-label">' + _unit +  '</div>');
         row.append(name);
@@ -278,7 +308,7 @@ CustomFightScreen.prototype.createAddUnitScrollContainer = function(_dialog, _si
     _dialog.prepend(this.createFilterBar(scrollContainer));
 
     MSU.iterateObject(this.mData.AllUnits, $.proxy(function(_key, _unit){
-        var row = this.addRow(scrollContainer);
+        var row = this.addRow(scrollContainer, "", true);
 
         var name = $('<div class="title-font-normal font-color-brother-name custom-fight-entry-label">' + _unit.DisplayName +  '</div>');
         row.append(name);
@@ -295,7 +325,7 @@ CustomFightScreen.prototype.createAddUnitScrollContainer = function(_dialog, _si
 
 CustomFightScreen.prototype.addUnitToBox = function(_unit, _side, _key)
 {
-    var row = this.addRow(_side);
+    var row = this.addRow(_side, "", true);
     row.data("unitID", _key);
     row.data("unit", _unit);
 
@@ -311,14 +341,9 @@ CustomFightScreen.prototype.addUnitToBox = function(_unit, _side, _key)
     row.data("amount", amountInput);
     amountInput.bindTooltip({ contentType: 'ui-element', elementId: "CustomFight.Screen.Units.Main.Amount"});
 
-    var checkbox = $('<input type="checkbox" id="champion-checkbox"/>').appendTo(row).iCheck({
-        checkboxClass: 'icheckbox_flat-orange',
-        radioClass: 'iradio_flat-orange',
-        increaseArea: '30%'
-    });
+    var checkbox = this.addCheckboxSetting(row, "champion-checkbox", null, "uncheck", "Champion")
+    checkbox.bindTooltip({ contentType: 'ui-element', elementId: "CustomFight.Screen.Units.Main.Champion"})
     row.data("champion", checkbox);
-    var label = $('<label class="text-font-normal font-color-subtitle bool-checkbox-label" for="bool-checkbox-label">Champion</label>').appendTo(row);
-
 
     var destroyButtonLayout = $('<div class="delete-button-container"/>');
     row.append(destroyButtonLayout);
@@ -336,7 +361,7 @@ CustomFightScreen.prototype.createAddSpawnlistScrollContainer = function(_dialog
     var scrollContainer = this.mPopupListContainer.findListScrollContainer();
     _dialog.prepend(this.createFilterBar(scrollContainer));
     MSU.iterateObject(this.mData.AllSpawnlists, $.proxy(function(_key, _unit){
-        var row = this.addRow(scrollContainer);
+        var row = this.addRow(scrollContainer, "", true);
         var name = $('<div class="title-font-normal font-color-brother-name custom-fight-entry-label">' + _unit.id +  '</div>');
         row.append(name);
         var addButtonContainer = $('<div class="custom-fight-text-button-layout"/>');
@@ -349,7 +374,7 @@ CustomFightScreen.prototype.createAddSpawnlistScrollContainer = function(_dialog
 
 CustomFightScreen.prototype.addSpawnlistToBox = function(_unit, _boxDiv)
 {
-    var row = this.addRow(_boxDiv);
+    var row = this.addRow(_boxDiv, "", true);
     row.data("unitID", _unit.id);
     row.data("unit", _unit);
 
@@ -416,13 +441,17 @@ CustomFightScreen.prototype.createFilterBar = function(_scrollContainer)
     return row;
 }
 
-CustomFightScreen.prototype.addRow = function(_div, _classes)
+CustomFightScreen.prototype.addRow = function(_div, _classes, _divider)
 {
     var row = $('<div class="row"/>');
     _div.append(row);
     if (_classes != undefined)
     {
         row.addClass(_classes);
+    }
+    if(_divider === true)
+    {
+        $('<div class="bottom-gold-line"/>').appendTo(_div)
     }
     return row;
 }
@@ -441,10 +470,13 @@ CustomFightScreen.prototype.setData = function (_data)
     this.initialiseValues();
 };
 
-CustomFightScreen.prototype.initialiseValues = function (_data)
+CustomFightScreen.prototype.initialiseValues = function ()
 {  
     this.mTerrainButton.changeButtonText(this.mData.AllBaseTerrains[1]);
     this.mSettings.Terrain = this.mData.AllBaseTerrains[1];
+
+    this.mTrackButton.changeButtonText(this.mData.AllMusicTracks[0]);
+    this.mSettings.MusicTrack = this.mData.AllMusicTracks[0];
 
     this.mMapButton.changeButtonText("");
     this.mSettings.Map = "";
@@ -452,8 +484,14 @@ CustomFightScreen.prototype.initialiseValues = function (_data)
     this.mSpectatorModeCheck.iCheck('uncheck');
     this.mSettings.SpectatorMode = false;
 
-    this.mChopDownTreesCheck.iCheck('uncheck');
-    this.mSettings.ChopDownTrees = false;
+    this.mCutDownTreesCheck.iCheck('uncheck');
+    this.mSettings.CutDownTrees = false;
+
+    this.mCutDownTreesCheck.iCheck('uncheck');
+    this.mSettings.CutDownTrees = false;
+
+    this.mCutDownTreesCheck.iCheck('uncheck');
+    this.mSettings.CutDownTrees = false;
 
     this.mLeftSideSetupBox.spawnlistScrollContainer.empty();
     this.mRightSideSetupBox.spawnlistScrollContainer.empty();
@@ -462,6 +500,7 @@ CustomFightScreen.prototype.initialiseValues = function (_data)
 
     this.testThings()
 };
+
 
 CustomFightScreen.prototype.testThings = function ()
 {  
@@ -533,7 +572,7 @@ CustomFightScreen.prototype.notifyBackendTopBarButtonPressed = function (_button
 
 CustomFightScreen.prototype.setTopBarButtonState = function (_data)
 {
-    var button = this.mButtons[_data[0]];
+    var button = this.mTopBarButtons[_data[0]];
     button.Button.changeButtonImage(Path.GFX + button.Paths[_data[1].toString()]);
     // if the button was clicked, refresh tooltip
     if(_data[2]) button.Button.trigger('update-tooltip' + TooltipModuleIdentifier.KeyEvent.Namespace)
@@ -541,7 +580,7 @@ CustomFightScreen.prototype.setTopBarButtonState = function (_data)
 
 CustomFightScreen.prototype.setTopBarButtonsDisplay = function (_bool)
 {
-    MSU.iterateObject(this.mButtons, function(_key, _button){
+    MSU.iterateObject(this.mTopBarButtons, function(_key, _button){
         MSU.toggleDisplay(_button.Layout, _bool);
     })
 };

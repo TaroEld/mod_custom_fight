@@ -20,6 +20,7 @@
 	::CustomFight.SpawnScreen <- this.new("scripts/ui/screens/custom_fight_spawn_screen");
 	::CustomFight.Setup <- this.new("CustomFight/custom_fight_setup");
 	::CustomFight.Const <- {};
+	::include("CustomFight/const/track_list")
 	::MSU.UI.registerConnection(::CustomFight.Screen);
 	::MSU.UI.registerConnection(::CustomFight.SpawnScreen);
 	::CustomFight.Mod.Keybinds.addSQKeybind("toggleCustomFightScreen", "ctrl+s", ::MSU.Key.State.World,  ::CustomFight.Screen.toggle.bindenv(::CustomFight.Screen));

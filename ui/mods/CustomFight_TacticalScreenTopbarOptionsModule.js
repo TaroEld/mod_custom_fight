@@ -3,7 +3,7 @@ TacticalScreenTopbarOptionsModule.prototype.createDIV = function(_parentDiv)
 {
     var self = this;
     createDIV.call(this, _parentDiv);
-    var buttons = Screens.CustomFightScreen.mButtons;
+    var buttons = Screens.CustomFightScreen.mTopBarButtons;
     var idx = -5;
     MSU.iterateObject(buttons, function(key, _button){
         _button.Layout = $('<div class="l-custom-fight-button display-none"/>');

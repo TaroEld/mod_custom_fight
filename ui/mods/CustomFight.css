@@ -11,6 +11,16 @@
     background-repeat: no-repeat;
 }
 
+.bottom-gold-line {
+    padding-top: 1rem;
+    height: 1rem;
+    width: 100%;
+    background-image: url("coui://gfx/ui/skin/line_gold.png");
+    background-size: 100% 0.3rem;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
 .custom-fight-container-layout .ui-control.dialog
 {
     background-color: rgba(0, 0, 0, 0.3);
@@ -77,7 +87,15 @@
     width: 20rem;
 }
 
-.settings-box .row .bool-checkbox-label
+.checkbox-container
+{
+    width: 22rem;
+    margin-left: 2rem;
+    border: 1px solid white;
+}
+
+.settings-box .row .bool-checkbox-label,
+.setup-box .bool-checkbox-label
 {
     padding-left: 2rem;
     padding-right: 2rem;
@@ -150,16 +168,6 @@
     margin-left: auto;
 }
 
-.setup-box .units-box .bool-checkbox-label
-{
-    font-size: 1.8rem;
-    color: #d7b174;
-    font-weight: normal;
-    font-style : normal;
-    font-family: 'FreeUniversal-Regular';
-    border: 1px solid red;
-}
-
 .setup-box .button-bar-box
 {
     width: 100%;
@@ -181,6 +189,7 @@
 .custom-fight-entry-label
 {
     width: 30rem;
+    text-align: center;
 }
 
 .generic-popup
@@ -252,6 +261,8 @@
     overflow: hidden;
     padding-left: 1rem;
     display: flex;
+    flex-wrap: wrap;
+    align-items: center;
 
     /*border: 2px solid green;*/
 }

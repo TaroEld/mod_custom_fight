@@ -55,18 +55,6 @@ this.custom_fight_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 		return true;
 	}
 
-	function queryData()
-	{
-		local ret = {
-			AllUnits = ::CustomFight.Setup.querySpawnlistMaster(),
-			AllFactions =  ::CustomFight.Setup.queryFactions(),
-			AllSpawnlists = ::CustomFight.Setup.querySpawnlists(),
-			AllBaseTerrains = ::CustomFight.Setup.queryTerrains(),
-			AllLocationTerrains = ::CustomFight.Setup.queryTerrainLocations(),
-		}
-		return ret;
-	}
-
 	function onCancelButtonPressed()
 	{
 		this.hide();
@@ -175,21 +163,26 @@ this.custom_fight_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 	{
 		local p = this.Const.Tactical.CombatInfo.getClone();
 		p.Tile = this.World.State.getPlayer().getTile();
-		local noble
+
 		p.TerrainTemplate = _data.Settings.Terrain;
 		if(_data.Settings.Map != "")
 		{
+			if(_data.Settings.Map != "tactical.arena_floor") p.IsAttackingLocation = true;
 			p.LocationTemplate = clone this.Const.Tactical.LocationTemplate;
 			p.LocationTemplate.Template[0] = _data.Settings.Map;
 			p.LocationTemplate.OwnedByFaction = this.Const.Faction.Enemy;
+			p.LocationTemplate.CutDownTrees <- _data.Settings.CutDownTrees;
+			p.LocationTemplate.Fortification = _data.Settings.Fortification ? this.Const.Tactical.FortificationType.Palisade : this.Const.Tactical.FortificationType.None;
 		}
+		::MSU.Log.printData(p.LocationTemplate, 2)
 		p.Entities = [];
 		p.CombatID = "CustomFight";
-		p.Music = this.Const.Music.OrcsTracks;
+		p.Music = this.Const.Music[_data.Settings.MusicTrack];
 		p.PlayerDeploymentType = this.Const.Tactical.DeploymentType.Line;
 		p.EnemyDeploymentType = this.Const.Tactical.DeploymentType.Line;
 		p.IsAutoAssigningBases = false;
 		p.IsFogOfWarVisible = _data.Settings.SpectatorMode;
+		p.IsFleeingProhibited = _data.Settings.IsFleeingProhibited;
 
 		p.IsUsingSetPlayers = _data.Settings.SpectatorMode;
 		p.SpectatorMode <- _data.Settings.SpectatorMode;
@@ -216,6 +209,19 @@ this.custom_fight_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 		::CustomFight.Setup.addUnitsToCombat(_data.Player.Units, p.Entities, p.NobleFactionAlly.getID());
 		::CustomFight.Setup.addUnitsToCombat(_data.Enemy.Units, p.Entities, p.NobleFactionEnemy.getID());
 		this.World.State.startScriptedCombat(p, false, false, true);
+	}
+
+	function queryData()
+	{
+		local ret = {
+			AllUnits = ::CustomFight.Setup.querySpawnlistMaster(),
+			AllFactions =  ::CustomFight.Setup.queryFactions(),
+			AllSpawnlists = ::CustomFight.Setup.querySpawnlists(),
+			AllBaseTerrains = ::CustomFight.Setup.queryTerrains(),
+			AllLocationTerrains = ::CustomFight.Setup.queryTerrainLocations(),
+			AllMusicTracks =::CustomFight.Setup.queryTracklist(),
+		}
+		return ret;
 	}
 });
 
