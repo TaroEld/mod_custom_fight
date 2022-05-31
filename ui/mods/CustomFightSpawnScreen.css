@@ -1,0 +1,98 @@
+.custom-fight-spawn
+{
+    height: 50%;
+    width: 20%;
+    top: 25%;
+    z-index: 10000;
+}
+
+.custom-fight-spawn-container-layout
+{
+    height: 100%;
+    width: 100%;
+    position: relative;
+    background-image: url("coui://gfx/mods/msu/skin/generic_background_large_border.png");
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+}
+
+.custom-fight-spawn-container-layout .ui-control.dialog
+{
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+}
+
+.test-row
+{
+    width: 100%;
+    height: 4.3rem;
+}
+
+.filter-bar
+{
+    width: 100%;
+    height: 4.3rem;
+    display: flex;
+    justify-content: space-between;
+}
+
+.spawn-screen-units-div
+{
+    width: 100%;
+    height: 80%;
+    border: 1px solid white;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+.spawn-screen-units-div .row
+{
+    display: flex;
+    width: 100%;
+    margin-top: 1rem;
+    padding-left: 2rem;
+    height: 5rem;
+    cursor: move;
+}
+
+.orientation-div,
+.orientation-img
+{
+    width: 4.5rem;
+    height: 4.5rem;
+}
+
+.spawn-screen-settings-div
+{
+    width: 100%;
+    height: 20%;
+}
+.spawn-screen-settings-div > .row
+{
+    display: flex;
+    align-items: center;
+    width: 100%;
+    margin-top: 1rem;
+    padding-left: 2rem;
+}
+
+.spawn-screen-settings-div > .row .label
+{
+    width: 20rem;
+}
+
+.spawn-screen-settings-div .row .bool-checkbox-label
+{
+    padding-left: 2rem;
+    padding-right: 2rem;
+    font-size: 1.8rem;
+    color: #d7b174;
+    font-weight: normal;
+    font-style : normal;
+    font-family: 'FreeUniversal-Regular';
+}

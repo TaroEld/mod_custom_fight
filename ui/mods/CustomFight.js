@@ -101,7 +101,7 @@ CustomFightScreen.prototype.createDIV = function (_parentDiv)
     var self = this;
 
     // create: containers (init hidden!)
-    this.mContainer = $('<div class="dialog-screen ui-control dialog-mod display-none opacity-none custom-fight"/>');
+    this.mContainer = $('<div class="dialog-screen ui-control display-none opacity-none custom-fight"/>');
     _parentDiv.append(this.mContainer);
 
     // create: dialog container
@@ -188,7 +188,7 @@ CustomFightScreen.prototype.createSettingsDiv = function()
     var addCheckboxSetting = $.proxy(function(_id, _settingKey, _default, _name)
     {
         var checkboxRow = this.addRow(this.mSettingsBox);
-        var checkbox = checkboxRow.append($('<input type="checkbox" id="' + _id + '" />')).iCheck({
+        var checkbox = $('<input type="checkbox" id="' + _id + '" />').appendTo(checkboxRow).iCheck({
             checkboxClass: 'icheckbox_flat-orange',
             radioClass: 'iradio_flat-orange',
             increaseArea: '30%'
@@ -288,9 +288,9 @@ CustomFightScreen.prototype.createAddUnitScrollContainer = function(_dialog, _si
     _dialog.prepend(this.createFilterBar(scrollContainer));
 
     MSU.iterateObject(this.mData.AllUnits, $.proxy(function(_key, _unit){
-        var row = this.addRow(scrollContainer, "unit-row");
+        var row = this.addRow(scrollContainer);
 
-        var name = $('<div class="title-font-normal font-color-brother-name custom-fight-entry-label">' + _unit.Name +  '</div>');
+        var name = $('<div class="title-font-normal font-color-brother-name custom-fight-entry-label">' + _unit.DisplayName +  '</div>');
         row.append(name);
 
         var addButtonContainer = $('<div class="custom-fight-text-button-layout"/>');
@@ -309,7 +309,7 @@ CustomFightScreen.prototype.addUnitToBox = function(_unit, _side, _key)
     row.data("unitID", _key);
     row.data("unit", _unit);
 
-    var name = $('<div class="title-font-normal font-color-brother-name custom-fight-entry-label">' + _unit.Name +  '</div>');
+    var name = $('<div class="title-font-normal font-color-brother-name custom-fight-entry-label">' + _unit.DisplayName +  '</div>');
     row.append(name);
     name.bindTooltip({ contentType: 'ui-element', elementId: "CustomFight.Screen.Units.Main.Type"});
 
@@ -321,13 +321,13 @@ CustomFightScreen.prototype.addUnitToBox = function(_unit, _side, _key)
     row.data("amount", amountInput);
     amountInput.bindTooltip({ contentType: 'ui-element', elementId: "CustomFight.Screen.Units.Main.Amount"});
 
-    var checkbox = row.append($('<input type="checkbox" id="champion-checkbox"/>')).iCheck({
+    var checkbox = $('<input type="checkbox" id="champion-checkbox"/>').appendTo(row).iCheck({
         checkboxClass: 'icheckbox_flat-orange',
         radioClass: 'iradio_flat-orange',
         increaseArea: '30%'
     });
     row.data("champion", checkbox);
-    var label = row.append($('<label class="text-font-normal font-color-subtitle bool-checkbox-label" for="bool-checkbox-label">Champion</label>'))
+    var label = $('<label class="text-font-normal font-color-subtitle bool-checkbox-label" for="bool-checkbox-label">Champion</label>').appendTo(row);
 
 
     var destroyButtonLayout = $('<div class="delete-button-container"/>');
@@ -346,7 +346,7 @@ CustomFightScreen.prototype.createAddSpawnlistScrollContainer = function(_dialog
     var scrollContainer = this.mPopupListContainer.findListScrollContainer();
     _dialog.prepend(this.createFilterBar(scrollContainer));
     MSU.iterateObject(this.mData.AllSpawnlists, $.proxy(function(_key, _unit){
-        var row = this.addRow(scrollContainer, "unit-row");
+        var row = this.addRow(scrollContainer);
         var name = $('<div class="title-font-normal font-color-brother-name custom-fight-entry-label">' + _unit.id +  '</div>');
         row.append(name);
         var addButtonContainer = $('<div class="custom-fight-text-button-layout"/>');

@@ -82,11 +82,13 @@ this.custom_fight_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 	function querySpawnlistMaster()
 	{
 		// clone it
-		local ret = clone ::Const.World.Spawn.Troops;
-		foreach (id, unit in ret)
+		local ret = {};
+
+		foreach (id, unit in ::Const.World.Spawn.Troops)
 		{	
-			unit.Name <- ::Const.Strings.EntityName[unit.ID];
-			unit.Icon <- ::Const.EntityIcon[unit.ID];
+			ret[id] <- clone unit;
+			ret[id].DisplayName <- ::Const.Strings.EntityName[unit.ID];
+			ret[id].Icon <- ::Const.EntityIcon[unit.ID];
 		}
 		return ret;
 	}

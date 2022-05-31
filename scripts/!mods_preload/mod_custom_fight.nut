@@ -9,14 +9,19 @@
 {
 	::mods_registerJS("CustomFight.js");
 	::mods_registerCSS("CustomFight.css");
+	::mods_registerJS("CustomFightSpawnScreen.js");
+	::mods_registerCSS("CustomFightSpawnScreen.css");
 	::mods_registerJS("CustomFight_TacticalScreenTopbarOptionsModule.js");
 	::mods_registerCSS("CustomFight_TacticalScreenTopbarOptionsModule.css");
 
 	::CustomFight.Mod <- ::MSU.Class.Mod(::CustomFight.ID, ::CustomFight.Version, ::CustomFight.Name); 
 	::CustomFight.Screen <- this.new("scripts/ui/screens/custom_fight_screen");
+	::CustomFight.SpawnScreen <- this.new("scripts/ui/screens/custom_fight_spawn_screen");
 	::CustomFight.Const <- {};
 	::MSU.UI.registerConnection(::CustomFight.Screen);
+	::MSU.UI.registerConnection(::CustomFight.SpawnScreen);
 	::CustomFight.Mod.Keybinds.addSQKeybind("toggleCustomFightScreen", "ctrl+p", ::MSU.Key.State.All,  ::CustomFight.Screen.toggle.bindenv(::CustomFight.Screen));
+	::CustomFight.Mod.Keybinds.addSQKeybind("toggleCustomFightSpawnScreen", "ctrl+s", ::MSU.Key.State.Tactical,  ::CustomFight.SpawnScreen.toggle.bindenv(::CustomFight.SpawnScreen));
 	::CustomFight.Mod.Keybinds.addSQKeybind("initNextTurn", "f", ::MSU.Key.State.Tactical, function(){
 		this.Tactical.TurnSequenceBar.initNextTurn(true);
 		return true;
