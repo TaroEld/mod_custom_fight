@@ -451,7 +451,7 @@ CustomFightScreen.prototype.addRow = function(_div, _classes, _divider)
     }
     if(_divider === true)
     {
-        $('<div class="bottom-gold-line"/>').appendTo(_div)
+        row.addClass("bottom-gold-line");
     }
     return row;
 }
