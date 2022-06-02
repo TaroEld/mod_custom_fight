@@ -17,9 +17,9 @@ var CustomFightScreen = function(_parent)
 
     this.mData = null;
     this.mSettings = {
-        Terrain : "",
+        Terrain : "tactical.plains",
         Map : "",
-        MusicTrack : "",
+        MusicTrack : "BanditTracks",
         SpectatorMode : false,
         CutDownTrees : false,
         StartEmptyMode : false,
@@ -128,7 +128,7 @@ CustomFightScreen.prototype.createDIV = function (_parentDiv)
     footerButtonBar.append(layout);
     this.mResetButton = layout.createTextButton("Reset", function ()
     {
-        self.initialiseValues();
+        self.reset();
     }, 'custom-fight-text-button', 4);
     this.mResetButton.bindTooltip({ contentType: 'ui-element', elementId: "CustomFight.Screen.Main.Reset"});
 
@@ -159,7 +159,7 @@ CustomFightScreen.prototype.createSettingsDiv = function()
 
     var terrainRow = this.addRow(this.mSettingsBox);
     terrainRow.append(this.getTextDiv("Terrain", "label"));
-    this.mTerrainButton = terrainRow.createTextButton("", $.proxy(function(_div){
+    this.mTerrainButton = terrainRow.createTextButton("tactical.plains", $.proxy(function(_div){
        this.createArrayScrollContainer(this.createPopup('Choose Terrain','generic-popup', 'generic-popup-container'), _div, this.mData.AllBaseTerrains, "Terrain")
     }, this), "custom-fight-text-button", 4);
     this.mTerrainButton.bindTooltip({ contentType: 'ui-element', elementId: "CustomFight.Screen.Settings.Terrain"});
@@ -180,9 +180,10 @@ CustomFightScreen.prototype.createSettingsDiv = function()
 
     var trackRow = this.addRow(this.mSettingsBox);
     trackRow.append(this.getTextDiv("Music Track", "label"));
-    this.mTrackButton = trackRow.createTextButton("", $.proxy(function(_div){
+    this.mTrackButton = trackRow.createTextButton("BanditTracks", $.proxy(function(_div){
        this.createArrayScrollContainer(this.createPopup('Choose Music Track','generic-popup', 'generic-popup-container'), _div, this.mData.AllMusicTracks, "MusicTrack")
     }, this), "custom-fight-text-button", 4);
+
     this.mTrackButton.mousedown(function(_event){
         if(_event.which == 3)
         {
@@ -217,12 +218,13 @@ CustomFightScreen.prototype.addCheckboxSetting = function(_div, _id, _settingKey
             self.mSettings[_settingKey] = $(this).prop("checked")
         });
     }
-    checkbox.iCheck(_default);
+    
     var label = $('<label class="text-font-normal font-color-subtitle bool-checkbox-label" for="' + _id + '">' + _name + '</label>');
     checkboxContainer.append(label)
     label.click(function(){
         checkbox.iCheck('toggle');
     })
+    checkbox.iCheck(_default);
     if(_settingKey != null) checkboxContainer.bindTooltip({ contentType: 'ui-element', elementId: "CustomFight.Screen.Settings." + _settingKey});
     return checkbox;
 }
@@ -467,7 +469,7 @@ CustomFightScreen.prototype.getTextDiv = function(_text, _classes)
 CustomFightScreen.prototype.setData = function (_data)
 {    
     this.mData = _data;
-    this.initialiseValues();
+    this.testThings()
 };
 
 CustomFightScreen.prototype.initialiseValues = function ()
@@ -482,25 +484,20 @@ CustomFightScreen.prototype.initialiseValues = function ()
     this.mSettings.Map = "";
 
     this.mSpectatorModeCheck.iCheck('uncheck');
-    this.mSettings.SpectatorMode = false;
-
     this.mCutDownTreesCheck.iCheck('uncheck');
-    this.mSettings.CutDownTrees = false;
+    this.mControlAlliesCheck.iCheck('uncheck');
+    this.mIsFleeingProhibitedCheck.iCheck('uncheck');
+    this.mFortificationCheck.iCheck('uncheck');
+}
 
-    this.mCutDownTreesCheck.iCheck('uncheck');
-    this.mSettings.CutDownTrees = false;
-
-    this.mCutDownTreesCheck.iCheck('uncheck');
-    this.mSettings.CutDownTrees = false;
-
+CustomFightScreen.prototype.reset = function()
+{
+    this.initialiseValues();
     this.mLeftSideSetupBox.spawnlistScrollContainer.empty();
     this.mRightSideSetupBox.spawnlistScrollContainer.empty();
     this.mLeftSideSetupBox.unitsScrollContainer.empty();
     this.mRightSideSetupBox.unitsScrollContainer.empty();
-
-    this.testThings()
-};
-
+}
 
 CustomFightScreen.prototype.testThings = function ()
 {  
