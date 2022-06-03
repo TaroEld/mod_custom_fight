@@ -6,7 +6,11 @@
 			Reset = ::MSU.Class.UITooltip("Reset", "Reset all settings."),
 		}
 		Settings = {
-			Terrain = ::MSU.Class.UITooltip("Choose Terrain", "Choose the terrain."),
+			Terrain = ::MSU.Class.UITooltip("Choose Terrain", function(_data){
+				local text = "Choose the terrain.";
+				if ("test" in _data) text += _data.test;
+				return text
+			}),
 			Map = ::MSU.Class.UITooltip("Choose Map", "Choose the map. Rightclick to clear."),
 			Music = ::MSU.Class.UITooltip("Choose Music", "Choose the music."),
 			CutDownTrees = ::MSU.Class.UITooltip("Cut down trees", "Cut down trees."),
@@ -44,10 +48,10 @@
 	Tactical = 
 	{
 		Topbar = {
-			Pause = ::MSU.Class.UITooltip("Toggle Pause", @() format("Toggle pause %s", ::MSU.Utils.getState("tactical_state").m.IsGamePaused ? "off." : "on.")),
-			FOV = ::MSU.Class.UITooltip("Toggle FOV", @() format("Toggle FOV %s", ::MSU.Utils.getState("tactical_state").m.IsFogOfWarVisible ? "off." : "on.")),
-			ManualTurns = ::MSU.Class.UITooltip("Toggle Manual Turns", @() format("Toggle Manual Turns %s", this.Tactical.State.getStrategicProperties().ManualTurns ? "off." : "on.")),
-			UnlockCamera = ::MSU.Class.UITooltip("Toggle Unlock Camera", @() format("%s the camera.", this.Tactical.State.getStrategicProperties().UnlockCamera ? "Lock" : "Unlock")),
+			Pause = ::MSU.Class.UITooltip("Toggle Pause", @(_) format("Toggle pause %s", ::CustomFight.Screen.getButton("Pause").getValue() ? "off." : "on.")),
+			FOV = ::MSU.Class.UITooltip("Toggle FOV", @(_) format("Toggle FOV %s", ::CustomFight.Screen.getButton("FOV").getValue() ? "off." : "on.")),
+			ManualTurns = ::MSU.Class.UITooltip("Toggle Manual Turns", @(_) format("Toggle Manual Turns %s", ::CustomFight.Screen.getButton("ManualTurns").getValue() ? "off." : "on.")),
+			UnlockCamera = ::MSU.Class.UITooltip("Toggle Unlock Camera", @(_) format("%s the camera.", ::CustomFight.Screen.getButton("UnlockCamera").getValue() ? "Lock" : "Unlock")),
 			FinishFight = ::MSU.Class.UITooltip("Finish Fight", "Finish the current fight."),
 		}
 	}

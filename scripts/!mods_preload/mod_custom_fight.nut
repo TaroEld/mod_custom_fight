@@ -29,14 +29,14 @@
 		this.Tactical.TurnSequenceBar.initNextTurn(true);
 		return true;
 	});
-	::CustomFight.Mod.Keybinds.addSQKeybind("togglePauseTactical", "p", ::MSU.Key.State.Tactical, function()
+	::CustomFight.Mod.Keybinds.addSQKeybind("togglePauseTactical", "shift+p", ::MSU.Key.State.Tactical, function()
 	{
-		::CustomFight.Screen.onPausePressed();
+		::CustomFight.Screen.getButton("Pause").onPressed(false);
 		return true;
 	})
-	::CustomFight.Mod.Keybinds.addSQKeybind("toggleFovTactical", "d", ::MSU.Key.State.Tactical, function()
+	::CustomFight.Mod.Keybinds.addSQKeybind("toggleFovTactical", "shift+f", ::MSU.Key.State.Tactical, function()
 	{
-		::CustomFight.Screen.onFOVPressed();
+		::CustomFight.Screen.getButton("FOV").onPressed(false);
 		return true;
 	})
 	local generalPage = ::CustomFight.Mod.ModSettings.addPage("General");
@@ -111,11 +111,8 @@
 		local setInputLocked = o.setInputLocked;
 		o.setInputLocked = function(_bool)
 		{
-			local properties = this.Tactical.State.getStrategicProperties();
-			if ("UnlockCamera" in properties && properties.UnlockCamera)
-			{
+			if (::CustomFight.Screen.getButton("UnlockCamera").getValue()) 
 				return setInputLocked(false);
-			}
 			return setInputLocked(_bool);
 		}
 
@@ -127,7 +124,8 @@
 			local factions = this.World.FactionManager.m.Factions;
 			local len = factions.len();
 			factions[len - 1] = null;
-			factions[len - 2] = null;			
+			factions[len - 2] = null;	
+			::CustomFight.Screen.resetButtonValues();		
 			return exitTactical();
 		}
 	})
@@ -137,11 +135,8 @@
 		o.initNextTurn = function(_force = false)
 		{
 			if (_force) return initNextTurn(_force);
-			local properties = this.Tactical.State.getStrategicProperties();
-			if ("ManualTurns" in properties && properties.ManualTurns)
-			{
+			if (::CustomFight.Screen.getButton("ManualTurns").getValue())
 				return;
-			}
 			return initNextTurn(_force);
 		}
 	})
