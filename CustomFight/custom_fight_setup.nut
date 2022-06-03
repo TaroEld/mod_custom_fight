@@ -131,4 +131,41 @@ this.custom_fight_setup <- {
 			}
 		}
 	}
+
+	function setupEntity(_e, _t)
+	{
+		local properties = this.Tactical.State.getStrategicProperties();
+		if (properties.CombatID != "CustomFight") return;
+
+		if (_e.getFaction() != properties.NobleFactionAlly.getID()) return;
+
+		// basically false turns them left for humans and right for beasts because rap pls
+		// so it's wrong for humans, but we rely on onFactionChanged to change them back
+		foreach(key in ::CustomFight.Const.SpriteList)
+		{
+			if (_e.hasSprite(key))
+			{
+				_e.getSprite(key).setHorizontalFlipping(true);
+			}
+		}
+		_e.onFactionChanged();
+
+		if (!properties.ControlAllies || _e.m.IsControlledByPlayer) return;
+
+		_e.setFaction(this.Const.Faction.Player);
+		_e.m.AIAgent = this.new("scripts/ai/tactical/player_agent");
+		_e.m.AIAgent.setActor(_e);
+		_e.m.IsControlledByPlayer = true;
+		_e.m.IsGuest <- true;
+		_e.isGuest <- function(){
+			return this.m.IsGuest;
+		}
+		
+		_e.onCombatStart <- function(){};
+
+		if("Tail" in _e.m)
+		{
+			_e.m.Tail.setFaction(this.Const.Faction.PlayerAnimals);
+		}
+	}
 }
