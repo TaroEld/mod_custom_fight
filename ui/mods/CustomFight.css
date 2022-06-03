@@ -12,9 +12,8 @@
 }
 
 .bottom-gold-line {
-    padding-bottom: 1rem;
     background-image: url("coui://gfx/ui/skin/line_gold.png");
-    background-size: 100% 0.3rem;
+    background-size: 90% 0.3rem;
     background-position: bottom center;
     background-repeat: no-repeat;
 }

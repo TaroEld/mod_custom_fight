@@ -454,6 +454,7 @@ CustomFightScreen.prototype.addRow = function(_div, _classes, _divider)
     if(_divider === true)
     {
         row.addClass("bottom-gold-line");
+        row.css("height", "+=20px")
     }
     return row;
 }
