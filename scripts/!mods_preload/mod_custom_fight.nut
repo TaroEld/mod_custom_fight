@@ -1,7 +1,7 @@
 ::CustomFight <- {
 	ID = "mod_custom_fight",
 	Name = "Custom Fight",
-	Version = "1.0.0"
+	Version = "0.9.0"
 }
 ::mods_registerMod(::CustomFight.ID, ::CustomFight.Version)
 
