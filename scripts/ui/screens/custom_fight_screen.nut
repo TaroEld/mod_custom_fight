@@ -236,8 +236,8 @@ this.custom_fight_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 		p.ControlAllies <- _data.Settings.ControlAllies;
 		if(p.SpectatorMode)
 		{
-			this.getSetting("UnlockCamera").setValue(true);
-			this.getSetting("FOV").setValue(false);
+			this.getButton("UnlockCamera").setValue(true);
+			this.getButton("FOV").setValue(false);
 		}
 
 		// Use noble factions so that noble units dont break when they look for banner

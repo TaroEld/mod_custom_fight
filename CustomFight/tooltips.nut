@@ -8,7 +8,6 @@
 		Settings = {
 			Terrain = ::MSU.Class.BasicTooltip("Choose Terrain", function(_data){
 				local text = "Choose the terrain.";
-				if ("test" in _data) text += _data.test;
 				return text
 			}),
 			Map = ::MSU.Class.BasicTooltip("Choose Map", "Choose the map. Rightclick to clear."),

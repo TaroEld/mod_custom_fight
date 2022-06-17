@@ -191,7 +191,6 @@ CustomFightSpawnScreen.prototype.getTextDiv = function(_text, _classes)
 
 CustomFightSpawnScreen.prototype.setData = function (_data)
 {    
-    console.error("setData")
     this.mData = _data;
     this.fillUnitsList();
 };
