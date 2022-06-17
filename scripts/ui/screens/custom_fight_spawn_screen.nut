@@ -10,13 +10,13 @@ this.custom_fight_spawn_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 		local previousPauseState = activeState.m.IsGamePaused;
 		if (!previousPauseState)
 		{
-			::CustomFight.Screen.onPausePressed(true);
+			::CustomFight.Screen.getButton("Pause").onPressed(false);
 		}
 		activeState.m.MenuStack.push(function ()
 		{
 			if(!previousPauseState)
 			{
-				::CustomFight.Screen.onPausePressed(true);
+				::CustomFight.Screen.getButton("Pause").onPressed(false);
 			}
 			::CustomFight.SpawnScreen.hide();
 		});
