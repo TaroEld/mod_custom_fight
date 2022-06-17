@@ -182,7 +182,7 @@ this.custom_fight_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 		this.startFight(_data);
 	}
 
-	function getSetting(_id)
+	function getButton(_id)
 	{
 		return this.m.Buttons[_id];
 	}
@@ -191,9 +191,9 @@ this.custom_fight_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 	{
 		// manual is true when the button was clicked instead of hotkey
 		local properties = this.Tactical.State.getStrategicProperties();
-		if (properties.CombatID != "CustomFight" && ::CustomFight.Mod.ModSettings.getSetting("AllowSettings").getValue() == false)
+		if (properties.CombatID != "CustomFight" && ::CustomFight.Mod.ModSettings.getButton("AllowSettings").getValue() == false)
 			return
-		this.getSetting(_buttonType).onPressed(true);
+		this.getButton(_buttonType).onPressed(true);
 	}
 
 	function setTopBarButtonsDisplay(_bool)
@@ -223,7 +223,7 @@ this.custom_fight_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 		}
 		p.Entities = [];
 		p.CombatID = "CustomFight";
-		p.Music = this.Const.Music[_data.Settings.MusicTrack];
+		p.Music = this.Const.Music[_data.Settings.MusicTrack];	
 		p.PlayerDeploymentType = this.Const.Tactical.DeploymentType.Line;
 		p.EnemyDeploymentType = this.Const.Tactical.DeploymentType.Line;
 		p.IsAutoAssigningBases = false;
