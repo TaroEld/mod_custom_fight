@@ -5,7 +5,7 @@
 }
 ::mods_registerMod(::CustomFight.ID, ::CustomFight.Version)
 
-::mods_queue(::CustomFight.ID, "mod_msu", function()
+::mods_queue(::CustomFight.ID, "mod_msu(>=1.1.0)", function()
 {
 	::mods_registerJS("CustomFight.js");
 	::mods_registerCSS("CustomFight.css");
