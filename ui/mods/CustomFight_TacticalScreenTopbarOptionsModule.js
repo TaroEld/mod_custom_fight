@@ -15,6 +15,6 @@ TacticalScreenTopbarOptionsModule.prototype.createDIV = function(_parentDiv)
         {
             Screens.CustomFightScreen.notifyBackendTopBarButtonPressed(key);
         }, '', 6);
-        _button.Button.bindTooltip({ contentType: 'msu-generic', elementId: _button.Tooltip});
+        _button.Button.bindTooltip({ contentType: 'msu-generic', modId: CustomFight.ModID, elementId: _button.Tooltip});
     })
 } 
