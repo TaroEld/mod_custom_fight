@@ -1,4 +1,4 @@
-this.custom_fight_setup <- {
+this.combat_simulator_setup <- {
 	m = {},
 	function querySpawnlistMaster()
 	{
@@ -39,7 +39,7 @@ this.custom_fight_setup <- {
 
 	function queryTracklist()
 	{
-		return clone ::CustomFight.Const.TrackList
+		return clone ::CombatSimulator.Const.TrackList
 	}
 
 
@@ -135,13 +135,13 @@ this.custom_fight_setup <- {
 	function setupEntity(_e, _t)
 	{
 		local properties = this.Tactical.State.getStrategicProperties();
-		if (properties.CombatID != "CustomFight") return;
+		if (properties.CombatID != "CombatSimulator") return;
 
 		if (_e.getFaction() != properties.NobleFactionAlly.getID()) return;
 
 		// basically false turns them left for humans and right for beasts because rap pls
 		// so it's wrong for humans, but we rely on onFactionChanged to change them back
-		foreach(key in ::CustomFight.Const.SpriteList)
+		foreach(key in ::CombatSimulator.Const.SpriteList)
 		{
 			if (_e.hasSprite(key))
 			{

@@ -1,4 +1,4 @@
-::CustomFight.TooltipIdentifiers <- {
+::CombatSimulator.TooltipIdentifiers <- {
 	Screen = {
 		Main = {
 			Start = ::MSU.Class.BasicTooltip("Start Fight", "Start the fight with the chosen setup."),
@@ -47,12 +47,12 @@
 	Tactical = 
 	{
 		Topbar = {
-			Pause = ::MSU.Class.BasicTooltip("Toggle Pause", @(_) format("Toggle pause %s", ::CustomFight.Screen.getButton("Pause").getValue() ? "off." : "on.")),
-			FOV = ::MSU.Class.BasicTooltip("Toggle FOV", @(_) format("Toggle FOV %s", ::CustomFight.Screen.getButton("FOV").getValue() ? "off." : "on.")),
-			ManualTurns = ::MSU.Class.BasicTooltip("Toggle Manual Turns", @(_) format("Toggle Manual Turns %s", ::CustomFight.Screen.getButton("ManualTurns").getValue() ? "off." : "on.")),
-			UnlockCamera = ::MSU.Class.BasicTooltip("Toggle Unlock Camera", @(_) format("%s the camera.", ::CustomFight.Screen.getButton("UnlockCamera").getValue() ? "Lock" : "Unlock")),
+			Pause = ::MSU.Class.BasicTooltip("Toggle Pause", @(_) format("Toggle pause %s", ::CombatSimulator.Screen.getButton("Pause").getValue() ? "off." : "on.")),
+			FOV = ::MSU.Class.BasicTooltip("Toggle FOV", @(_) format("Toggle FOV %s", ::CombatSimulator.Screen.getButton("FOV").getValue() ? "off." : "on.")),
+			ManualTurns = ::MSU.Class.BasicTooltip("Toggle Manual Turns", @(_) format("Toggle Manual Turns %s", ::CombatSimulator.Screen.getButton("ManualTurns").getValue() ? "off." : "on.")),
+			UnlockCamera = ::MSU.Class.BasicTooltip("Toggle Unlock Camera", @(_) format("%s the camera.", ::CombatSimulator.Screen.getButton("UnlockCamera").getValue() ? "Lock" : "Unlock")),
 			FinishFight = ::MSU.Class.BasicTooltip("Finish Fight", "Finish the current fight."),
 		}
 	}
 }
-::CustomFight.Mod.Tooltips.setTooltips(::CustomFight.TooltipIdentifiers);
+::CombatSimulator.Mod.Tooltips.setTooltips(::CombatSimulator.TooltipIdentifiers);

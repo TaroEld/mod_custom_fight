@@ -1,4 +1,4 @@
-::CustomFight.Const.TrackList <- [
+::CombatSimulator.Const.TrackList <- [
 	"BanditTracks",
 	"NobleTracks",
 	"CivilianTracks",

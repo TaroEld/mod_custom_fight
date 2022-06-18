@@ -1,4 +1,4 @@
-.custom-fight-spawn
+.combat-simulator-spawn
 {
     height: 50%;
     width: 20%;
@@ -6,7 +6,7 @@
     z-index: 10000;
 }
 
-.custom-fight-spawn-container-layout
+.combat-simulator-spawn-container-layout
 {
     height: 100%;
     width: 100%;
@@ -16,7 +16,7 @@
     background-repeat: no-repeat;
 }
 
-.custom-fight-spawn-container-layout .ui-control.dialog
+.combat-simulator-spawn-container-layout .ui-control.dialog
 {
     top: 0;
     left: 0;

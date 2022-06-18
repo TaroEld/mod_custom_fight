@@ -1,13 +1,13 @@
 "use strict";
-var CustomFight = {
-    ModID : "mod_custom_fight"
+var CombatSimulator = {
+    ModID : "mod_combat_simulator"
 }
 
-var CustomFightScreen = function(_parent)
+var CombatSimulatorScreen = function(_parent)
 {
     MSUUIScreen.call(this);
-    this.mModID = "mod_custom_fight"
-    this.mID = "CustomFightScreen";
+    this.mModID = "mod_combat_simulator"
+    this.mID = "CombatSimulatorScreen";
     this.mContainer = null;
     this.mDialogContainer = null;
     this.mDialogContentContainer = null;
@@ -85,25 +85,25 @@ var CustomFightScreen = function(_parent)
     }
 }
 
-CustomFightScreen.prototype = Object.create(MSUUIScreen.prototype);
-Object.defineProperty(CustomFightScreen.prototype, 'constructor', {
-    value: CustomFightScreen,
+CombatSimulatorScreen.prototype = Object.create(MSUUIScreen.prototype);
+Object.defineProperty(CombatSimulatorScreen.prototype, 'constructor', {
+    value: CombatSimulatorScreen,
     enumerable: false,
     writable: true
 });
 
-CustomFightScreen.prototype.createDIV = function (_parentDiv)
+CombatSimulatorScreen.prototype.createDIV = function (_parentDiv)
 {
     var self = this;
 
     // create: containers (init hidden!)
-    this.mContainer = $('<div class="dialog-screen ui-control display-none opacity-none custom-fight"/>');
+    this.mContainer = $('<div class="dialog-screen ui-control display-none opacity-none combat-simulator"/>');
     _parentDiv.append(this.mContainer);
 
     // create: dialog container
-    var dialogLayout = $('<div class="custom-fight-container-layout"/>');
+    var dialogLayout = $('<div class="combat-simulator-container-layout"/>');
     this.mContainer.append(dialogLayout);
-    this.mDialogContainer = dialogLayout.createDialog('Custom Fight', null, null, false);
+    this.mDialogContainer = dialogLayout.createDialog('Combat Simulator', null, null, false);
     this.mDialogContentContainer = this.mDialogContainer.findDialogContentContainer();
 
     // create footer button bar
@@ -113,47 +113,47 @@ CustomFightScreen.prototype.createDIV = function (_parentDiv)
     // create: buttons
     var layout = $('<div class="l-ok-button"/>');
     footerButtonBar.append(layout);
-    this.mStartButton = layout.createTextButton("Start custom fight", function ()
+    this.mStartButton = layout.createTextButton("Start Battle", function ()
     {
         self.notifyBackendOkButtonPressed();
-    }, 'custom-fight-text-button', 4);
-    this.mStartButton.bindTooltip({ contentType: 'msu-generic', modId: CustomFight.ModID, elementId: "Screen.Main.Start"});
+    }, 'combat-simulator-text-button', 4);
+    this.mStartButton.bindTooltip({ contentType: 'msu-generic', modId: CombatSimulator.ModID, elementId: "Screen.Main.Start"});
     
     var layout = $('<div class="l-cancel-button"/>');
     footerButtonBar.append(layout);
     this.mNoButton = layout.createTextButton("Cancel", function ()
     {
         self.notifyBackendCancelButtonPressed();
-    }, 'custom-fight-text-button', 4);
-    this.mNoButton.bindTooltip({ contentType: 'msu-generic', modId: CustomFight.ModID, elementId: "Screen.Main.Cancel"});
+    }, 'combat-simulator-text-button', 4);
+    this.mNoButton.bindTooltip({ contentType: 'msu-generic', modId: CombatSimulator.ModID, elementId: "Screen.Main.Cancel"});
 
     var layout = $('<div class="l-cancel-button"/>');
     footerButtonBar.append(layout);
     this.mResetButton = layout.createTextButton("Reset", function ()
     {
         self.reset();
-    }, 'custom-fight-text-button', 4);
-    this.mResetButton.bindTooltip({ contentType: 'msu-generic', modId: CustomFight.ModID, elementId: "Screen.Main.Reset"});
+    }, 'combat-simulator-text-button', 4);
+    this.mResetButton.bindTooltip({ contentType: 'msu-generic', modId: CombatSimulator.ModID, elementId: "Screen.Main.Reset"});
 
     this.mIsVisible = false;
     this.createContentDiv();
 };
 
-CustomFightScreen.prototype.destroyDIV = function ()
+CombatSimulatorScreen.prototype.destroyDIV = function ()
 {    
     this.mContainer.empty();
     this.mContainer.remove();
     this.mContainer = null;
 };
 
-CustomFightScreen.prototype.createContentDiv = function()
+CombatSimulatorScreen.prototype.createContentDiv = function()
 {
     this.createSettingsDiv();
     this.mLeftSideSetupBox = this.createSideDiv("left-side", "Allies");
     this.mRightSideSetupBox = this.createSideDiv("right-side", "Enemies");
 }
 
-CustomFightScreen.prototype.createSettingsDiv = function()
+CombatSimulatorScreen.prototype.createSettingsDiv = function()
 {
     var self = this;
     this.mSettingsBox = $('<div class="settings-box"/>');
@@ -164,14 +164,14 @@ CustomFightScreen.prototype.createSettingsDiv = function()
     terrainRow.append(this.getTextDiv("Terrain", "label"));
     this.mTerrainButton = terrainRow.createTextButton("tactical.plains", $.proxy(function(_div){
        this.createArrayScrollContainer(this.createPopup('Choose Terrain','generic-popup', 'generic-popup-container'), _div, this.mData.AllBaseTerrains, "Terrain")
-    }, this), "custom-fight-text-button", 4);
-    this.mTerrainButton.bindTooltip({ contentType: 'msu-generic', modId: CustomFight.ModID, elementId: "Screen.Settings.Terrain", test: "hello, world"});
+    }, this), "combat-simulator-text-button", 4);
+    this.mTerrainButton.bindTooltip({ contentType: 'msu-generic', modId: CombatSimulator.ModID, elementId: "Screen.Settings.Terrain", test: "hello, world"});
 
     var mapRow = this.addRow(this.mSettingsBox);
     mapRow.append(this.getTextDiv("Map", "label"));
     this.mMapButton = mapRow.createTextButton("", $.proxy(function(_div){
        this.createArrayScrollContainer(this.createPopup('Choose Map','generic-popup', 'generic-popup-container'), _div, this.mData.AllLocationTerrains, "Map")
-    }, this), "custom-fight-text-button", 4);
+    }, this), "combat-simulator-text-button", 4);
     this.mMapButton.mousedown(function(_event){
         if(_event.which == 3)
         {
@@ -179,13 +179,13 @@ CustomFightScreen.prototype.createSettingsDiv = function()
             self.mSettings.Map = "";
         }
     });
-    this.mMapButton.bindTooltip({ contentType: 'msu-generic', modId: CustomFight.ModID, elementId: "Screen.Settings.Map"});
+    this.mMapButton.bindTooltip({ contentType: 'msu-generic', modId: CombatSimulator.ModID, elementId: "Screen.Settings.Map"});
 
     var trackRow = this.addRow(this.mSettingsBox);
     trackRow.append(this.getTextDiv("Music Track", "label"));
     this.mTrackButton = trackRow.createTextButton("BanditTracks", $.proxy(function(_div){
        this.createArrayScrollContainer(this.createPopup('Choose Music Track','generic-popup', 'generic-popup-container'), _div, this.mData.AllMusicTracks, "MusicTrack")
-    }, this), "custom-fight-text-button", 4);
+    }, this), "combat-simulator-text-button", 4);
 
     this.mTrackButton.mousedown(function(_event){
         if(_event.which == 3)
@@ -194,7 +194,7 @@ CustomFightScreen.prototype.createSettingsDiv = function()
             self.mSettings.MusicTrack = "";
         }
     });
-    this.mTrackButton.bindTooltip({ contentType: 'msu-generic', modId: CustomFight.ModID, elementId: "Screen.Settings.Music"});
+    this.mTrackButton.bindTooltip({ contentType: 'msu-generic', modId: CombatSimulator.ModID, elementId: "Screen.Settings.Music"});
 
     this.mSpectatorModeCheck = this.addCheckboxSetting(this.addRow(this.mSettingsBox), "use-player-checkbox", "SpectatorMode", "uncheck", "Spectator Mode")
     this.mCutDownTreesCheck = this.addCheckboxSetting(this.addRow(this.mSettingsBox), "cut-down-trees-checkbox", "CutDownTrees", "uncheck", "Chop down trees");
@@ -203,7 +203,7 @@ CustomFightScreen.prototype.createSettingsDiv = function()
     this.mFortificationCheck = this.addCheckboxSetting(this.addRow(this.mSettingsBox), "fortification-checkbox", "Fortification", "uncheck", "Add fortification");
 }
 
-CustomFightScreen.prototype.addCheckboxSetting = function(_div, _id, _settingKey, _default, _name)
+CombatSimulatorScreen.prototype.addCheckboxSetting = function(_div, _id, _settingKey, _default, _name)
 {
     var self = this
     var checkboxContainer = $('<div class="checkbox-container"/>');
@@ -227,12 +227,12 @@ CustomFightScreen.prototype.addCheckboxSetting = function(_div, _id, _settingKey
         checkbox.iCheck('toggle');
     })
     checkbox.iCheck(_default);
-    if(_settingKey != null) checkboxContainer.bindTooltip({ contentType: 'msu-generic', modId: CustomFight.ModID, elementId: "Screen.Settings." + _settingKey});
+    if(_settingKey != null) checkboxContainer.bindTooltip({ contentType: 'msu-generic', modId: CombatSimulator.ModID, elementId: "Screen.Settings." + _settingKey});
     return checkbox;
 }
 
 // creates a generic popup that lists entries in an array
-CustomFightScreen.prototype.createArrayScrollContainer = function(_dialog, _div, _array, _setting)
+CombatSimulatorScreen.prototype.createArrayScrollContainer = function(_dialog, _div, _array, _setting)
 {
     this.mPopupListContainer = _dialog.createList(2);
     var scrollContainer = this.mPopupListContainer.findListScrollContainer();
@@ -241,20 +241,20 @@ CustomFightScreen.prototype.createArrayScrollContainer = function(_dialog, _div,
         if(_unit == "") return
         var row = this.addRow(scrollContainer, "", true);
 
-        var name = $('<div class="title-font-normal font-color-brother-name custom-fight-entry-label">' + _unit +  '</div>');
+        var name = $('<div class="title-font-normal font-color-brother-name combat-simulator-entry-label">' + _unit +  '</div>');
         row.append(name);
 
 
-        var addButtonContainer = $('<div class="custom-fight-text-button-layout"/>');
+        var addButtonContainer = $('<div class="combat-simulator-text-button-layout"/>');
         var addButton = addButtonContainer.createTextButton("Choose", $.proxy(function(_button){
             _div.changeButtonText(_unit)
             this.mSettings[_setting] = _unit;
-        }, this), "custom-fight-text-button", 4);
+        }, this), "combat-simulator-text-button", 4);
         row.append(addButtonContainer);
     }, this))
 }
 
-CustomFightScreen.prototype.createSideDiv = function(_side, _name)
+CombatSimulatorScreen.prototype.createSideDiv = function(_side, _name)
 {
     var self = this;
     var ret = $('<div class="setup-box"/>');
@@ -288,23 +288,23 @@ CustomFightScreen.prototype.createSideDiv = function(_side, _name)
     ret.append(buttonBar);
     ret.buttons = {};
 
-    var layout = $('<div class="custom-fight-text-button-layout"/>');
+    var layout = $('<div class="combat-simulator-text-button-layout"/>');
     buttonBar.append(layout);
     ret.buttons.addUnitButton = layout.createTextButton("Add Unit", $.proxy(function(_div){
         this.createAddUnitScrollContainer(this.createPopup('Add Unit','generic-popup', 'generic-popup-container'), ret.unitsScrollContainer);
-    }, this), "custom-fight-text-button", 4);
-    ret.buttons.addUnitButton.bindTooltip({ contentType: 'msu-generic', modId: CustomFight.ModID, elementId: "Screen.Units.Main.Add"});
+    }, this), "combat-simulator-text-button", 4);
+    ret.buttons.addUnitButton.bindTooltip({ contentType: 'msu-generic', modId: CombatSimulator.ModID, elementId: "Screen.Units.Main.Add"});
 
-    layout = $('<div class="custom-fight-text-button-layout"/>');
+    layout = $('<div class="combat-simulator-text-button-layout"/>');
     buttonBar.append(layout);
     ret.buttons.addSpawnlistButton = layout.createTextButton("Add Spawnlist", $.proxy(function(_div){
         this.createAddSpawnlistScrollContainer(this.createPopup('Add Spawnlist','generic-popup', 'generic-popup-container'), ret.spawnlistScrollContainer);
-    }, this), "custom-fight-text-button", 4);
-    ret.buttons.addSpawnlistButton.bindTooltip({ contentType: 'msu-generic', modId: CustomFight.ModID, elementId: "Screen.Spawnlist.Main.Add"});
+    }, this), "combat-simulator-text-button", 4);
+    ret.buttons.addSpawnlistButton.bindTooltip({ contentType: 'msu-generic', modId: CombatSimulator.ModID, elementId: "Screen.Spawnlist.Main.Add"});
     return ret;
 }
 
-CustomFightScreen.prototype.createAddUnitScrollContainer = function(_dialog, _side)
+CombatSimulatorScreen.prototype.createAddUnitScrollContainer = function(_dialog, _side)
 {
     var self = this;
     this.mPopupListContainer = _dialog.createList(2);
@@ -314,28 +314,28 @@ CustomFightScreen.prototype.createAddUnitScrollContainer = function(_dialog, _si
     MSU.iterateObject(this.mData.AllUnits, $.proxy(function(_key, _unit){
         var row = this.addRow(scrollContainer, "", true);
 
-        var name = $('<div class="title-font-normal font-color-brother-name custom-fight-entry-label">' + _unit.DisplayName +  '</div>');
+        var name = $('<div class="title-font-normal font-color-brother-name combat-simulator-entry-label">' + _unit.DisplayName +  '</div>');
         row.append(name);
 
-        var addButtonContainer = $('<div class="custom-fight-text-button-layout"/>');
+        var addButtonContainer = $('<div class="combat-simulator-text-button-layout"/>');
         var addButton = addButtonContainer.createTextButton("Add", $.proxy(function(_button){
             this.addUnitToBox(_unit, _side, _key);
-        }, self), "custom-fight-text-button", 4);
-        addButton.bindTooltip({ contentType: 'msu-generic', modId: CustomFight.ModID, elementId: "Screen.Units.Main.Add"});
+        }, self), "combat-simulator-text-button", 4);
+        addButton.bindTooltip({ contentType: 'msu-generic', modId: CombatSimulator.ModID, elementId: "Screen.Units.Main.Add"});
 
         row.append(addButtonContainer);
     }, this))
 }
 
-CustomFightScreen.prototype.addUnitToBox = function(_unit, _side, _key)
+CombatSimulatorScreen.prototype.addUnitToBox = function(_unit, _side, _key)
 {
     var row = this.addRow(_side, "", true);
     row.data("unitID", _key);
     row.data("unit", _unit);
 
-    var name = $('<div class="title-font-normal font-color-brother-name custom-fight-entry-label">' + _unit.DisplayName +  '</div>');
+    var name = $('<div class="title-font-normal font-color-brother-name combat-simulator-entry-label">' + _unit.DisplayName +  '</div>');
     row.append(name);
-    name.bindTooltip({ contentType: 'msu-generic', modId: CustomFight.ModID, elementId: "Screen.Units.Main.Type"});
+    name.bindTooltip({ contentType: 'msu-generic', modId: CombatSimulator.ModID, elementId: "Screen.Units.Main.Type"});
 
     var amountInputLayout = $('<div class="short-input-container"/>');
     row.append(amountInputLayout);
@@ -343,10 +343,10 @@ CustomFightScreen.prototype.addUnitToBox = function(_unit, _side, _key)
     amountInputLayout.append(amountInput);
     amountInput.val(1);
     row.data("amount", amountInput);
-    amountInput.bindTooltip({ contentType: 'msu-generic', modId: CustomFight.ModID, elementId: "Screen.Units.Main.Amount"});
+    amountInput.bindTooltip({ contentType: 'msu-generic', modId: CombatSimulator.ModID, elementId: "Screen.Units.Main.Amount"});
 
     var checkbox = this.addCheckboxSetting(row, "champion-checkbox", null, "uncheck", "Champion")
-    checkbox.bindTooltip({ contentType: 'msu-generic', modId: CustomFight.ModID, elementId: "Screen.Units.Main.Champion"})
+    checkbox.bindTooltip({ contentType: 'msu-generic', modId: CombatSimulator.ModID, elementId: "Screen.Units.Main.Champion"})
     row.data("champion", checkbox);
 
     var destroyButtonLayout = $('<div class="delete-button-container"/>');
@@ -355,10 +355,10 @@ CustomFightScreen.prototype.addUnitToBox = function(_unit, _side, _key)
     {
         row.remove();
     }, '', 2);
-    destroyButton.bindTooltip({ contentType: 'msu-generic', modId: CustomFight.ModID, elementId: "Screen.Units.Main.Delete"});
+    destroyButton.bindTooltip({ contentType: 'msu-generic', modId: CombatSimulator.ModID, elementId: "Screen.Units.Main.Delete"});
 }
 
-CustomFightScreen.prototype.createAddSpawnlistScrollContainer = function(_dialog, _boxDiv)
+CombatSimulatorScreen.prototype.createAddSpawnlistScrollContainer = function(_dialog, _boxDiv)
 {
     var self = this;
     this.mPopupListContainer = _dialog.createList(2);
@@ -366,17 +366,17 @@ CustomFightScreen.prototype.createAddSpawnlistScrollContainer = function(_dialog
     _dialog.prepend(this.createFilterBar(scrollContainer));
     MSU.iterateObject(this.mData.AllSpawnlists, $.proxy(function(_key, _unit){
         var row = this.addRow(scrollContainer, "", true);
-        var name = $('<div class="title-font-normal font-color-brother-name custom-fight-entry-label">' + _unit.id +  '</div>');
+        var name = $('<div class="title-font-normal font-color-brother-name combat-simulator-entry-label">' + _unit.id +  '</div>');
         row.append(name);
-        var addButtonContainer = $('<div class="custom-fight-text-button-layout"/>');
+        var addButtonContainer = $('<div class="combat-simulator-text-button-layout"/>');
         var addButton = addButtonContainer.createTextButton("Add", $.proxy(function(_button){
             this.addSpawnlistToBox(_unit, _boxDiv);
-        }, self), "custom-fight-text-button", 4);
+        }, self), "combat-simulator-text-button", 4);
         row.append(addButtonContainer);
     }, this))
 }
 
-CustomFightScreen.prototype.addSpawnlistToBox = function(_unit, _boxDiv)
+CombatSimulatorScreen.prototype.addSpawnlistToBox = function(_unit, _boxDiv)
 {
     var row = this.addRow(_boxDiv, "", true);
     row.data("unitID", _unit.id);
@@ -384,7 +384,7 @@ CustomFightScreen.prototype.addSpawnlistToBox = function(_unit, _boxDiv)
 
     var name = this.getTextDiv(_unit.id);
     row.append(name);
-    name.bindTooltip({ contentType: 'msu-generic', modId: CustomFight.ModID, elementId: "Screen.Spawnlist.Main.Type"});
+    name.bindTooltip({ contentType: 'msu-generic', modId: CombatSimulator.ModID, elementId: "Screen.Spawnlist.Main.Type"});
 
     var amountInputLayout = $('<div class="short-input-container"/>');
     row.append(amountInputLayout);
@@ -392,7 +392,7 @@ CustomFightScreen.prototype.addSpawnlistToBox = function(_unit, _boxDiv)
     amountInputLayout.append(amountInput);
     amountInput.val(100);
     row.data("amount", amountInput);
-    amountInput.bindTooltip({ contentType: 'msu-generic', modId: CustomFight.ModID, elementId: "Screen.Spawnlist.Main.Resources"});
+    amountInput.bindTooltip({ contentType: 'msu-generic', modId: CombatSimulator.ModID, elementId: "Screen.Spawnlist.Main.Resources"});
 
     var destroyButtonLayout = $('<div class="delete-button-container"/>');
     row.append(destroyButtonLayout);
@@ -400,10 +400,10 @@ CustomFightScreen.prototype.addSpawnlistToBox = function(_unit, _boxDiv)
     {
         row.remove();
     }, '', 2);
-    destroyButton.bindTooltip({ contentType: 'msu-generic', modId: CustomFight.ModID, elementId: "Screen.Spawnlist.Main.Delete"});
+    destroyButton.bindTooltip({ contentType: 'msu-generic', modId: CombatSimulator.ModID, elementId: "Screen.Spawnlist.Main.Delete"});
 }
 
-CustomFightScreen.prototype.createPopup = function(_name, _popupClass, _popupDialogContentClass)
+CombatSimulatorScreen.prototype.createPopup = function(_name, _popupClass, _popupDialogContentClass)
 {
     var self = this;
     this.popup = this.mContainer.createPopupDialog(_name, "", null, _popupClass);
@@ -416,7 +416,7 @@ CustomFightScreen.prototype.createPopup = function(_name, _popupClass, _popupDia
     return result;
 }
 
-CustomFightScreen.prototype.createFilterBar = function(_scrollContainer)
+CombatSimulatorScreen.prototype.createFilterBar = function(_scrollContainer)
 {
     var row = $('<div class="row filter-bar"/>');
     var name = this.getTextDiv("Filter");
@@ -429,7 +429,7 @@ CustomFightScreen.prototype.createFilterBar = function(_scrollContainer)
         var currentInput = $(this).val();
         var rows = _scrollContainer.find(".row");
         rows.each(function(_idx){
-            var label = $(this).find(".custom-fight-entry-label");
+            var label = $(this).find(".combat-simulator-entry-label");
             if (label.length == 0) return;
             var labelText = $(label[0]).html();
             if (labelText.toLowerCase().search(currentInput.toLowerCase()) == -1)
@@ -445,7 +445,7 @@ CustomFightScreen.prototype.createFilterBar = function(_scrollContainer)
     return row;
 }
 
-CustomFightScreen.prototype.addRow = function(_div, _classes, _divider)
+CombatSimulatorScreen.prototype.addRow = function(_div, _classes, _divider)
 {
     var row = $('<div class="row"/>');
     _div.append(row);
@@ -461,21 +461,21 @@ CustomFightScreen.prototype.addRow = function(_div, _classes, _divider)
     return row;
 }
 
-CustomFightScreen.prototype.getTextDiv = function(_text, _classes)
+CombatSimulatorScreen.prototype.getTextDiv = function(_text, _classes)
 {
-    var row = $('<div class="title-font-normal font-color-brother-name custom-fight-entry-label"></div>')
+    var row = $('<div class="title-font-normal font-color-brother-name combat-simulator-entry-label"></div>')
     row.html(_text);
     if(_classes != undefined && _classes != null) row.addClass(_classes);
     return row;
 }
 
-CustomFightScreen.prototype.setData = function (_data)
+CombatSimulatorScreen.prototype.setData = function (_data)
 {    
     this.mData = _data;
     // this.testThings()
 };
 
-CustomFightScreen.prototype.initialiseValues = function ()
+CombatSimulatorScreen.prototype.initialiseValues = function ()
 {  
     this.mTerrainButton.changeButtonText(this.mData.AllBaseTerrains[1]);
     this.mSettings.Terrain = this.mData.AllBaseTerrains[1];
@@ -493,7 +493,7 @@ CustomFightScreen.prototype.initialiseValues = function ()
     this.mFortificationCheck.iCheck('uncheck');
 }
 
-CustomFightScreen.prototype.reset = function()
+CombatSimulatorScreen.prototype.reset = function()
 {
     this.initialiseValues();
     this.mLeftSideSetupBox.spawnlistScrollContainer.empty();
@@ -502,7 +502,7 @@ CustomFightScreen.prototype.reset = function()
     this.mRightSideSetupBox.unitsScrollContainer.empty();
 }
 
-CustomFightScreen.prototype.testThings = function ()
+CombatSimulatorScreen.prototype.testThings = function ()
 {  
     var randomProperty = function (obj) {
         var keys = Object.keys(obj);
@@ -512,7 +512,7 @@ CustomFightScreen.prototype.testThings = function ()
     this.addSpawnlistToBox(randomProperty(this.mData.AllSpawnlists), this.mLeftSideSetupBox.spawnlistScrollContainer)
 }
 
-CustomFightScreen.prototype.gatherData = function()
+CombatSimulatorScreen.prototype.gatherData = function()
 {
     var ret = {
         Settings : this.mSettings,
@@ -532,7 +532,7 @@ CustomFightScreen.prototype.gatherData = function()
     return ret;
 }
 
-CustomFightScreen.prototype.gatherUnits = function(_ret, _div)
+CombatSimulatorScreen.prototype.gatherUnits = function(_ret, _div)
 {
     var spawnlistRows = _div.spawnlistScrollContainer.find(".row")
     spawnlistRows.each(function(_idx){
@@ -554,7 +554,7 @@ CustomFightScreen.prototype.gatherUnits = function(_ret, _div)
     // row.amount
 }
 
-CustomFightScreen.prototype.checkStartEmptyMode = function(_ret)
+CombatSimulatorScreen.prototype.checkStartEmptyMode = function(_ret)
 {
     if (_ret.Player.Spawnlists.length == 0 && _ret.Player.Units.length == 0 && _ret.Enemy.Spawnlists.length == 0 && _ret.Enemy.Units.length == 0)
     {
@@ -562,7 +562,7 @@ CustomFightScreen.prototype.checkStartEmptyMode = function(_ret)
     }
 }
 
-CustomFightScreen.prototype.notifyBackendTopBarButtonPressed = function (_buttonType)
+CombatSimulatorScreen.prototype.notifyBackendTopBarButtonPressed = function (_buttonType)
 {
     if (this.mSQHandle !== null)
     {
@@ -570,7 +570,7 @@ CustomFightScreen.prototype.notifyBackendTopBarButtonPressed = function (_button
     }
 };
 
-CustomFightScreen.prototype.setTopBarButtonState = function (_data)
+CombatSimulatorScreen.prototype.setTopBarButtonState = function (_data)
 {
     var button = this.mTopBarButtons[_data[0]];
     button.Button.changeButtonImage(Path.GFX + button.Paths[_data[1].toString()]);
@@ -578,14 +578,14 @@ CustomFightScreen.prototype.setTopBarButtonState = function (_data)
     if(_data[2]) button.Button.trigger('update-tooltip' + TooltipModuleIdentifier.KeyEvent.Namespace)
 };
 
-CustomFightScreen.prototype.setTopBarButtonsDisplay = function (_bool)
+CombatSimulatorScreen.prototype.setTopBarButtonsDisplay = function (_bool)
 {
     MSU.iterateObject(this.mTopBarButtons, function(_key, _button){
         MSU.toggleDisplay(_button.Layout, _bool);
     })
 };
 
-CustomFightScreen.prototype.notifyBackendOkButtonPressed = function ()
+CombatSimulatorScreen.prototype.notifyBackendOkButtonPressed = function ()
 {
     if (this.mSQHandle !== null)
     {
@@ -593,7 +593,7 @@ CustomFightScreen.prototype.notifyBackendOkButtonPressed = function ()
     }
 };
 
-CustomFightScreen.prototype.notifyBackendCancelButtonPressed = function ()
+CombatSimulatorScreen.prototype.notifyBackendCancelButtonPressed = function ()
 {
     if (this.mSQHandle !== null)
     {
@@ -601,5 +601,5 @@ CustomFightScreen.prototype.notifyBackendCancelButtonPressed = function ()
     }
 };
 
-registerScreen("CustomFightScreen", new CustomFightScreen());
+registerScreen("CombatSimulatorScreen", new CombatSimulatorScreen());
 

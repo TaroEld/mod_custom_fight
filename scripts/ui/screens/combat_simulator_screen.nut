@@ -1,6 +1,6 @@
-this.custom_fight_screen <- ::inherit("scripts/mods/msu/ui_screen", {
+this.combat_simulator_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 	m = {
-		ID = "CustomFightScreen",
+		ID = "CombatSimulatorScreen",
 		ButtonDelegate = {
 			function toggleSettingValue()
 			{
@@ -26,7 +26,7 @@ this.custom_fight_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 
 			function informBackend(_manual)
 			{
-				::CustomFight.Screen.m.JSHandle.asyncCall("setTopBarButtonState", [this.ID, this.getValue(), _manual]);
+				::CombatSimulator.Screen.m.JSHandle.asyncCall("setTopBarButtonState", [this.ID, this.getValue(), _manual]);
 			}
 		},
 		Buttons = {
@@ -130,7 +130,7 @@ this.custom_fight_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 				activeState.setAutoPause(true);
 				activeState.m.MenuStack.push(function ()
 				{
-					::CustomFight.Screen.hide();
+					::CombatSimulator.Screen.hide();
 					this.onShow();
 					this.setAutoPause(false);
 				});
@@ -139,7 +139,7 @@ this.custom_fight_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 			case "main_menu_state":
 				activeState.m.MenuStack.push(function ()
 				{
-					::CustomFight.Screen.hide();
+					::CombatSimulator.Screen.hide();
 					this.onShow();
 				});
 				break;
@@ -191,7 +191,7 @@ this.custom_fight_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 	{
 		// manual is true when the button was clicked instead of hotkey
 		local properties = this.Tactical.State.getStrategicProperties();
-		if (properties.CombatID != "CustomFight" && ::CustomFight.Mod.ModSettings.getButton("AllowSettings").getValue() == false)
+		if (properties.CombatID != "CombatSimulator" && ::CombatSimulator.Mod.ModSettings.getButton("AllowSettings").getValue() == false)
 			return
 		this.getButton(_buttonType).onPressed(true);
 	}
@@ -222,7 +222,7 @@ this.custom_fight_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 			p.LocationTemplate.Fortification = _data.Settings.Fortification ? this.Const.Tactical.FortificationType.Palisade : this.Const.Tactical.FortificationType.None;
 		}
 		p.Entities = [];
-		p.CombatID = "CustomFight";
+		p.CombatID = "CombatSimulator";
 		p.Music = this.Const.Music[_data.Settings.MusicTrack];	
 		p.PlayerDeploymentType = this.Const.Tactical.DeploymentType.Line;
 		p.EnemyDeploymentType = this.Const.Tactical.DeploymentType.Line;
@@ -241,7 +241,7 @@ this.custom_fight_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 		}
 
 		// Use noble factions so that noble units dont break when they look for banner
-		::CustomFight.Setup.setupFactions(p)
+		::CombatSimulator.Setup.setupFactions(p)
 
 
 		foreach(spawnlist in _data.Player.Spawnlists)
@@ -253,20 +253,20 @@ this.custom_fight_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 			this.Const.World.Common.addUnitsToCombat(p.Entities, this.Const.World.Spawn[spawnlist.ID], spawnlist.Resources.tointeger(), p.NobleFactionEnemy.getID());
 		}
 		local playerFaction = this.Const.Faction.PlayerAnimals;
-		::CustomFight.Setup.addUnitsToCombat(_data.Player.Units, p.Entities, p.NobleFactionAlly.getID());
-		::CustomFight.Setup.addUnitsToCombat(_data.Enemy.Units, p.Entities, p.NobleFactionEnemy.getID());
+		::CombatSimulator.Setup.addUnitsToCombat(_data.Player.Units, p.Entities, p.NobleFactionAlly.getID());
+		::CombatSimulator.Setup.addUnitsToCombat(_data.Enemy.Units, p.Entities, p.NobleFactionEnemy.getID());
 		this.World.State.startScriptedCombat(p, false, false, true);
 	}
 
 	function queryData()
 	{
 		local ret = {
-			AllUnits = ::CustomFight.Setup.querySpawnlistMaster(),
-			AllFactions =  ::CustomFight.Setup.queryFactions(),
-			AllSpawnlists = ::CustomFight.Setup.querySpawnlists(),
-			AllBaseTerrains = ::CustomFight.Setup.queryTerrains(),
-			AllLocationTerrains = ::CustomFight.Setup.queryTerrainLocations(),
-			AllMusicTracks =::CustomFight.Setup.queryTracklist(),
+			AllUnits = ::CombatSimulator.Setup.querySpawnlistMaster(),
+			AllFactions =  ::CombatSimulator.Setup.queryFactions(),
+			AllSpawnlists = ::CombatSimulator.Setup.querySpawnlists(),
+			AllBaseTerrains = ::CombatSimulator.Setup.queryTerrains(),
+			AllLocationTerrains = ::CombatSimulator.Setup.queryTerrainLocations(),
+			AllMusicTracks =::CombatSimulator.Setup.queryTracklist(),
 		}
 		return ret;
 	}

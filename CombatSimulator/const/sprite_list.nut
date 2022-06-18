@@ -1,4 +1,4 @@
-::CustomFight.Const.SpriteList <- [
+::CombatSimulator.Const.SpriteList <- [
 	"body", 
 	"armor", 
 	"head", 

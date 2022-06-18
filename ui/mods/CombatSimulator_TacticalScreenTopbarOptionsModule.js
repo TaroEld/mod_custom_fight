@@ -3,18 +3,18 @@ TacticalScreenTopbarOptionsModule.prototype.createDIV = function(_parentDiv)
 {
     var self = this;
     createDIV.call(this, _parentDiv);
-    var buttons = Screens.CustomFightScreen.mTopBarButtons;
+    var buttons = Screens.CombatSimulatorScreen.mTopBarButtons;
     var idx = -5;
     MSU.iterateObject(buttons, function(key, _button){
-        _button.Layout = $('<div class="l-custom-fight-button display-none"/>');
+        _button.Layout = $('<div class="l-combat-simulator-button display-none"/>');
         self.mContainer.append(_button.Layout);
         _button.Layout.css("left", idx + "rem");
         idx = idx - 4;
         var gfx = Path.GFX + _button.Paths["false"];
         _button.Button = _button.Layout.createImageButton(gfx, function ()
         {
-            Screens.CustomFightScreen.notifyBackendTopBarButtonPressed(key);
+            Screens.CombatSimulatorScreen.notifyBackendTopBarButtonPressed(key);
         }, '', 6);
-        _button.Button.bindTooltip({ contentType: 'msu-generic', modId: CustomFight.ModID, elementId: _button.Tooltip});
+        _button.Button.bindTooltip({ contentType: 'msu-generic', modId: CombatSimulator.ModID, elementId: _button.Tooltip});
     })
 } 

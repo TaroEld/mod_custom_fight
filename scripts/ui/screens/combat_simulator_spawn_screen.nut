@@ -1,6 +1,6 @@
-this.custom_fight_spawn_screen <- ::inherit("scripts/mods/msu/ui_screen", {
+this.combat_simulator_spawn_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 	m = {
-		ID = "CustomFightSpawnScreen"
+		ID = "CombatSimulatorSpawnScreen"
 	},
 	
 	function show()
@@ -10,15 +10,15 @@ this.custom_fight_spawn_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 		local previousPauseState = activeState.m.IsGamePaused;
 		if (!previousPauseState)
 		{
-			::CustomFight.Screen.getButton("Pause").onPressed(false);
+			::CombatSimulator.Screen.getButton("Pause").onPressed(false);
 		}
 		activeState.m.MenuStack.push(function ()
 		{
 			if(!previousPauseState)
 			{
-				::CustomFight.Screen.getButton("Pause").onPressed(false);
+				::CombatSimulator.Screen.getButton("Pause").onPressed(false);
 			}
-			::CustomFight.SpawnScreen.hide();
+			::CombatSimulator.SpawnScreen.hide();
 		});
 		this.Tooltip.hide();
 		this.m.JSHandle.asyncCall("setData", this.queryData());
@@ -50,7 +50,7 @@ this.custom_fight_spawn_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 	function queryData()
 	{
 		local ret = {
-			AllUnits = ::CustomFight.Setup.querySpawnlistMaster(),
+			AllUnits = ::CombatSimulator.Setup.querySpawnlistMaster(),
 		}
 		return ret;
 	}
@@ -62,7 +62,7 @@ this.custom_fight_spawn_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 
 		local tile = this.Tactical.getTile(this.Tactical.screenToTile(::Cursor.getX(), ::Cursor.getY()));
 		local properties = this.Tactical.State.getStrategicProperties();
-		if (!("NobleFactionAlly" in properties)) ::CustomFight.Setup.setupFactions(properties, true);
+		if (!("NobleFactionAlly" in properties)) ::CombatSimulator.Setup.setupFactions(properties, true);
 
 		unit.Faction <- settings.Ally ?  properties.NobleFactionAlly.getID() : properties.NobleFactionEnemy.getID();
 		unit.Name <- "";

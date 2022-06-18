@@ -18,7 +18,7 @@
     background-repeat: no-repeat;
 }
 
-.custom-fight-container-layout .ui-control.dialog
+.combat-simulator-container-layout .ui-control.dialog
 {
     background-color: rgba(0, 0, 0, 0.3);
 
@@ -32,7 +32,7 @@
     z-index : 1;
 }
 
-.custom-fight-container-layout
+.combat-simulator-container-layout
 {
     height: 100%;
     width: 100%;
@@ -42,18 +42,18 @@
     background-repeat: no-repeat;
 }
 
-.custom-fight .dialog .footer
+.combat-simulator .dialog .footer
 {
     display: flex;
     justify-content: center;
 }
 
-.custom-fight .dialog .footer .l-button-bar
+.combat-simulator .dialog .footer .l-button-bar
 {
     display: flex;
 }
 
-.custom-fight-container-layout .content
+.combat-simulator-container-layout .content
 {
     display: flex;
 }
@@ -174,8 +174,8 @@
     /*border: 1px solid orange;*/
 }
 
-.custom-fight .custom-fight-text-button-layout,
-.custom-fight .custom-fight-text-button
+.combat-simulator .combat-simulator-text-button-layout,
+.combat-simulator .combat-simulator-text-button
 {
     width: 23rem;
     height: 4rem;
@@ -183,7 +183,7 @@
     /*border: 2px solid blue;*/
 }
 
-.custom-fight-entry-label
+.combat-simulator-entry-label
 {
     width: 30rem;
     text-align: center;
