@@ -122,9 +122,8 @@
 			local properties = this.Tactical.State.getStrategicProperties();
 			if (!("NobleFactionAlly" in properties))  return exitTactical();
 			local factions = this.World.FactionManager.m.Factions;
-			local len = factions.len();
-			factions[len - 1] = null;
-			factions[len - 2] = null;	
+			factions.pop();
+			factions.pop();
 			::CustomFight.Screen.resetButtonValues();		
 			return exitTactical();
 		}
