@@ -1,7 +1,7 @@
 ::CombatSimulator <- {
 	ID = "mod_combat_simulator",
 	Name = "Combat Simulator",
-	Version = "0.9.0"
+	Version = "0.9.1"
 }
 ::mods_registerMod(::CombatSimulator.ID, ::CombatSimulator.Version)
 
