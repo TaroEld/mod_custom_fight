@@ -191,7 +191,7 @@ this.combat_simulator_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 	{
 		// manual is true when the button was clicked instead of hotkey
 		local properties = this.Tactical.State.getStrategicProperties();
-		if (properties.CombatID != "CombatSimulator" && ::CombatSimulator.Mod.ModSettings.getButton("AllowSettings").getValue() == false)
+		if (properties.CombatID != "CombatSimulator" && ::CombatSimulator.Mod.ModSettings.getSetting("AllowSettings").getValue() == false)
 			return
 		this.getButton(_buttonType).onPressed(true);
 	}
