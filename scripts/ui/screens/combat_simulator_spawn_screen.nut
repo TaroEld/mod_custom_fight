@@ -5,6 +5,10 @@ this.combat_simulator_spawn_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 	
 	function show()
 	{
+		local properties = this.Tactical.State.getStrategicProperties();
+		if (properties.CombatID != "CombatSimulator" && ::CombatSimulator.Mod.ModSettings.getSetting("AllowSettings").getValue() == false) 
+			return false;
+
 		local activeState = ::MSU.Utils.getActiveState();
 		this.Cursor.setCursor(this.Const.UI.Cursor.Hand);
 		local previousPauseState = activeState.m.IsGamePaused;
