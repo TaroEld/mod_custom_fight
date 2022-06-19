@@ -66,7 +66,7 @@ this.combat_simulator_spawn_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 
 		local tile = this.Tactical.getTile(this.Tactical.screenToTile(::Cursor.getX(), ::Cursor.getY()));
 		local properties = this.Tactical.State.getStrategicProperties();
-		if (!("NobleFactionAlly" in properties)) ::CombatSimulator.Setup.setupFactions(properties, true);
+		if (!("CustomFactions" in properties)) ::CombatSimulator.Setup.setupFactions(properties, true);
 
 		unit.Faction <- settings.Ally ?  properties.NobleFactionAlly.getID() : properties.NobleFactionEnemy.getID();
 		unit.Name <- "";

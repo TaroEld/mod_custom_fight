@@ -222,6 +222,7 @@ this.combat_simulator_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 			p.LocationTemplate.Fortification = _data.Settings.Fortification ? this.Const.Tactical.FortificationType.Palisade : this.Const.Tactical.FortificationType.None;
 		}
 		p.Entities = [];
+		p.CustomFactions <- [];
 		p.CombatID = "CombatSimulator";
 		p.Music = this.Const.Music[_data.Settings.MusicTrack];	
 		p.PlayerDeploymentType = this.Const.Tactical.DeploymentType.Line;
@@ -241,20 +242,15 @@ this.combat_simulator_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 		}
 
 		// Use noble factions so that noble units dont break when they look for banner
-		::CombatSimulator.Setup.setupFactions(p)
-
-
-		foreach(spawnlist in _data.Player.Spawnlists)
+		::CombatSimulator.Setup.setupFactions(p, _data.Factions);
+		foreach (idx, faction in p.CustomFactions)
 		{
-			this.Const.World.Common.addUnitsToCombat(p.Entities, this.Const.World.Spawn[spawnlist.ID], spawnlist.Resources.tointeger() , p.NobleFactionAlly.getID());
+			foreach(spawnlist in _data.Factions[idx].Spawnlists)
+			{
+				this.Const.World.Common.addUnitsToCombat(p.Entities, this.Const.World.Spawn[spawnlist.ID], spawnlist.Resources.tointeger() , faction.getID());
+			}
+			::CombatSimulator.Setup.addUnitsToCombat(_data.Factions[idx].Units, p.Entities, faction.getID());
 		}
-		foreach(spawnlist in _data.Enemy.Spawnlists)
-		{
-			this.Const.World.Common.addUnitsToCombat(p.Entities, this.Const.World.Spawn[spawnlist.ID], spawnlist.Resources.tointeger(), p.NobleFactionEnemy.getID());
-		}
-		local playerFaction = this.Const.Faction.PlayerAnimals;
-		::CombatSimulator.Setup.addUnitsToCombat(_data.Player.Units, p.Entities, p.NobleFactionAlly.getID());
-		::CombatSimulator.Setup.addUnitsToCombat(_data.Enemy.Units, p.Entities, p.NobleFactionEnemy.getID());
 		this.World.State.startScriptedCombat(p, false, false, true);
 	}
 

@@ -170,15 +170,33 @@
     width: 100%;
     height: 10%;
     display: flex;
+    flex-wrap: wrap;
 
     /*border: 1px solid orange;*/
+}
+
+.faction-button-container
+{
+    width: 15rem;
+    height: 3.3rem;
+    border: 1px solid orange;
+    right: 0rem;
+    top: 0rem;
+}
+
+.faction-button-container .l-button
+{
+    width: 4.2rem;
+    height: 3.3rem;
+    position: relative;
+    float: left;
 }
 
 .combat-simulator .combat-simulator-text-button-layout,
 .combat-simulator .combat-simulator-text-button
 {
     width: 23rem;
-    height: 4rem;
+    height: 4.3rem;
     line-height: 3.6rem;
     /*border: 2px solid blue;*/
 }
@@ -187,6 +205,7 @@
 {
     width: 30rem;
     text-align: center;
+    /*border: 1px solid blue;*/
 }
 
 .generic-popup

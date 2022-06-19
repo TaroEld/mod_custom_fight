@@ -62,15 +62,19 @@ this.combat_simulator_setup <- {
 		return ret;
 	}
 
-	function setupFactions(_properties, _tacticalActive = false)
+	function setupFactions(_properties, _data, _tacticalActive = false)
 	{
-		local nobleFactionAlly = createFaction(_tacticalActive, 100.0);
-		local nobleFactionEnemy = createFaction(_tacticalActive, 0.0);
-		_properties.NobleFactionAlly <- ::WeakTableRef(nobleFactionAlly);
-		_properties.NobleFactionEnemy <- ::WeakTableRef(nobleFactionEnemy);
+		::logInfo("setting up faction s" + _data)
+		if (_tacticalActive && !("CustomFactions" in _properties))
+			_properties.CustomFactions = [];
+		foreach(faction in _data)
+		{
+			::logInfo("setting up faction s" + _data)
+			_properties.CustomFactions.push(::WeakTableRef(createFaction(_tacticalActive, faction)))
+		}
 	}
 
-	function createFaction(_tacticalActive, _relation)
+	function createFaction(_tacticalActive, _faction)
 	{
 		local a = ::MSU.Array.rand(::Const.FactionArchetypes[0])
 		local f = this.new("scripts/factions/noble_faction");
@@ -82,7 +86,8 @@ this.combat_simulator_setup <- {
 		f.setDescription(a.Description);
 		f.setBanner(banner);
 		f.setDiscovered(true);
-		f.m.PlayerRelation = _relation;
+		f.m.PlayerRelation = _faction.Settings.AlliedToPlayer ? 100.0 : 0;
+		f.m.ControlUnits <- _faction.Settings.ControlUnits
 		f.updatePlayerRelation();
 		this.World.FactionManager.m.Factions.push(f);
 		// If spawn screen is used during a normal fight, we need to add these empty arrays
@@ -136,36 +141,46 @@ this.combat_simulator_setup <- {
 	{
 		local properties = this.Tactical.State.getStrategicProperties();
 		if (properties.CombatID != "CombatSimulator") return;
+		local faction = ::World.FactionManager.getFaction(_e.getFaction())
 
-		if (_e.getFaction() != properties.NobleFactionAlly.getID()) return;
 
-		// basically false turns them left for humans and right for beasts because rap pls
-		// so it's wrong for humans, but we rely on onFactionChanged to change them back
-		foreach(key in ::CombatSimulator.Const.SpriteList)
+		if (faction.m.ControlUnits && !_e.m.IsControlledByPlayer)
 		{
-			if (_e.hasSprite(key))
+			_e.m.AIAgent = this.new("scripts/ai/tactical/player_agent");
+			_e.m.AIAgent.setActor(_e);
+			_e.m.IsControlledByPlayer = true;
+			_e.isPlayerControlled = function()
 			{
-				_e.getSprite(key).setHorizontalFlipping(true);
+				return true;
 			}
-		}
-		_e.onFactionChanged();
+			_e.m.IsGuest <- true;
+			_e.isGuest <- function(){
+				return this.m.IsGuest;
+			}
+			
+			_e.onCombatStart <- function(){};
+		} 
 
-		if (!properties.ControlAllies || _e.m.IsControlledByPlayer) return;
+		// _e.setFaction(this.Const.Faction.Player);
 
-		_e.setFaction(this.Const.Faction.Player);
-		_e.m.AIAgent = this.new("scripts/ai/tactical/player_agent");
-		_e.m.AIAgent.setActor(_e);
-		_e.m.IsControlledByPlayer = true;
-		_e.m.IsGuest <- true;
-		_e.isGuest <- function(){
-			return this.m.IsGuest;
-		}
-		
-		_e.onCombatStart <- function(){};
 
-		if("Tail" in _e.m)
+		// if("Tail" in _e.m)
+		// {
+		// 	_e.m.Tail.setFaction(this.Const.Faction.PlayerAnimals);
+		// }
+
+		if (faction.isAlliedWithPlayer())
 		{
-			_e.m.Tail.setFaction(this.Const.Faction.PlayerAnimals);
+			// basically false turns them left for humans and right for beasts because rap pls
+			// so it's wrong for humans, but we rely on onFactionChanged to change them back
+			foreach(key in ::CombatSimulator.Const.SpriteList)
+			{
+				if (_e.hasSprite(key))
+				{
+					_e.getSprite(key).setHorizontalFlipping(true);
+				}
+			}
+			_e.onFactionChanged();
 		}
 	}
 }
