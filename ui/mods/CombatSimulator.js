@@ -520,7 +520,7 @@ CombatSimulatorScreen.prototype.createFilterBar = function(_scrollContainer)
 
 CombatSimulatorScreen.prototype.addRow = function(_div, _classes, _divider)
 {
-    var row = $('<div class="row"/>');
+    var row = $('<div class="combat-simulator-row"/>');
     _div.append(row);
     if (_classes != undefined)
     {
@@ -529,7 +529,6 @@ CombatSimulatorScreen.prototype.addRow = function(_div, _classes, _divider)
     if(_divider === true)
     {
         row.addClass("bottom-gold-line");
-        row.css("height", "+=20px")
     }
     return row;
 }
