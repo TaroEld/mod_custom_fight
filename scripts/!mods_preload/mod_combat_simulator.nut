@@ -23,7 +23,7 @@
 	::include("CombatSimulator/const/track_list")
 	::MSU.UI.registerConnection(::CombatSimulator.Screen);
 	::MSU.UI.registerConnection(::CombatSimulator.SpawnScreen);
-	::CombatSimulator.Mod.Keybinds.addSQKeybind("toggleCombatSimulatorScreen", "ctrl+s", ::MSU.Key.State.World,  ::CombatSimulator.Screen.toggle.bindenv(::CombatSimulator.Screen));
+	::CombatSimulator.Mod.Keybinds.addSQKeybind("toggleCombatSimulatorScreen", "ctrl+s", ::MSU.Key.State.All,  ::CombatSimulator.Screen.toggle.bindenv(::CombatSimulator.Screen));
 	::CombatSimulator.Mod.Keybinds.addSQKeybind("toggleCombatSimulatorSpawnScreen", "ctrl+s", ::MSU.Key.State.Tactical,  ::CombatSimulator.SpawnScreen.toggle.bindenv(::CombatSimulator.SpawnScreen));
 	::CombatSimulator.Mod.Keybinds.addSQKeybind("initNextTurn", "f", ::MSU.Key.State.Tactical, function(){
 		this.Tactical.TurnSequenceBar.initNextTurn(true);
@@ -39,6 +39,22 @@
 		::CombatSimulator.Screen.getButton("FOV").onPressed(false);
 		return true;
 	})
+
+	::CombatSimulator.Mod.Keybinds.addSQKeybind("killHoveredUnit", "k", ::MSU.Key.State.Tactical, function()
+	{
+		local activeState = ::MSU.Utils.getActiveState();
+		if (activeState.m.LastTileHovered != null && !activeState.m.LastTileHovered.IsEmpty)
+		{
+		  local entity = activeState.m.LastTileHovered.getEntity();
+		  if (entity != null && this.isKindOf(entity, "actor"))
+		  {
+		    if (entity == this.Tactical.TurnSequenceBar.getActiveEntity()) {activeState.cancelEntityPath(entity);}
+		    entity.kill();
+		  }
+		}
+	})
+
+
 	local generalPage = ::CombatSimulator.Mod.ModSettings.addPage("General");
 	generalPage.addBooleanSetting("AllowSettings", false, "Allow Settings", "Allow the topbar buttons and the spawner screen to work in normal fights, outside of Combat Simulators.");
 	::include("CombatSimulator/tooltips")
