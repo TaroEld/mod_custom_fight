@@ -18,7 +18,7 @@ var CombatSimulatorScreen = function(_parent)
     this.mMapButton = null;
 
     this.mFactions = {};
-    this.mFactionNum = 0;
+    this.mMaxFactions = 6;
     this.mNextFactionID = 0;
     this.mFactionsIdx = 0;
     
@@ -31,7 +31,6 @@ var CombatSimulatorScreen = function(_parent)
         SpectatorMode : false,
         CutDownTrees : false,
         StartEmptyMode : true,
-        ControlAllies : false,
         IsFleeingProhibited : false,
         Fortification : false,
     }
@@ -161,6 +160,10 @@ CombatSimulatorScreen.prototype.createContentDiv = function()
     this.createFactionDiv("Allies", "faction-0");
     this.mFactions["faction-0"].data("alliedToPlayerCheckbox").iCheck('check');
     this.createFactionDiv("Enemies", "faction-1");
+    this.createFactionDiv("Faction 3", "faction-2");
+    this.createFactionDiv("Faction 4", "faction-3");
+    this.createFactionDiv("Faction 5", "faction-4");
+    this.createFactionDiv("Faction 6", "faction-5");
 }
 
 CombatSimulatorScreen.prototype.createSettingsDiv = function()
@@ -186,16 +189,6 @@ CombatSimulatorScreen.prototype.createSettingsDiv = function()
     {
         self.switchFaction(1);
     }, "", 3);
-
-    var addFactionRow = this.addRow(this.mSettingsBox)
-    addFactionRow.append(this.getTextDiv("Add faction", "label"));
-    var layout = $('<div class="combat-simulator-text-button-layout"/>');
-    addFactionRow.append(layout);
-    var button = layout.createTextButton("", $.proxy(function(_div){
-        self.createFactionDiv();
-        self.switchFaction(1);
-    }, this), "combat-simulator-text-button", 4);
-
 
     var terrainRow = this.addRow(this.mSettingsBox);
     terrainRow.append(this.getTextDiv("Terrain", "label"));
@@ -235,7 +228,6 @@ CombatSimulatorScreen.prototype.createSettingsDiv = function()
 
     this.mSpectatorModeCheck = this.addCheckboxSetting(this.addRow(this.mSettingsBox), "use-player-checkbox", "SpectatorMode", "uncheck", "Spectator Mode")
     this.mCutDownTreesCheck = this.addCheckboxSetting(this.addRow(this.mSettingsBox), "cut-down-trees-checkbox", "CutDownTrees", "uncheck", "Chop down trees");
-    this.mControlAlliesCheck = this.addCheckboxSetting(this.addRow(this.mSettingsBox), "control-allies-checkbox", "ControlAllies", "uncheck", "Control allies");
     this.mIsFleeingProhibitedCheck = this.addCheckboxSetting(this.addRow(this.mSettingsBox), "fleeing-prohibited-checkbox", "IsFleeingProhibited", "uncheck", "Disallow fleeing");
     this.mFortificationCheck = this.addCheckboxSetting(this.addRow(this.mSettingsBox), "fortification-checkbox", "Fortification", "uncheck", "Add fortification");
 
@@ -246,8 +238,7 @@ CombatSimulatorScreen.prototype.switchFaction = function(_idx)
     var clamp = function(num, min, max){
         return Math.min(Math.max(num, min), max);
     }
-    this.mFactionsIdx = clamp(this.mFactionsIdx + _idx, 0, this.mFactionNum-2);
-    console.error(this.mFactionsIdx)
+    this.mFactionsIdx = clamp(this.mFactionsIdx + _idx, 0, this.mMaxFactions-1);
     var idx = 0;
     $(".setup-box").css("display", "none");
     MSU.iterateObject(this.mFactions, function(_id, _faction){
@@ -306,24 +297,20 @@ CombatSimulatorScreen.prototype.createArrayScrollContainer = function(_dialog, _
     }, this))
 }
 
-CombatSimulatorScreen.prototype.createFactionDiv = function()
+CombatSimulatorScreen.prototype.createFactionDiv = function(_name, _id)
 {
     var self = this;
     var ret = $('<div class="setup-box"/>');
-    var nextFactionID = this.mNextFactionID++;
-    var id = "faction-" + nextFactionID;
-    this.mFactionNum++;
+    this.mFactions[_id] = ret;
 
-
-    ret.data("id", id);
-    ret.data("alliedFactionCheckboxes", {});
+    ret.data("id", _id);
     this.mDialogContentContainer.append(ret);
     var headerRow = this.addRow(ret)
-    headerRow.append(this.getTextDiv("Faction " + nextFactionID, "box-title"));
-    var alliedToPlayerCheckbox = this.addCheckboxSetting(headerRow, "AlliedToPlayer" + id, null, "uncheck", "Allied to player");
+    headerRow.append(this.getTextDiv(_name, "box-title"));
+    var alliedToPlayerCheckbox = this.addCheckboxSetting(headerRow, "AlliedToPlayer" + _id, null, "uncheck", "Allied to player");
     ret.data("alliedToPlayerCheckbox", alliedToPlayerCheckbox);
 
-    var controlUnitsCheckbox = this.addCheckboxSetting(headerRow, "ControlUnits" + id, null, "uncheck", "Control Units");
+    var controlUnitsCheckbox = this.addCheckboxSetting(headerRow, "ControlUnits" + _id, null, "uncheck", "Control Units");
     ret.data("controlUnitsCheckbox", controlUnitsCheckbox);
 
     var spawnlistBox = $('<div class="spawnlist-box"/>');
@@ -365,16 +352,6 @@ CombatSimulatorScreen.prototype.createFactionDiv = function()
         this.createAddSpawnlistScrollContainer(this.createPopup('Add Spawnlist','generic-popup', 'generic-popup-container'), ret.spawnlistScrollContainer);
     }, this), "combat-simulator-text-button", 4);
     ret.buttons.addSpawnlistButton.bindTooltip({ contentType: 'msu-generic', modId: CombatSimulator.ModID, elementId: "Screen.Spawnlist.Main.Add"});
-
-
-    this.mFactions[id] = ret;
-}
-
-CombatSimulatorScreen.prototype.removeFactionDiv = function (_id)
-{
-    this.mFactions[_id].remove();
-    delete this.mFactions[_id];
-    this.mFactionNum--;
 }
 
 CombatSimulatorScreen.prototype.createAddUnitScrollContainer = function(_dialog, _side)
@@ -560,7 +537,6 @@ CombatSimulatorScreen.prototype.initialiseValues = function ()
 
     this.mSpectatorModeCheck.iCheck('uncheck');
     this.mCutDownTreesCheck.iCheck('uncheck');
-    this.mControlAlliesCheck.iCheck('uncheck');
     this.mIsFleeingProhibitedCheck.iCheck('uncheck');
     this.mFortificationCheck.iCheck('uncheck');
 }
@@ -569,17 +545,9 @@ CombatSimulatorScreen.prototype.reset = function()
 {
     var self = this;
     this.initialiseValues();
-    this.mFactions["faction-0"].spawnlistScrollContainer.empty();
-    this.mFactions["faction-1"].spawnlistScrollContainer.empty();
-    this.mFactions["faction-0"].unitsScrollContainer.empty();
-    this.mFactions["faction-1"].unitsScrollContainer.empty();
-
-    MSU.iterateObject(this.mFactions, function(_id, _div)
-    {
-        if (_id != "faction-0" && _id != "faction-1")
-        {
-            self.removeFactionDiv(_id);
-        }
+    MSU.iterateObject(this.mFactions, function(_id, _faction){
+        _faction.spawnlistScrollContainer.empty();
+        _faction.unitsScrollContainer.empty();
     })
 }
 
