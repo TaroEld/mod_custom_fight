@@ -233,8 +233,6 @@ this.combat_simulator_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 
 		p.IsUsingSetPlayers = _data.Settings.SpectatorMode;
 		p.SpectatorMode <- _data.Settings.SpectatorMode;
-		p.StartEmptyMode <- _data.Settings.StartEmptyMode;
-		p.ControlAllies <- _data.Settings.ControlAllies;
 		if(p.SpectatorMode)
 		{
 			this.getButton("UnlockCamera").setValue(true);
@@ -243,8 +241,12 @@ this.combat_simulator_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 
 		// Use noble factions so that noble units dont break when they look for banner
 		::CombatSimulator.Setup.setupFactions(p, _data.Factions);
+
+		p.StartEmptyMode <- true;
 		foreach (idx, faction in p.CustomFactions)
 		{
+			if (_data.Factions[idx].Spawnlists.len() != 0 || _data.Factions[idx].Units.len() != 0)
+				p.StartEmptyMode <- false;
 			foreach(spawnlist in _data.Factions[idx].Spawnlists)
 			{
 				this.Const.World.Common.addUnitsToCombat(p.Entities, this.Const.World.Spawn[spawnlist.ID], spawnlist.Resources.tointeger() , faction.getID());

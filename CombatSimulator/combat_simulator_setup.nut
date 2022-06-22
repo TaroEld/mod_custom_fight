@@ -80,14 +80,15 @@ this.combat_simulator_setup <- {
 		local f = this.new("scripts/factions/noble_faction");
 		local banner = this.Math.rand(2, 10);
 		local name = this.Const.Strings.NobleHouseNames[this.Math.rand(0, this.Const.Strings.NobleHouseNames.len() - 1)];
+		f.m.CustomID <- _faction.ID;
 		f.setID( this.World.FactionManager.m.Factions.len());
 		f.setName(name);
 		f.setMotto("\"" + a.Mottos[this.Math.rand(0, a.Mottos.len() - 1)] + "\"");
 		f.setDescription(a.Description);
 		f.setBanner(banner);
 		f.setDiscovered(true);
-		f.m.PlayerRelation = _faction.Settings.AlliedToPlayer ? 100.0 : 0;
-		f.m.ControlUnits <- _faction.Settings.ControlUnits
+		f.m.PlayerRelation = "AlliedToPlayer" in _faction ? 100.0 : 0;
+		f.m.ControlUnits <- _faction.ControlUnits
 		f.updatePlayerRelation();
 		this.World.FactionManager.m.Factions.push(f);
 		// If spawn screen is used during a normal fight, we need to add these empty arrays
@@ -100,6 +101,18 @@ this.combat_simulator_setup <- {
 			this.Tactical.Entities.m.Strategies.push(s);
 		}
 		return f;
+	}
+
+	function removeFactions()
+	{
+		for(local idx = this.World.FactionManager.m.Factions.len()-1; idx != 0; idx--)
+		{
+			local faction = this.World.FactionManager.m.Factions[idx];
+			if(faction != null && "CustomID" in faction.m)
+			{
+				this.World.FactionManager.m.Factions.remove(idx);
+			}
+		}
 	}
 
 	function addUnitsToCombat(_units, _into, _faction)

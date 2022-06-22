@@ -18,8 +18,7 @@ var CombatSimulatorScreen = function(_parent)
     this.mMapButton = null;
 
     this.mFactions = {};
-    this.mMaxFactions = 6;
-    this.mNextFactionID = 0;
+    this.mMaxFactions = 4;
     this.mFactionsIdx = 0;
     
 
@@ -157,13 +156,12 @@ CombatSimulatorScreen.prototype.destroyDIV = function ()
 CombatSimulatorScreen.prototype.createContentDiv = function()
 {
     this.createSettingsDiv();
-    this.createFactionDiv("Allies", "faction-0");
-    this.mFactions["faction-0"].data("alliedToPlayerCheckbox").iCheck('check');
-    this.createFactionDiv("Enemies", "faction-1");
-    this.createFactionDiv("Faction 3", "faction-2");
-    this.createFactionDiv("Faction 4", "faction-3");
-    this.createFactionDiv("Faction 5", "faction-4");
-    this.createFactionDiv("Faction 6", "faction-5");
+    this.createFactionDiv("Allies", "faction-0", "page-1");
+    this.mFactions["faction-0"].data("alliedToPlayer", true);
+    this.createFactionDiv("Faction 2", "faction-1", "page-1");
+    this.createFactionDiv("Faction 3", "faction-2", "page-2");
+    this.createFactionDiv("Faction 4", "faction-3", "page-2");
+    this.switchFaction(0);
 }
 
 CombatSimulatorScreen.prototype.createSettingsDiv = function()
@@ -178,14 +176,14 @@ CombatSimulatorScreen.prototype.createSettingsDiv = function()
     this.mFactionButtonContainer =  $('<div class="faction-button-container"/>').appendTo(switchFactionRow);
     var buttonLayout = $('<div class="l-button"/>');
     this.mFactionButtonContainer.append(buttonLayout);
-    var button = buttonLayout.createImageButton(Path.GFX + "mods/ui/buttons/switch_previous_faction.png", function ()
+    this.mFactionPreviousButton = buttonLayout.createImageButton(Path.GFX + "mods/ui/buttons/switch_previous_faction.png", function ()
     {
-        self.switchFaction(-1);
+        self.switchFaction(0);
     }, "", 3);
 
     var buttonLayout = $('<div class="l-button"/>');
     this.mFactionButtonContainer.append(buttonLayout);
-    var button = buttonLayout.createImageButton(Path.GFX + "mods/ui/buttons/switch_next_faction.png", function ()
+    this.mFactionNextButton = buttonLayout.createImageButton(Path.GFX + "mods/ui/buttons/switch_next_faction.png", function ()
     {
         self.switchFaction(1);
     }, "", 3);
@@ -198,7 +196,7 @@ CombatSimulatorScreen.prototype.createSettingsDiv = function()
     this.mTerrainButton.bindTooltip({ contentType: 'msu-generic', modId: CombatSimulator.ModID, elementId: "Screen.Settings.Terrain", test: "hello, world"});
 
     var mapRow = this.addRow(this.mSettingsBox);
-    mapRow.append(this.getTextDiv("Map", "label"));
+    mapRow.append(this.getTextDiv("Map", "label")); 
     this.mMapButton = mapRow.createTextButton("", $.proxy(function(_div){
        this.createArrayScrollContainer(this.createPopup('Choose Map','generic-popup', 'generic-popup-container'), _div, this.mData.AllLocationTerrains, "Map")
     }, this), "combat-simulator-text-button", 4);
@@ -238,13 +236,19 @@ CombatSimulatorScreen.prototype.switchFaction = function(_idx)
     var clamp = function(num, min, max){
         return Math.min(Math.max(num, min), max);
     }
-    this.mFactionsIdx = clamp(this.mFactionsIdx + _idx, 0, this.mMaxFactions-1);
-    var idx = 0;
     $(".setup-box").css("display", "none");
-    MSU.iterateObject(this.mFactions, function(_id, _faction){
-        if(idx >= self.mFactionsIdx && idx < self.mFactionsIdx+2) _faction.css("display", "flex");
-        idx++
-    })
+    if (_idx == 0)
+    {
+        $(".page-1").css("display", "flex");
+        this.mFactionNextButton.attr('disabled', false);
+        this.mFactionPreviousButton.attr('disabled', true);
+    }
+    else 
+    {
+        $(".page-2").css("display", "flex");
+        this.mFactionNextButton.attr('disabled', true);
+        this.mFactionPreviousButton.attr('disabled', false);
+    }
 } 
 CombatSimulatorScreen.prototype.addCheckboxSetting = function(_div, _id, _settingKey, _default, _name)
 {
@@ -297,18 +301,17 @@ CombatSimulatorScreen.prototype.createArrayScrollContainer = function(_dialog, _
     }, this))
 }
 
-CombatSimulatorScreen.prototype.createFactionDiv = function(_name, _id)
+CombatSimulatorScreen.prototype.createFactionDiv = function(_name, _id, _page)
 {
     var self = this;
     var ret = $('<div class="setup-box"/>');
     this.mFactions[_id] = ret;
+    ret.addClass(_page);
 
     ret.data("id", _id);
     this.mDialogContentContainer.append(ret);
     var headerRow = this.addRow(ret)
     headerRow.append(this.getTextDiv(_name, "box-title"));
-    var alliedToPlayerCheckbox = this.addCheckboxSetting(headerRow, "AlliedToPlayer" + _id, null, "uncheck", "Allied to player");
-    ret.data("alliedToPlayerCheckbox", alliedToPlayerCheckbox);
 
     var controlUnitsCheckbox = this.addCheckboxSetting(headerRow, "ControlUnits" + _id, null, "uncheck", "Control Units");
     ret.data("controlUnitsCheckbox", controlUnitsCheckbox);
@@ -572,7 +575,6 @@ CombatSimulatorScreen.prototype.gatherData = function()
     MSU.iterateObject(this.mFactions, function(_id, _faction){
         self.getFactionData(ret, _faction);
     })
-    // this.checkStartEmptyMode(ret);
     console.error(JSON.stringify(ret))
     return ret;
 }
@@ -581,15 +583,12 @@ CombatSimulatorScreen.prototype.getFactionData = function(_ret, _div)
 {
     console.error("getFactionData")
     var ret = {
+        ID : _div.data("id"),
         Spawnlists : [],
         Units : [],
-        Settings : {
-            AlliedFactions : [],
-            AlliedToPlayer : false,
-            ControlUnits : false,
-        },
+        ControlUnits : false,
     }
-    var spawnlistRows = _div.spawnlistScrollContainer.find(".row")
+    var spawnlistRows = _div.spawnlistScrollContainer.find(".combat-simulator-row")
     spawnlistRows.each(function(_idx){
         ret.Spawnlists.push({
             ID : $(this).data("unitID"),
@@ -597,7 +596,7 @@ CombatSimulatorScreen.prototype.getFactionData = function(_ret, _div)
         })
     })
 
-    var unitRows = _div.unitsScrollContainer.find(".row")
+    var unitRows = _div.unitsScrollContainer.find(".combat-simulator-row")
     unitRows.each(function(_idx){
         ret.Units.push({
             Type : $(this).data("unitID"),
@@ -606,27 +605,15 @@ CombatSimulatorScreen.prototype.getFactionData = function(_ret, _div)
         })
     })
 
-    if (_div.data("alliedToPlayerCheckbox").prop("checked"))
-        ret.Settings.AlliedToPlayer = true;
-
     if (_div.data("controlUnitsCheckbox").prop("checked"))
-        ret.Settings.ControlUnits = true;
+        ret.ControlUnits = true;
+    if (_div.data("alliedToPlayer")
+        ret.AlliedToPlayer = true;
     
 
     _ret.Factions.push(ret)
     // ret.unitsScrollContainer
     // row.amount
-}
-
-CombatSimulatorScreen.prototype.checkStartEmptyMode = function(_ret)
-{
-    _ret.Settings.StartEmptyMode = true;
-    MSU.iterateObject(_ret.mFactions, function(_id, _faction){
-        if (_faction.Spawnlists.length != 0 || _faction.Units.length != 0)
-        {
-            _ret.Settings.StartEmptyMode = false;
-        }
-    })
 }
 
 CombatSimulatorScreen.prototype.notifyBackendTopBarButtonPressed = function (_buttonType)

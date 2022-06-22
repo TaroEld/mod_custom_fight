@@ -135,11 +135,7 @@
 		local exitTactical = o.exitTactical;
 		o.exitTactical = function()
 		{
-			local properties = this.Tactical.State.getStrategicProperties();
-			if (!("NobleFactionAlly" in properties))  return exitTactical();
-			local factions = this.World.FactionManager.m.Factions;
-			factions.pop();
-			factions.pop();
+			::CombatSimulator.Setup.removeFactions();
 			::CombatSimulator.Screen.resetButtonValues();		
 			return exitTactical();
 		}
