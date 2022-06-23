@@ -1,6 +1,6 @@
 .combat-simulator-spawn
 {
-    height: 50%;
+    height: 70%;
     width: 20%;
     top: 25%;
     z-index: 10000;
@@ -27,6 +27,28 @@
     position: absolute;
 }
 
+.spawn-screen-units-div
+{
+    width: 100%;
+    height: 60%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+.spawn-screen-settings-div
+{
+    width: 100%;
+    height: 15%;
+    margin-top: 2rem;
+}
+
+.spawn-screen-factions-container
+{
+    width: 100%;
+    height: 15%;
+    margin-top: 2rem;
+}
+
 .filter-bar
 {
     width: 100%;
@@ -35,14 +57,7 @@
     justify-content: space-between;
 }
 
-.spawn-screen-units-div
-{
-    width: 100%;
-    height: 80%;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-}
+
 .spawn-screen-units-div .row
 {
     display: flex;
@@ -60,12 +75,6 @@
     height: 4.5rem;
 }
 
-.spawn-screen-settings-div
-{
-    width: 100%;
-    height: 20%;
-    margin-top: 2rem;
-}
 .spawn-screen-settings-div > .row
 {
     display: flex;
@@ -89,4 +98,12 @@
     font-weight: normal;
     font-style : normal;
     font-family: 'FreeUniversal-Regular';
+}
+
+.spawn-screen-factions-div
+{
+    width: 100%;
+    height:  100%;
+    display: flex;
+    flex-wrap: wrap;
 }

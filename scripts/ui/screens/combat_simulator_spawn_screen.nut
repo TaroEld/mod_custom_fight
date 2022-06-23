@@ -56,19 +56,26 @@ this.combat_simulator_spawn_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 		local ret = {
 			AllUnits = ::CombatSimulator.Setup.querySpawnlistMaster(),
 		}
+		local properties = this.Tactical.State.getStrategicProperties();
+		if(!("CustomFactions" in properties))
+		{
+			properties.CustomFactions = {};
+			::CombatSimulator.Setup.setupFactions(properties, true);
+		}
+		ret.Factions <- ::CombatSimulator.Setup.m.CustomFactions;
 		return ret;
 	}
 
 	function spawnUnit(_data)
 	{
 		local unit = _data.Unit;
+		local faction = _data.Faction;
 		local settings = _data.Settings;
 
 		local tile = this.Tactical.getTile(this.Tactical.screenToTile(::Cursor.getX(), ::Cursor.getY()));
 		local properties = this.Tactical.State.getStrategicProperties();
-		if (!("CustomFactions" in properties)) ::CombatSimulator.Setup.setupFactions(properties, true);
 
-		unit.Faction <- settings.Ally ?  properties.NobleFactionAlly.getID() : properties.NobleFactionEnemy.getID();
+		unit.Faction <- properties.CustomFactions[faction].getID();
 		unit.Name <- "";
 		unit.Champion <- settings.Champion;
 		unit.Variant <- settings.Champion ? this.Math.rand(1, 255) : 0;

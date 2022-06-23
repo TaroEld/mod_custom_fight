@@ -1,5 +1,24 @@
 this.combat_simulator_setup <- {
-	m = {},
+	m = {
+		CustomFactions = {
+			"faction-0" : {
+			    ID = "faction-0",
+			    ControlUnits = false,
+			},
+			"faction-1" : {
+			    ID = "faction-1",
+			    ControlUnits = false,
+			},
+			"faction-2" : {
+			    ID = "faction-2",
+			    ControlUnits = false,
+			},
+			"faction-3" : {
+			    ID = "faction-3",
+			    ControlUnits = false,
+			}
+		}
+	},
 	function querySpawnlistMaster()
 	{
 		// clone it
@@ -62,15 +81,11 @@ this.combat_simulator_setup <- {
 		return ret;
 	}
 
-	function setupFactions(_properties, _data, _tacticalActive = false)
+	function setupFactions(_properties, _tacticalActive = false)
 	{
-		::logInfo("setting up faction s" + _data)
-		if (_tacticalActive && !("CustomFactions" in _properties))
-			_properties.CustomFactions = [];
-		foreach(faction in _data)
+		foreach(id, faction in this.m.CustomFactions)
 		{
-			::logInfo("setting up faction s" + _data)
-			_properties.CustomFactions.push(::WeakTableRef(createFaction(_tacticalActive, faction)))
+			_properties.CustomFactions[id] <- ::WeakTableRef(createFaction(_tacticalActive, faction));
 		}
 	}
 
@@ -87,7 +102,7 @@ this.combat_simulator_setup <- {
 		f.setDescription(a.Description);
 		f.setBanner(banner);
 		f.setDiscovered(true);
-		f.m.PlayerRelation = "AlliedToPlayer" in _faction ? 100.0 : 0;
+		f.m.PlayerRelation = _faction.ID == "faction-0" ? 100.0 : 0;
 		f.m.ControlUnits <- _faction.ControlUnits
 		f.updatePlayerRelation();
 		this.World.FactionManager.m.Factions.push(f);
@@ -150,33 +165,48 @@ this.combat_simulator_setup <- {
 		}
 	}
 
-	function setupEntity(_e, _t)
+	function setupEntity(_e)
 	{
 		local properties = this.Tactical.State.getStrategicProperties();
 		if (properties.CombatID != "CombatSimulator") return;
 		local faction = ::World.FactionManager.getFaction(_e.getFaction())
 
-
-		if (faction.m.ControlUnits && !_e.m.IsControlledByPlayer)
+		if (faction.m.ControlUnits)
 		{
-			_e.m.AIAgent = this.new("scripts/ai/tactical/player_agent");
-			_e.m.AIAgent.setActor(_e);
-			_e.m.IsControlledByPlayer = true;
+			if(!_e.m.IsControlledByPlayer)
+			{
+				_e.m.old_AIAgent <- _e.m.AIAgent;
+				_e.m.old_AIAgent.setActor(null);
+				_e.m.AIAgent = this.new("scripts/ai/tactical/player_agent");
+				_e.m.AIAgent.setActor(_e);
+				_e.m.IsControlledByPlayer = true;
+				_e.isPlayerControlled = function()
+				{
+					return true;
+				}
+				_e.m.IsGuest <- true;
+				_e.isGuest <- function(){
+					return this.m.IsGuest;
+				}
+				
+				_e.onCombatStart <- function(){};
+			}
+		} 
+		else
+		{
+			if("old_AIAgent" in _e.m)
+			{
+				_e.m.AIAgent = _e.m.old_AIAgent;
+				_e.m.AIAgent.setActor(_e);
+				delete _e.m.old_AIAgent
+			}
+			_e.m.IsControlledByPlayer <- false;
+			_e.m.IsGuest <- false;
 			_e.isPlayerControlled = function()
 			{
-				return true;
+				return this.getFaction() == this.Const.Faction.Player && this.m.IsControlledByPlayer;
 			}
-			_e.m.IsGuest <- true;
-			_e.isGuest <- function(){
-				return this.m.IsGuest;
-			}
-			
-			_e.onCombatStart <- function(){};
-		} 
-
-		// _e.setFaction(this.Const.Faction.Player);
-
-
+		}
 		// if("Tail" in _e.m)
 		// {
 		// 	_e.m.Tail.setFaction(this.Const.Faction.PlayerAnimals);
@@ -194,6 +224,23 @@ this.combat_simulator_setup <- {
 				}
 			}
 			_e.onFactionChanged();
+		}
+	}
+
+	function updateFactionProperty(_data)
+	{
+		local id = _data[0];
+		local property = _data[1];
+		local value = _data[2];
+		this.m.CustomFactions[id][property] = _data[2];
+		if (property == "ControlUnits" && ::MSU.Utils.getActiveState().ClassName == "tactical_state")
+		{
+			local faction = this.Tactical.State.getStrategicProperties().CustomFactions[id];
+			faction.m.ControlUnits <- value;
+			foreach(unit in this.Tactical.Entities.getInstancesOfFaction(faction.getID()))
+			{
+				this.setupEntity(unit);
+			}
 		}
 	}
 }

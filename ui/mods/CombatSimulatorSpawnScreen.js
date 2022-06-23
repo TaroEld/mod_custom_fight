@@ -9,9 +9,13 @@ var CombatSimulatorSpawnScreen = function(_parent)
     this.mDialogContainer = null;
     this.mDialogContentContainer = null;
 
+    this.mFactions = {};
+    this.mMaxFactions = 4;
+    this.mActiveFaction = null;
+    this.mFactionsIdx = 0;
+
     this.mSettingsBox = null;
     this.mSettings = {
-        Ally : false,
         Champion : false
     }
 }
@@ -64,6 +68,8 @@ CombatSimulatorSpawnScreen.prototype.createContentDiv = function()
     this.createUnitsList();
     this.mSettingsBox = $('<div class="spawn-screen-settings-div"/>').appendTo(this.mDialogContentContainer);
     this.createSettingsContent();
+    this.mFactionsBox = $('<div class="spawn-screen-factions-container"/>').appendTo(this.mDialogContentContainer);
+    this.createFactionsContent();
 }
 
 CombatSimulatorSpawnScreen.prototype.createUnitsList = function()
@@ -91,6 +97,86 @@ CombatSimulatorSpawnScreen.prototype.fillUnitsList = function()
         row.append($('<div class="title-font-normal font-color-brother-name combat-simulator-entry-label">' + _unit.DisplayName +  '</div>'));   
         this.createDragHandler(row);     
     }, this))
+}
+
+CombatSimulatorSpawnScreen.prototype.createSettingsContent = function()
+{
+    var self = this;
+    var checkboxRow = this.addRow(this.mSettingsBox);
+    this.mChampionCheck = this.addCheckboxSetting(checkboxRow, "champion-checkbox", "uncheck", "Spawn as Champion", "Champion");
+    this.mChampionCheck.on('ifChecked ifUnchecked', null, this, function (_event) {
+        self.mSettings["Champion"] = $(this).prop("checked");
+    });
+
+    var switchFactionRow = this.addRow(this.mSettingsBox, null, true)
+    switchFactionRow.append(this.getTextDiv("Switch faction", "label"));
+    this.mFactionButtonContainer =  $('<div class="faction-button-container"/>').appendTo(switchFactionRow);
+
+    var buttonLayout = $('<div class="l-button"/>');
+    this.mFactionButtonContainer.append(buttonLayout);
+    this.mFactionNextButton = buttonLayout.createImageButton(Path.GFX + "mods/ui/buttons/switch_next_faction.png", function ()
+    {
+        self.switchFaction();
+    }, "", 3);
+}
+
+CombatSimulatorSpawnScreen.prototype.createFactionsContent = function()
+{
+    var self = this;
+    this.createFactionDiv("Allies", "faction-0");
+    this.createFactionDiv("Faction 2", "faction-1");
+    this.createFactionDiv("Faction 3", "faction-2");
+    this.createFactionDiv("Faction 4", "faction-3");
+    $(".spawn-screen-factions-div").css("display", "none");
+    this.mFactions["faction-0"].css("display", "flex");
+    this.mActiveFaction = this.mFactions["faction-0"];
+}
+
+CombatSimulatorSpawnScreen.prototype.createFactionDiv = function(_name, _id, _allies)
+{
+    var self = this;
+    var ret = $('<div class="spawn-screen-factions-div"/>').appendTo(this.mFactionsBox);
+    ret.data("id", _id);
+    this.mFactions[_id] = ret;
+
+    var headerRow = this.addRow(ret)
+    headerRow.append(this.getTextDiv(_name, "box-title"));
+
+    var checkboxRow = this.addRow(ret);
+    var controlUnitsCheck = this.addCheckboxSetting(checkboxRow, "control-allies-checkbox" + _id, "uncheck", "Control Units", "ControlAllies");
+    controlUnitsCheck.on('ifChecked ifUnchecked', null, this, function (_event) {
+        Screens["CombatSimulatorScreen"].notifyBackendUpdateFactionProperty(_id, "ControlUnits", $(this).prop("checked"))
+    });
+    ret.data("ControlUnitsCheckbox", controlUnitsCheck);
+}
+
+CombatSimulatorSpawnScreen.prototype.switchFaction = function()
+{
+    var self = this;
+    this.mFactionsIdx++;
+    if (this.mFactionsIdx > 3) this.mFactionsIdx = 0;
+    var idx = 0;
+    $(".spawn-screen-factions-div").css("display", "none");
+    MSU.iterateObject(this.mFactions, function(_id, _faction){
+        if (idx == self.mFactionsIdx)
+        {
+            self.mActiveFaction = _faction;
+            _faction.css("display", "flex");
+        }
+        idx++
+    })
+} 
+
+CombatSimulatorSpawnScreen.prototype.setupFactionSettings = function()
+{
+    var self = this;
+    MSU.iterateObject(this.mData.Factions, function(_id, _faction){
+        var div = self.mFactions[_id];
+        if(_faction.ControlUnits)
+            div.data("ControlUnitsCheckbox").iCheck("check");
+        else
+            div.data("ControlUnitsCheckbox").iCheck("uncheck");
+    })
 }
 
 CombatSimulatorSpawnScreen.prototype.createDragHandler = function(_row)
@@ -122,35 +208,47 @@ CombatSimulatorSpawnScreen.prototype.createDragHandler = function(_row)
 
     _row.drag("end", function(ev, dd)
     {
-        if (self.mUnitsDiv.data("hover") == 0) self.notifyBackendSpawnUnit(_row.data('unit'));
+        if (self.mUnitsDiv.data("hover") == 0) self.notifyBackendSpawnUnit(_row.data('unit'), self.mActiveFaction.data("id"));
         var proxy = $(dd.proxy);
         proxy.remove();
     });
 }
 
-CombatSimulatorSpawnScreen.prototype.createSettingsContent = function()
+CombatSimulatorSpawnScreen.prototype.addCheckboxSetting = function(_div, _id, _default, _name, _tooltip)
 {
-    var self = this;
-    var addCheckboxSetting = $.proxy(function(_id, _settingKey, _default, _name)
-    {
-        var checkboxRow = $('<div class="row"/>').appendTo(this.mSettingsBox);
-        var checkbox = $('<input type="checkbox" id="' + _id + '" />').appendTo(checkboxRow).iCheck({
-            checkboxClass: 'icheckbox_flat-orange',
-            radioClass: 'iradio_flat-orange',
-            increaseArea: '30%'
-        });
-        checkbox.on('ifChecked ifUnchecked', null, this, function (_event) {
-            self.mSettings[_settingKey] = $(this).prop("checked")
-        });
-        checkbox.iCheck(_default);
-        checkboxRow.append($('<label class="text-font-normal font-color-subtitle bool-checkbox-label" for="' + _id + '">' + _name + '</label>'))
-        return checkbox;
-    }, this)
-
-    this.mAllyCheck = addCheckboxSetting("ally-checkbox", "Ally", "uncheck", "Set to Ally")
-    this.mChampionCheck = addCheckboxSetting("champion-checkbox", "Champion", "uncheck", "Spawn as Champion");
+    var self = this
+    var checkboxContainer = $('<div class="checkbox-container"/>');
+    _div.append(checkboxContainer)
+    var checkbox = $('<input type="checkbox" id="' + _id + '" />').appendTo(checkboxContainer).iCheck({
+        checkboxClass: 'icheckbox_flat-orange',
+        radioClass: 'iradio_flat-orange',
+        increaseArea: '30%'
+    });
+    
+    var label = $('<label class="text-font-normal font-color-subtitle bool-checkbox-label" for="' + _id + '">' + _name + '</label>');
+    checkboxContainer.append(label)
+    label.click(function(){
+        checkbox.iCheck('toggle');
+    })
+    checkbox.iCheck(_default);
+    checkboxContainer.bindTooltip({ contentType: 'msu-generic', modId: CombatSimulator.ModID, elementId: "Screen.Settings." + _tooltip});
+    return checkbox;
 }
 
+CombatSimulatorSpawnScreen.prototype.addRow = function(_div, _classes, _divider)
+{
+    var row = $('<div class="combat-simulator-row"/>');
+    _div.append(row);
+    if (_classes != undefined && _classes != null)
+    {
+        row.addClass(_classes);
+    }
+    if(_divider === true)
+    {
+        row.addClass("bottom-gold-line");
+    }
+    return row;
+}
 
 CombatSimulatorSpawnScreen.prototype.createFilterBar = function(_scrollContainer)
 {
@@ -193,6 +291,7 @@ CombatSimulatorSpawnScreen.prototype.setData = function (_data)
 {    
     this.mData = _data;
     this.fillUnitsList();
+    this.setupFactionSettings();
 };
 
 CombatSimulatorSpawnScreen.prototype.notifyBackendOkButtonPressed = function ()
@@ -203,10 +302,11 @@ CombatSimulatorSpawnScreen.prototype.notifyBackendOkButtonPressed = function ()
     }
 };
 
-CombatSimulatorSpawnScreen.prototype.notifyBackendSpawnUnit = function (_data)
+CombatSimulatorSpawnScreen.prototype.notifyBackendSpawnUnit = function (_unit, _factionID)
 {
     var ret = {
-        Unit : _data,
+        Unit : _unit,
+        Faction : _factionID,
         Settings : this.mSettings
     }
     if (this.mSQHandle !== null)

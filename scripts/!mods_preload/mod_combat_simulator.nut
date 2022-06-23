@@ -1,7 +1,7 @@
 ::CombatSimulator <- {
 	ID = "mod_combat_simulator",
 	Name = "Combat Simulator",
-	Version = "0.9.2"
+	Version = "0.9.3"
 }
 ::mods_registerMod(::CombatSimulator.ID, ::CombatSimulator.Version)
 
@@ -23,24 +23,24 @@
 	::include("CombatSimulator/const/track_list")
 	::MSU.UI.registerConnection(::CombatSimulator.Screen);
 	::MSU.UI.registerConnection(::CombatSimulator.SpawnScreen);
-	::CombatSimulator.Mod.Keybinds.addSQKeybind("toggleCombatSimulatorScreen", "ctrl+s", ::MSU.Key.State.All,  ::CombatSimulator.Screen.toggle.bindenv(::CombatSimulator.Screen));
-	::CombatSimulator.Mod.Keybinds.addSQKeybind("toggleCombatSimulatorSpawnScreen", "ctrl+s", ::MSU.Key.State.Tactical,  ::CombatSimulator.SpawnScreen.toggle.bindenv(::CombatSimulator.SpawnScreen));
+	::CombatSimulator.Mod.Keybinds.addSQKeybind("toggleCombatSimulatorSpawnScreen", "ctrl+s", ::MSU.Key.State.Tactical,  ::CombatSimulator.SpawnScreen.toggle.bindenv(::CombatSimulator.SpawnScreen), "Open tactical screen");
+	::CombatSimulator.Mod.Keybinds.addSQKeybind("toggleCombatSimulatorScreen", "ctrl+s", ::MSU.Key.State.All,  ::CombatSimulator.Screen.toggle.bindenv(::CombatSimulator.Screen), "Open worldmap screen"));
 	::CombatSimulator.Mod.Keybinds.addSQKeybind("initNextTurn", "f", ::MSU.Key.State.Tactical, function(){
 		this.Tactical.TurnSequenceBar.initNextTurn(true);
 		return true;
-	});
+	}, "End turn");
 	::CombatSimulator.Mod.Keybinds.addSQKeybind("togglePauseTactical", "shift+p", ::MSU.Key.State.Tactical, function()
 	{
 		::CombatSimulator.Screen.getButton("Pause").onPressed(false);
 		return true;
-	})
+	}, "Toggle Pause")
 	::CombatSimulator.Mod.Keybinds.addSQKeybind("toggleFovTactical", "shift+f", ::MSU.Key.State.Tactical, function()
 	{
 		::CombatSimulator.Screen.getButton("FOV").onPressed(false);
 		return true;
-	})
+	}, "Toggle FOV")
 
-	::CombatSimulator.Mod.Keybinds.addSQKeybind("killHoveredUnit", "k", ::MSU.Key.State.Tactical, function()
+	::CombatSimulator.Mod.Keybinds.addSQKeybind("killHoveredUnit", "shift+k", ::MSU.Key.State.Tactical, function()
 	{
 		local activeState = ::MSU.Utils.getActiveState();
 		if (activeState.m.LastTileHovered != null && !activeState.m.LastTileHovered.IsEmpty)
@@ -52,7 +52,7 @@
 		    entity.kill();
 		  }
 		}
-	})
+	}, "Kill hovered unit")
 
 
 	local generalPage = ::CombatSimulator.Mod.ModSettings.addPage("General");
@@ -107,7 +107,8 @@
 		o.setupEntity = function(_e, _t)
 		{
 			setupEntity(_e, _t);
-			::CombatSimulator.Setup.setupEntity(_e, _t);
+			local properties = this.Tactical.State.getStrategicProperties();
+			if (properties.CombatID == "CombatSimulator") ::CombatSimulator.Setup.setupEntity(_e);
 		}
 	})
 

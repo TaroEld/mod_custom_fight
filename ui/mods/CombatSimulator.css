@@ -81,7 +81,6 @@
     width: 24rem;
     height: 4.3rem;
     margin-left: 2rem;
-    border:  1px solid red;
 }
 
 .setup-box
@@ -102,7 +101,6 @@
     padding-top: 1rem;
     height: 5rem;
     width: 30rem;
-    /*border: 1px solid red;*/
 }
 
 .setup-box .box-title
@@ -121,7 +119,6 @@
     height: 30%;
     overflow: hidden;
     margin-top: 3rem;
-    /*border: 1px solid green;*/
 }
 
 .setup-box .units-box
@@ -129,7 +126,6 @@
     width: 100%;
     height: 60%;
     overflow: hidden;
-    /*border: 1px solid blue;*/
 }
 
 .setup-box .spawnlist-box .list,
@@ -152,15 +148,12 @@
     height: 10%;
     display: flex;
     flex-wrap: wrap;
-
-    /*border: 1px solid orange;*/
 }
 
 .faction-button-container
 {
     width: 15rem;
     height: 3.3rem;
-    border: 1px solid orange;
     right: 0rem;
     top: 0rem;
 }
@@ -179,7 +172,6 @@
     width: 23rem;
     height: 4.3rem;
     line-height: 3.6rem;
-    /*border: 2px solid blue;*/
 }
 
 .combat-simulator-entry-label
@@ -235,7 +227,6 @@
 
 .generic-popup-container .list
 {
-    /*border: 1px solid purple;*/
     margin-top: 2rem;
 }
 
@@ -256,7 +247,6 @@
     width: 100%;
     margin-top: 1rem;
     padding-left: 2rem;
-    /*border: 1px solid white;*/
 }
 
 .bool-checkbox-label

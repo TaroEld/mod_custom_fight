@@ -250,33 +250,6 @@ CombatSimulatorScreen.prototype.switchFaction = function(_idx)
         this.mFactionPreviousButton.attr('disabled', false);
     }
 } 
-CombatSimulatorScreen.prototype.addCheckboxSetting = function(_div, _id, _settingKey, _default, _name)
-{
-    var self = this
-    var checkboxContainer = $('<div class="checkbox-container"/>');
-    _div.append(checkboxContainer)
-    var checkbox = $('<input type="checkbox" id="' + _id + '" />').appendTo(checkboxContainer).iCheck({
-        checkboxClass: 'icheckbox_flat-orange',
-        radioClass: 'iradio_flat-orange',
-        increaseArea: '30%'
-    });
-
-    if(_settingKey != null)
-    {
-        checkbox.on('ifChecked ifUnchecked', null, this, function (_event) {
-            self.mSettings[_settingKey] = $(this).prop("checked")
-        });
-    }
-    
-    var label = $('<label class="text-font-normal font-color-subtitle bool-checkbox-label" for="' + _id + '">' + _name + '</label>');
-    checkboxContainer.append(label)
-    label.click(function(){
-        checkbox.iCheck('toggle');
-    })
-    checkbox.iCheck(_default);
-    if(_settingKey != null) checkboxContainer.bindTooltip({ contentType: 'msu-generic', modId: CombatSimulator.ModID, elementId: "Screen.Settings." + _settingKey});
-    return checkbox;
-}
 
 // creates a generic popup that lists entries in an array
 CombatSimulatorScreen.prototype.createArrayScrollContainer = function(_dialog, _div, _array, _setting)
@@ -315,6 +288,9 @@ CombatSimulatorScreen.prototype.createFactionDiv = function(_name, _id, _page)
 
     var controlUnitsCheckbox = this.addCheckboxSetting(headerRow, "ControlUnits" + _id, null, "uncheck", "Control Units");
     ret.data("controlUnitsCheckbox", controlUnitsCheckbox);
+    controlUnitsCheckbox.on('ifChecked ifUnchecked', null, this, function (_event) {
+        self.notifyBackendUpdateFactionProperty(_id, "ControlUnits", $(this).prop("checked"))
+    });
 
     var spawnlistBox = $('<div class="spawnlist-box"/>');
     ret.append(spawnlistBox);
@@ -456,6 +432,125 @@ CombatSimulatorScreen.prototype.addSpawnlistToBox = function(_unit, _boxDiv)
     destroyButton.bindTooltip({ contentType: 'msu-generic', modId: CombatSimulator.ModID, elementId: "Screen.Spawnlist.Main.Delete"});
 }
 
+CombatSimulatorScreen.prototype.setData = function (_data)
+{    
+    this.mData = _data;
+    this.testThings()
+};
+
+CombatSimulatorScreen.prototype.initialiseValues = function ()
+{  
+    this.mTerrainButton.changeButtonText(this.mData.AllBaseTerrains[1]);
+    this.mSettings.Terrain = this.mData.AllBaseTerrains[1];
+
+    this.mTrackButton.changeButtonText(this.mData.AllMusicTracks[0]);
+    this.mSettings.MusicTrack = this.mData.AllMusicTracks[0];
+
+    this.mMapButton.changeButtonText("");
+    this.mSettings.Map = "";
+
+    this.mSpectatorModeCheck.iCheck('uncheck');
+    this.mCutDownTreesCheck.iCheck('uncheck');
+    this.mIsFleeingProhibitedCheck.iCheck('uncheck');
+    this.mFortificationCheck.iCheck('uncheck');
+}
+
+CombatSimulatorScreen.prototype.reset = function()
+{
+    var self = this;
+    this.initialiseValues();
+    MSU.iterateObject(this.mFactions, function(_id, _faction){
+        _faction.spawnlistScrollContainer.empty();
+        _faction.unitsScrollContainer.empty();
+    })
+}
+
+CombatSimulatorScreen.prototype.testThings = function ()
+{  
+    var randomProperty = function (obj) {
+        var keys = Object.keys(obj);
+        return obj[keys[ keys.length * Math.random() << 0]];
+    };
+    this.addSpawnlistToBox(randomProperty(this.mData.AllSpawnlists), this.mFactions["faction-0"].spawnlistScrollContainer)
+    this.addSpawnlistToBox(randomProperty(this.mData.AllSpawnlists), this.mFactions["faction-1"].spawnlistScrollContainer)
+}
+
+CombatSimulatorScreen.prototype.gatherData = function()
+{
+    var self = this;
+    var ret = {
+        Settings : this.mSettings,
+        Factions : {}
+    };
+
+    MSU.iterateObject(this.mFactions, function(_id, _faction){
+        self.getFactionData(ret, _faction);
+    })
+    return ret;
+}
+
+CombatSimulatorScreen.prototype.getFactionData = function(_ret, _div)
+{
+    var ret = {
+        ID : _div.data("id"),
+        Spawnlists : [],
+        Units : [],
+        ControlUnits : false,
+    }
+    var spawnlistRows = _div.spawnlistScrollContainer.find(".combat-simulator-row")
+    spawnlistRows.each(function(_idx){
+        ret.Spawnlists.push({
+            ID : $(this).data("unitID"),
+            Resources : $(this).data("amount").val()
+        })
+    })
+
+    var unitRows = _div.unitsScrollContainer.find(".combat-simulator-row")
+    unitRows.each(function(_idx){
+        ret.Units.push({
+            Type : $(this).data("unitID"),
+            Num : $(this).data("amount").val(),
+            Champion : $(this).data("champion").prop("checked")
+        })
+    })
+
+    if (_div.data("controlUnitsCheckbox").prop("checked"))
+        ret.ControlUnits = true;    
+
+    _ret.Factions[_div.data("id")] = ret;
+    // ret.unitsScrollContainer
+    // row.amount
+}
+
+
+CombatSimulatorScreen.prototype.addCheckboxSetting = function(_div, _id, _settingKey, _default, _name)
+{
+    var self = this
+    var checkboxContainer = $('<div class="checkbox-container"/>');
+    _div.append(checkboxContainer)
+    var checkbox = $('<input type="checkbox" id="' + _id + '" />').appendTo(checkboxContainer).iCheck({
+        checkboxClass: 'icheckbox_flat-orange',
+        radioClass: 'iradio_flat-orange',
+        increaseArea: '30%'
+    });
+
+    if(_settingKey != null)
+    {
+        checkbox.on('ifChecked ifUnchecked', null, this, function (_event) {
+            self.mSettings[_settingKey] = $(this).prop("checked")
+        });
+    }
+    
+    var label = $('<label class="text-font-normal font-color-subtitle bool-checkbox-label" for="' + _id + '">' + _name + '</label>');
+    checkboxContainer.append(label)
+    label.click(function(){
+        checkbox.iCheck('toggle');
+    })
+    checkbox.iCheck(_default);
+    if(_settingKey != null) checkboxContainer.bindTooltip({ contentType: 'msu-generic', modId: CombatSimulator.ModID, elementId: "Screen.Settings." + _settingKey});
+    return checkbox;
+}
+
 CombatSimulatorScreen.prototype.createPopup = function(_name, _popupClass, _popupDialogContentClass)
 {
     var self = this;
@@ -521,100 +616,13 @@ CombatSimulatorScreen.prototype.getTextDiv = function(_text, _classes)
     return row;
 }
 
-CombatSimulatorScreen.prototype.setData = function (_data)
-{    
-    this.mData = _data;
-    // this.testThings()
-};
-
-CombatSimulatorScreen.prototype.initialiseValues = function ()
-{  
-    this.mTerrainButton.changeButtonText(this.mData.AllBaseTerrains[1]);
-    this.mSettings.Terrain = this.mData.AllBaseTerrains[1];
-
-    this.mTrackButton.changeButtonText(this.mData.AllMusicTracks[0]);
-    this.mSettings.MusicTrack = this.mData.AllMusicTracks[0];
-
-    this.mMapButton.changeButtonText("");
-    this.mSettings.Map = "";
-
-    this.mSpectatorModeCheck.iCheck('uncheck');
-    this.mCutDownTreesCheck.iCheck('uncheck');
-    this.mIsFleeingProhibitedCheck.iCheck('uncheck');
-    this.mFortificationCheck.iCheck('uncheck');
-}
-
-CombatSimulatorScreen.prototype.reset = function()
+CombatSimulatorScreen.prototype.notifyBackendUpdateFactionProperty = function (_id, _property, _value)
 {
-    var self = this;
-    this.initialiseValues();
-    MSU.iterateObject(this.mFactions, function(_id, _faction){
-        _faction.spawnlistScrollContainer.empty();
-        _faction.unitsScrollContainer.empty();
-    })
-}
-
-CombatSimulatorScreen.prototype.testThings = function ()
-{  
-    var randomProperty = function (obj) {
-        var keys = Object.keys(obj);
-        return obj[keys[ keys.length * Math.random() << 0]];
-    };
-    this.addSpawnlistToBox(randomProperty(this.mData.AllSpawnlists), this.mFactions["faction-0"].spawnlistScrollContainer)
-    this.addSpawnlistToBox(randomProperty(this.mData.AllSpawnlists), this.mFactions["faction-1"].spawnlistScrollContainer)
-}
-
-CombatSimulatorScreen.prototype.gatherData = function()
-{
-    var self = this;
-    var ret = {
-        Settings : this.mSettings,
-        Factions : []
-    };
-
-    MSU.iterateObject(this.mFactions, function(_id, _faction){
-        self.getFactionData(ret, _faction);
-    })
-    console.error(JSON.stringify(ret))
-    return ret;
-}
-
-CombatSimulatorScreen.prototype.getFactionData = function(_ret, _div)
-{
-    console.error("getFactionData")
-    var ret = {
-        ID : _div.data("id"),
-        Spawnlists : [],
-        Units : [],
-        ControlUnits : false,
+    if (this.mSQHandle !== null)
+    {
+        SQ.call(this.mSQHandle, 'updateFactionProperty', [_id, _property, _value]);
     }
-    var spawnlistRows = _div.spawnlistScrollContainer.find(".combat-simulator-row")
-    spawnlistRows.each(function(_idx){
-        ret.Spawnlists.push({
-            ID : $(this).data("unitID"),
-            Resources : $(this).data("amount").val()
-        })
-    })
-
-    var unitRows = _div.unitsScrollContainer.find(".combat-simulator-row")
-    unitRows.each(function(_idx){
-        ret.Units.push({
-            Type : $(this).data("unitID"),
-            Num : $(this).data("amount").val(),
-            Champion : $(this).data("champion").prop("checked")
-        })
-    })
-
-    if (_div.data("controlUnitsCheckbox").prop("checked"))
-        ret.ControlUnits = true;
-    if (_div.data("alliedToPlayer")
-        ret.AlliedToPlayer = true;
-    
-
-    _ret.Factions.push(ret)
-    // ret.unitsScrollContainer
-    // row.amount
-}
+};
 
 CombatSimulatorScreen.prototype.notifyBackendTopBarButtonPressed = function (_buttonType)
 {

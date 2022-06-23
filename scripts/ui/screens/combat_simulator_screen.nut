@@ -222,7 +222,7 @@ this.combat_simulator_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 			p.LocationTemplate.Fortification = _data.Settings.Fortification ? this.Const.Tactical.FortificationType.Palisade : this.Const.Tactical.FortificationType.None;
 		}
 		p.Entities = [];
-		p.CustomFactions <- [];
+		p.CustomFactions <- {};
 		p.CombatID = "CombatSimulator";
 		p.Music = this.Const.Music[_data.Settings.MusicTrack];	
 		p.PlayerDeploymentType = this.Const.Tactical.DeploymentType.Line;
@@ -233,20 +233,22 @@ this.combat_simulator_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 
 		p.IsUsingSetPlayers = _data.Settings.SpectatorMode;
 		p.SpectatorMode <- _data.Settings.SpectatorMode;
-		if(p.SpectatorMode)
+		if (p.SpectatorMode)
 		{
 			this.getButton("UnlockCamera").setValue(true);
 			this.getButton("FOV").setValue(false);
 		}
 
 		// Use noble factions so that noble units dont break when they look for banner
-		::CombatSimulator.Setup.setupFactions(p, _data.Factions);
+		::CombatSimulator.Setup.setupFactions(p);
 
 		p.StartEmptyMode <- true;
 		foreach (idx, faction in p.CustomFactions)
 		{
 			if (_data.Factions[idx].Spawnlists.len() != 0 || _data.Factions[idx].Units.len() != 0)
+			{
 				p.StartEmptyMode <- false;
+			}
 			foreach(spawnlist in _data.Factions[idx].Spawnlists)
 			{
 				this.Const.World.Common.addUnitsToCombat(p.Entities, this.Const.World.Spawn[spawnlist.ID], spawnlist.Resources.tointeger() , faction.getID());
@@ -267,6 +269,11 @@ this.combat_simulator_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 			AllMusicTracks =::CombatSimulator.Setup.queryTracklist(),
 		}
 		return ret;
+	}
+
+	function updateFactionProperty(_data)
+	{
+		::CombatSimulator.Setup.updateFactionProperty(_data);
 	}
 });
 
