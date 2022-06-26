@@ -575,7 +575,7 @@ CombatSimulatorScreen.prototype.createFilterBar = function(_scrollContainer)
     filterLayout.append(filterInput);
     filterInput.on("keyup", function(_event){
         var currentInput = $(this).val();
-        var rows = _scrollContainer.find(".row");
+        var rows = _scrollContainer.find(".combat-simulator-row");
         rows.each(function(_idx){
             var label = $(this).find(".combat-simulator-entry-label");
             if (label.length == 0) return;
