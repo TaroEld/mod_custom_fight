@@ -77,7 +77,9 @@ CombatSimulatorSpawnScreen.prototype.createUnitsList = function()
     var self = this;
     this.mUnitsContainer = this.mUnitsDiv.createList(2);
     this.mUnitsScrollContainer = this.mUnitsContainer.findListScrollContainer();
-    this.mUnitsDiv.prepend(this.createFilterBar(this.mUnitsScrollContainer));
+    var filterBar = this.createFilterBar(this.mUnitsScrollContainer);
+    this.mUnitsDiv.prepend(filterBar);
+    filterBar.bindTooltip({ contentType: 'msu-generic', modId: CombatSimulator.ModID, elementId: "SpawnScreen.FilterBar"});
     this.mUnitsDiv.hover(function(){
         $(this).data('hover', 1);
     },
@@ -88,8 +90,10 @@ CombatSimulatorSpawnScreen.prototype.createUnitsList = function()
 
 CombatSimulatorSpawnScreen.prototype.fillUnitsList = function()
 {
+    this.mUnitsScrollContainer.empty();
     MSU.iterateObject(this.mData.AllUnits, $.proxy(function(_key, _unit){
         var row = $('<div class="row"/>').appendTo(this.mUnitsScrollContainer);
+        row.bindTooltip({ contentType: 'msu-generic', modId: CombatSimulator.ModID, elementId: "SpawnScreen.UnitRow"});
         row.data("unit", _unit);
         var iconContainer = $('<div class="orientation-div"/>')
         row.append(iconContainer)
@@ -118,6 +122,7 @@ CombatSimulatorSpawnScreen.prototype.createSettingsContent = function()
     {
         self.switchFaction();
     }, "", 3);
+    buttonLayout.bindTooltip({ contentType: 'msu-generic', modId: CombatSimulator.ModID, elementId: "SpawnScreen.FactionButton"});
 }
 
 CombatSimulatorSpawnScreen.prototype.createFactionsContent = function()
@@ -143,7 +148,7 @@ CombatSimulatorSpawnScreen.prototype.createFactionDiv = function(_name, _id, _al
     headerRow.append(this.getTextDiv(_name, "box-title"));
 
     var checkboxRow = this.addRow(ret);
-    var controlUnitsCheck = this.addCheckboxSetting(checkboxRow, "control-allies-checkbox" + _id, "uncheck", "Control Units", "ControlAllies");
+    var controlUnitsCheck = this.addCheckboxSetting(checkboxRow, "control-allies-checkbox" + _id, "uncheck", "Control Units", "ControlUnits");
     controlUnitsCheck.on('ifChecked ifUnchecked', null, this, function (_event) {
         Screens["CombatSimulatorScreen"].notifyBackendUpdateFactionProperty(_id, "ControlUnits", $(this).prop("checked"))
     });
@@ -231,7 +236,7 @@ CombatSimulatorSpawnScreen.prototype.addCheckboxSetting = function(_div, _id, _d
         checkbox.iCheck('toggle');
     })
     checkbox.iCheck(_default);
-    checkboxContainer.bindTooltip({ contentType: 'msu-generic', modId: CombatSimulator.ModID, elementId: "Screen.Settings." + _tooltip});
+    checkboxContainer.bindTooltip({ contentType: 'msu-generic', modId: CombatSimulator.ModID, elementId: "SpawnScreen." + _tooltip});
     return checkbox;
 }
 
