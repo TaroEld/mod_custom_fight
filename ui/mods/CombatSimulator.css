@@ -13,11 +13,20 @@
 
 .bottom-gold-line {
     background-image: url("coui://gfx/ui/skin/line_gold.png");
-    background-size: 90% 0.3rem;
+    background-size: 90% 0.5rem;
     background-position: bottom center;
     background-repeat: no-repeat;
-    padding-bottom: 0.3rem;
+    padding-bottom: 0.5rem;
 }
+
+.bottom-gold-line-thick {
+    background-image: url("coui://gfx/ui/skin/line_gold.png");
+    background-size: 95% 1.0rem;
+    background-position: bottom center;
+    background-repeat: no-repeat;
+    padding-bottom: 1.0rem;
+}
+
 
 .combat-simulator-container-layout .ui-control.dialog
 {
