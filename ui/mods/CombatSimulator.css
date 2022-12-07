@@ -85,13 +85,6 @@
     width: 20rem;
 }
 
-.checkbox-container
-{
-    width: 24rem;
-    height: 4.3rem;
-    margin-left: 2rem;
-}
-
 .setup-box
 {
     width: 40%;
@@ -127,7 +120,6 @@
     width: 100%;
     height: 30%;
     overflow: hidden;
-    margin-top: 3rem;
 }
 
 .setup-box .units-box
@@ -258,11 +250,19 @@
     padding-left: 2rem;
 }
 
+
+.checkbox-container
+{
+    width: 24rem;
+    height: 4.3rem;
+    margin-left: 2rem;
+    display: flex;
+    align-items: center;
+}
+
 .bool-checkbox-label
 {
-    padding-left: 2rem;
-    padding-right: 2rem;
-    font-size: 1.8rem;
+    font-size: 2.0rem;
     color: #d7b174;
     font-weight: normal;
     font-style : normal;

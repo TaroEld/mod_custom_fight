@@ -20,6 +20,8 @@ var CombatSimulatorScreen = function(_parent)
     this.mFactions = {};
     this.mMaxFactions = 4;
     this.mFactionsIdx = 0;
+
+    this.mSettingIDCounters = {};
     
 
     this.mData = null;
@@ -224,10 +226,10 @@ CombatSimulatorScreen.prototype.createSettingsDiv = function()
     });
     this.mTrackButton.bindTooltip({ contentType: 'msu-generic', modId: CombatSimulator.ModID, elementId: "Screen.Settings.Music"});
 
-    this.mSpectatorModeCheck = this.addCheckboxSetting(this.addRow(this.mSettingsBox), "use-player-checkbox", "SpectatorMode", "uncheck", "Spectator Mode")
-    this.mCutDownTreesCheck = this.addCheckboxSetting(this.addRow(this.mSettingsBox), "cut-down-trees-checkbox", "CutDownTrees", "uncheck", "Chop down trees");
-    this.mIsFleeingProhibitedCheck = this.addCheckboxSetting(this.addRow(this.mSettingsBox), "fleeing-prohibited-checkbox", "IsFleeingProhibited", "uncheck", "Disallow fleeing");
-    this.mFortificationCheck = this.addCheckboxSetting(this.addRow(this.mSettingsBox), "fortification-checkbox", "Fortification", "uncheck", "Add fortification");
+    this.mSpectatorModeCheck = this.addCheckboxSetting(this.addRow(this.mSettingsBox), "use-player-checkbox", "SpectatorMode", "uncheck", "Spectator Mode").checkbox;
+    this.mCutDownTreesCheck = this.addCheckboxSetting(this.addRow(this.mSettingsBox), "cut-down-trees-checkbox", "CutDownTrees", "uncheck", "Chop down trees").checkbox;
+    this.mIsFleeingProhibitedCheck = this.addCheckboxSetting(this.addRow(this.mSettingsBox), "fleeing-prohibited-checkbox", "IsFleeingProhibited", "uncheck", "Disallow fleeing").checkbox;
+    this.mFortificationCheck = this.addCheckboxSetting(this.addRow(this.mSettingsBox), "fortification-checkbox", "Fortification", "uncheck", "Add fortification").checkbox;
 
 }
 CombatSimulatorScreen.prototype.switchFaction = function(_idx)
@@ -286,19 +288,15 @@ CombatSimulatorScreen.prototype.createFactionDiv = function(_name, _id, _page)
     var headerRow = this.addRow(ret)
     headerRow.append(this.getTextDiv(_name, "box-title"));
 
-    var controlUnitsCheckbox = this.addCheckboxSetting(headerRow, "ControlUnits" + _id, null, "uncheck", "Control Units");
+    var controlUnitsCheckbox = this.addCheckboxSetting(headerRow, "ControlUnits" + _id, null, "uncheck", "Control Units").checkbox;
     ret.data("controlUnitsCheckbox", controlUnitsCheckbox);
     controlUnitsCheckbox.on('ifChecked ifUnchecked', null, this, function (_event) {
         self.notifyBackendUpdateFactionProperty(_id, "ControlUnits", $(this).prop("checked"))
     });
 
-    var spawnlistBox = $('<div class="spawnlist-box"/>');
+    var spawnlistBox = $('<div class="spawnlist-box bottom-gold-line-thick"/>');
     ret.append(spawnlistBox);
     this.addRow(spawnlistBox).append(this.getTextDiv("Spawnlist", "box-subtitle"));
-    
-    var listHeader = this.addRow(spawnlistBox, "unit-box-list-headers")
-    listHeader.append(this.getTextDiv("Type"))
-    listHeader.append(this.getTextDiv("Resources", "short-input-container"))
 
     var spawnlistBoxList = spawnlistBox.createList(2);
     ret.spawnlistScrollContainer = spawnlistBoxList.findListScrollContainer();
@@ -306,10 +304,6 @@ CombatSimulatorScreen.prototype.createFactionDiv = function(_name, _id, _page)
     var unitsBox = $('<div class="units-box"/>');
     unitsBox.append(this.getTextDiv("Units", "box-subtitle"))
     ret.append(unitsBox);
-    var listHeader = this.addRow(unitsBox)
-    listHeader.append(this.getTextDiv("Type"))
-    listHeader.append(this.getTextDiv("Amount", "short-input-container"))
-    listHeader.append(this.getTextDiv("Champion"))
 
     var unitsBoxList = unitsBox.createList(2);
     ret.unitsScrollContainer = unitsBoxList.findListScrollContainer();
@@ -374,9 +368,9 @@ CombatSimulatorScreen.prototype.addUnitToBox = function(_unit, _side, _key)
     row.data("amount", amountInput);
     amountInput.bindTooltip({ contentType: 'msu-generic', modId: CombatSimulator.ModID, elementId: "Screen.Units.Main.Amount"});
 
-    var checkbox = this.addCheckboxSetting(row, "champion-checkbox", null, "uncheck", "Champion")
-    checkbox.bindTooltip({ contentType: 'msu-generic', modId: CombatSimulator.ModID, elementId: "Screen.Units.Main.Champion"})
-    row.data("champion", checkbox);
+    var checkbox = this.addCheckboxSetting(row, "champion-checkbox", null, "uncheck", "Champion");
+    checkbox.container.bindTooltip({ contentType: 'msu-generic', modId: CombatSimulator.ModID, elementId: "Screen.Units.Main.Champion"})
+    row.data("champion", checkbox.checkbox);
 
     var destroyButtonLayout = $('<div class="delete-button-container"/>');
     row.append(destroyButtonLayout);
@@ -522,13 +516,21 @@ CombatSimulatorScreen.prototype.getFactionData = function(_ret, _div)
     // row.amount
 }
 
+CombatSimulatorScreen.prototype.getIDCounter = function(_id)
+{
+    if (!(_id in this.mSettingIDCounters))
+        this.mSettingIDCounters[_id] = -1;
+    return  (_id + ++this.mSettingIDCounters[_id]);
+}
+
 
 CombatSimulatorScreen.prototype.addCheckboxSetting = function(_div, _id, _settingKey, _default, _name)
 {
     var self = this
     var checkboxContainer = $('<div class="checkbox-container"/>');
+    var id = this.getIDCounter(_id);
     _div.append(checkboxContainer)
-    var checkbox = $('<input type="checkbox" id="' + _id + '" />').appendTo(checkboxContainer).iCheck({
+    var checkbox = $('<input type="checkbox" id="' + id + '" />').appendTo(checkboxContainer).iCheck({
         checkboxClass: 'icheckbox_flat-orange',
         radioClass: 'iradio_flat-orange',
         increaseArea: '30%'
@@ -541,14 +543,17 @@ CombatSimulatorScreen.prototype.addCheckboxSetting = function(_div, _id, _settin
         });
     }
     
-    var label = $('<label class="text-font-normal font-color-subtitle bool-checkbox-label" for="' + _id + '">' + _name + '</label>');
+    var label = $('<label class="text-font-normal font-color-subtitle bool-checkbox-label" for="' + id + '">' + _name + '</label>');
     checkboxContainer.append(label)
     label.click(function(){
         checkbox.iCheck('toggle');
     })
     checkbox.iCheck(_default);
     if(_settingKey != null) checkboxContainer.bindTooltip({ contentType: 'msu-generic', modId: CombatSimulator.ModID, elementId: "Screen.Settings." + _settingKey});
-    return checkbox;
+    return {
+        container : checkboxContainer,
+        checkbox : checkbox
+    }
 }
 
 CombatSimulatorScreen.prototype.createPopup = function(_name, _popupClass, _popupDialogContentClass)
