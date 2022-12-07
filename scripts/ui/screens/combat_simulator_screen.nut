@@ -58,8 +58,11 @@ this.combat_simulator_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 				ID = "Pause",
 				DefaultValue = false,
 				CurrentValue = false,
-				onPressed = function(_manual = false){
-					this.toggleSettingValue();
+				onPressed = function(_manual = false, _forceValue = null){
+					if (_forceValue != null)
+						this.setValue(_forceValue)
+					else
+						this.toggleSettingValue();
 					local state = ::MSU.Utils.getState("tactical_state")
 					state.setPause(this.getValue());
 					

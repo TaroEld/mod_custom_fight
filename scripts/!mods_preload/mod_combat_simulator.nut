@@ -140,6 +140,50 @@
 			::CombatSimulator.Screen.resetButtonValues();		
 			return exitTactical();
 		}
+
+		local onBattleEnded = o.onBattleEnded;
+		o.onBattleEnded = function()
+		{
+			local properties = this.Tactical.State.getStrategicProperties();
+
+			if (properties.CombatID != "CombatSimulator" || "UnpausedEndCombat" in properties)
+				return onBattleEnded();
+
+			if ("SetupEndCombat" in properties && !("UnpausedEndCombat" in properties))
+				return;
+
+			::CombatSimulator.Screen.getButton("Pause").onPressed(false, true);
+			local oldPause = this.setPause;
+			this.setPause = function( _f )
+			{
+				if (_f == false)
+				{
+					properties.UnpausedEndCombat <- true;
+					this.setPause = oldPause;
+					return oldPause(_f);
+				}
+			}
+			properties.SetupEndCombat <- true;
+		}
+
+		// local onBattleEndedDelayed = o.onBattleEndedDelayed
+		// o.onBattleEndedDelayed = function ( _isVictory )
+		// {
+		// 	local properties = this.Tactical.State.getStrategicProperties();
+		// 	if (properties.CombatID != "CombatSimulator" || "UnpausedEndCombat" in properties)
+		// 	{
+		// 		return onBattleEndedDelayed(_isVictory);
+		// 	}
+		// 	::logInfo("hooked onBattleEndedDelayed runs")
+		// 	properties.UnpausedEndCombat <- true;
+		// 	this.setPause(true);
+		// 	local oldPause = this.setPause;
+		// 	this.setPause = function( _f )
+		// 	{
+		// 		oldPause(_f);
+		// 		this.onBattleEndedDelayed(_isVictory);
+		// 	}
+		// }
 	})
 
 	::mods_hookExactClass("ui/screens/tactical/modules/turn_sequence_bar/turn_sequence_bar", function(o){
