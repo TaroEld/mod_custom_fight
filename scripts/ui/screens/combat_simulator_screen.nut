@@ -148,7 +148,7 @@ this.combat_simulator_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 				break;
 		}
 		this.Tooltip.hide();
-		this.m.JSHandle.asyncCall("setData", this.queryData());
+		this.m.JSHandle.asyncCall("setData", ::CombatSimulator.Setup.queryData());
 		this.m.JSHandle.asyncCall("show", null);
 		return false;
 	}
@@ -182,7 +182,7 @@ this.combat_simulator_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 	function onOkButtonPressed(_data)
 	{
 		this.hide();
-		this.startFight(_data);
+		::CombatSimulator.Setup.setupFight(_data);
 	}
 
 	function getButton(_id)
@@ -207,71 +207,6 @@ this.combat_simulator_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 	function resetButtonValues()
 	{
 		foreach(key, button in this.m.Buttons) button.setValue(button.DefaultValue)
-	}
-
-	function startFight(_data)
-	{
-		local p = this.Const.Tactical.CombatInfo.getClone();
-		p.Tile = this.World.State.getPlayer().getTile();
-
-		p.TerrainTemplate = _data.Settings.Terrain;
-		if(_data.Settings.Map != "")
-		{
-			if(_data.Settings.Map != "tactical.arena_floor") p.IsAttackingLocation = true;
-			p.LocationTemplate = clone this.Const.Tactical.LocationTemplate;
-			p.LocationTemplate.Template[0] = _data.Settings.Map;
-			p.LocationTemplate.OwnedByFaction = this.Const.Faction.Enemy;
-			p.LocationTemplate.CutDownTrees <- _data.Settings.CutDownTrees;
-			p.LocationTemplate.Fortification = _data.Settings.Fortification ? this.Const.Tactical.FortificationType.Palisade : this.Const.Tactical.FortificationType.None;
-		}
-		p.Entities = [];
-		p.CustomFactions <- {};
-		p.CombatID = "CombatSimulator";
-		p.Music = this.Const.Music[_data.Settings.MusicTrack];	
-		p.PlayerDeploymentType = this.Const.Tactical.DeploymentType.Line;
-		p.EnemyDeploymentType = this.Const.Tactical.DeploymentType.Line;
-		p.IsAutoAssigningBases = false;
-		p.IsFogOfWarVisible = !_data.Settings.SpectatorMode;
-		p.IsFleeingProhibited = _data.Settings.IsFleeingProhibited;
-
-		p.IsUsingSetPlayers = _data.Settings.SpectatorMode;
-		p.SpectatorMode <- _data.Settings.SpectatorMode;
-		if (p.SpectatorMode)
-		{
-			this.getButton("UnlockCamera").setValue(true);
-			this.getButton("FOV").setValue(false);
-		}
-
-		// Use noble factions so that noble units dont break when they look for banner
-		::CombatSimulator.Setup.setupFactions(p);
-
-		p.StartEmptyMode <- true;
-		foreach (idx, faction in p.CustomFactions)
-		{
-			if (_data.Factions[idx].Spawnlists.len() != 0 || _data.Factions[idx].Units.len() != 0)
-			{
-				p.StartEmptyMode <- false;
-			}
-			foreach(spawnlist in _data.Factions[idx].Spawnlists)
-			{
-				this.Const.World.Common.addUnitsToCombat(p.Entities, this.Const.World.Spawn[spawnlist.ID], spawnlist.Resources.tointeger() , faction.getID());
-			}
-			::CombatSimulator.Setup.addUnitsToCombat(_data.Factions[idx].Units, p.Entities, faction.getID());
-		}
-		this.World.State.startScriptedCombat(p, false, false, true);
-	}
-
-	function queryData()
-	{
-		local ret = {
-			AllUnits = ::CombatSimulator.Setup.querySpawnlistMaster(),
-			AllFactions =  ::CombatSimulator.Setup.queryFactions(),
-			AllSpawnlists = ::CombatSimulator.Setup.querySpawnlists(),
-			AllBaseTerrains = ::CombatSimulator.Setup.queryTerrains(),
-			AllLocationTerrains = ::CombatSimulator.Setup.queryTerrainLocations(),
-			AllMusicTracks =::CombatSimulator.Setup.queryTracklist(),
-		}
-		return ret;
 	}
 
 	function updateFactionProperty(_data)

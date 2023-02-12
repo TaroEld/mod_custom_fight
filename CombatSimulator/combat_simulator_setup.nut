@@ -19,6 +19,21 @@ this.combat_simulator_setup <- {
 			}
 		}
 	},
+
+	function queryData()
+	{
+		local ret = {
+			AllUnits = this.querySpawnlistMaster(),
+			AllFactions =  this.queryFactions(),
+			AllBrothers =  this.queryBrothers(),
+			AllSpawnlists = this.querySpawnlists(),
+			AllBaseTerrains = this.queryTerrains(),
+			AllLocationTerrains = this.queryTerrainLocations(),
+			AllMusicTracks =this.queryTracklist(),
+		}
+		return ret;
+	}
+
 	function querySpawnlistMaster()
 	{
 		// clone it
@@ -79,6 +94,62 @@ this.combat_simulator_setup <- {
 			ret.push(locFinal);
 		}
 		return ret;
+	}
+
+	function setupFight(_data)
+	{
+		local p = this.Const.Tactical.CombatInfo.getClone();
+		p.Tile = this.World.State.getPlayer().getTile();
+		p.TerrainTemplate = _data.Settings.Terrain;
+		if(_data.Settings.Map != "")
+		{
+			if(_data.Settings.Map != "tactical.arena_floor") p.IsAttackingLocation = true;
+			p.LocationTemplate = clone this.Const.Tactical.LocationTemplate;
+			p.LocationTemplate.Template[0] = _data.Settings.Map;
+			p.LocationTemplate.OwnedByFaction = this.Const.Faction.Enemy;
+			p.LocationTemplate.CutDownTrees <- _data.Settings.CutDownTrees;
+			p.LocationTemplate.Fortification = _data.Settings.Fortification ? this.Const.Tactical.FortificationType.Palisade : this.Const.Tactical.FortificationType.None;
+		}
+		p.Entities = [];
+		p.CustomFactions <- {};
+		p.CombatID = "CombatSimulator";
+		p.Music = this.Const.Music[_data.Settings.MusicTrack];	
+
+		// Use noble factions so that noble units dont break when they look for banner
+		this.setupFactions(p);
+
+		local hasBroInPlayerFaction = _data.Factions["faction-0"].Bros.len() > 0;
+		if (hasBroInPlayerFaction)
+			_data.Settings.SpectatorMode = false;
+		p.PlayerDeploymentType = this.Const.Tactical.DeploymentType.Line;
+		p.EnemyDeploymentType = this.Const.Tactical.DeploymentType.Line;
+		p.IsAutoAssigningBases = false;
+		p.IsFogOfWarVisible = !_data.Settings.SpectatorMode;
+		p.IsFleeingProhibited = _data.Settings.IsFleeingProhibited;
+
+		p.IsUsingSetPlayers = hasBroInPlayerFaction;
+		p.SpectatorMode <- _data.Settings.SpectatorMode;
+		if (p.SpectatorMode)
+		{
+			this.getButton("UnlockCamera").setValue(true);
+			this.getButton("FOV").setValue(false);
+		}
+
+		p.StartEmptyMode <- true;
+		foreach (idx, faction in p.CustomFactions)
+		{
+			if (_data.Factions[idx].Spawnlists.len() != 0 || _data.Factions[idx].Units.len() != 0 || _data.Factions[idx].Bros.len() != 0)
+			{
+				p.StartEmptyMode <- false;
+			}
+			foreach(spawnlist in _data.Factions[idx].Spawnlists)
+			{
+				this.Const.World.Common.addUnitsToCombat(p.Entities, this.Const.World.Spawn[spawnlist.ID], spawnlist.Resources.tointeger() , faction.getID());
+			}
+			this.addUnitsToCombat(_data.Factions[idx].Units, p.Entities, faction.getID());
+			this.addBrosToCombat(_data.Factions[idx].Bros, faction.m.CustomID == "faction-0" ? p.Players : p.Entities, faction.getID());
+		}
+		this.World.State.startScriptedCombat(p, false, false, true);
 	}
 
 	function setupFactions(_properties, _tacticalActive = false)
