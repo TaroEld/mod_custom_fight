@@ -53,6 +53,20 @@ this.combat_simulator_setup <- {
 		return clone ::Const.FactionType;
 	}
 
+	function queryBrothers()
+	{
+		local ret = {};
+		local players = ::World.getPlayerRoster().getAll();
+		foreach (bro in players)
+		{
+			ret[bro.getID().tostring()] <- {
+				ID = bro.getID(),
+				DisplayName = bro.getName()
+			}
+		}
+		return ret;
+	}
+
 	function querySpawnlists()
 	{
 		local ret = {};
@@ -233,6 +247,15 @@ this.combat_simulator_setup <- {
 
 				_into.push(unit);
 			}
+		}
+	}
+
+	function addBrosToCombat(_units, _into, _faction)
+	{
+		foreach (bro in _units)
+		{
+			local bro = this.Tactical.getEntityByID(bro.ID);
+			_into.push(bro)
 		}
 	}
 

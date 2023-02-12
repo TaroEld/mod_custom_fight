@@ -17,7 +17,7 @@
 			Music = ::MSU.Class.BasicTooltip("Choose Music", "Choose the music."),
 			StartEmptyMode = ::MSU.Class.BasicTooltip("Start Empty Mode", "Start Empty Mode."),
 			IsFleeingProhibited = ::MSU.Class.BasicTooltip("Fleeing Probhibited", "Block fleeing, like in the arena."),
-			SpectatorMode = ::MSU.Class.BasicTooltip("Spectator Mode", "Set spectator mode. Your bros won't be spawned."),
+			SpectatorMode = ::MSU.Class.BasicTooltip("Spectator Mode", "Set spectator mode. Your bros won't be spawned. This is unavailable if you spawn a bro using the 'Add Bro' button."),
 			ControlAllies = ::MSU.Class.BasicTooltip("Control Units", "If this is checked, you can control the units of this faction."),
 		},
 		Spawnlist = {
@@ -43,6 +43,12 @@
 				OK = ::MSU.Class.BasicTooltip("OK", "Close the popup."),
 			}
 		},
+		Bros = {
+			Main = {
+				Add = ::MSU.Class.BasicTooltip("Add a bro", "Add a brother from your party. A brother can only be added to the first faction, and each bro can only be added once."),
+				Type = ::MSU.Class.BasicTooltip("Name", "Name of the bro."),
+			}
+		}
 	},
 	SpawnScreen = 
 	{

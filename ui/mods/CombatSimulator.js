@@ -22,6 +22,8 @@ var CombatSimulatorScreen = function(_parent)
     this.mFactionsIdx = 0;
 
     this.mSettingIDCounters = {};
+
+    this.mUsedBros = [];
     
 
     this.mData = null;
@@ -226,7 +228,9 @@ CombatSimulatorScreen.prototype.createSettingsDiv = function()
     });
     this.mTrackButton.bindTooltip({ contentType: 'msu-generic', modId: CombatSimulator.ModID, elementId: "Screen.Settings.Music"});
 
-    this.mSpectatorModeCheck = this.addCheckboxSetting(this.addRow(this.mSettingsBox), "use-player-checkbox", "SpectatorMode", "uncheck", "Spectator Mode").checkbox;
+    var spectatorModeRow = this.addCheckboxSetting(this.addRow(this.mSettingsBox), "use-player-checkbox", "SpectatorMode", "uncheck", "Spectator Mode");
+    this.mSpectatorModeCheck = spectatorModeRow.checkbox;
+    this.mSpectatorModeContainer = spectatorModeRow.container
     this.mCutDownTreesCheck = this.addCheckboxSetting(this.addRow(this.mSettingsBox), "cut-down-trees-checkbox", "CutDownTrees", "uncheck", "Chop down trees").checkbox;
     this.mIsFleeingProhibitedCheck = this.addCheckboxSetting(this.addRow(this.mSettingsBox), "fleeing-prohibited-checkbox", "IsFleeingProhibited", "uncheck", "Disallow fleeing").checkbox;
     this.mFortificationCheck = this.addCheckboxSetting(this.addRow(this.mSettingsBox), "fortification-checkbox", "Fortification", "uncheck", "Add fortification").checkbox;
@@ -326,6 +330,16 @@ CombatSimulatorScreen.prototype.createFactionDiv = function(_name, _id, _page)
         this.createAddSpawnlistScrollContainer(this.createPopup('Add Spawnlist','generic-popup', 'generic-popup-container'), ret.spawnlistScrollContainer);
     }, this), "combat-simulator-text-button", 4);
     ret.buttons.addSpawnlistButton.bindTooltip({ contentType: 'msu-generic', modId: CombatSimulator.ModID, elementId: "Screen.Spawnlist.Main.Add"});
+
+    if (_id == "faction-0")
+    {
+        layout = $('<div class="combat-simulator-text-button-layout"/>');
+        buttonBar.append(layout);
+        ret.buttons.addBroButton = layout.createTextButton("Add Bro", $.proxy(function(_div){
+            this.createAddBroScrollContainer(this.createPopup('Add Bro','generic-popup', 'generic-popup-container'), ret.unitsScrollContainer);
+        }, this), "combat-simulator-text-button", 4);
+        ret.buttons.addBroButton.bindTooltip({ contentType: 'msu-generic', modId: CombatSimulator.ModID, elementId: "Screen.Bros.Main.Add"});
+    }
 }
 
 CombatSimulatorScreen.prototype.createAddUnitScrollContainer = function(_dialog, _side)
@@ -433,10 +447,74 @@ CombatSimulatorScreen.prototype.addSpawnlistToBox = function(_unit, _boxDiv)
     destroyButton.bindTooltip({ contentType: 'msu-generic', modId: CombatSimulator.ModID, elementId: "Screen.Spawnlist.Main.Delete"});
 }
 
+CombatSimulatorScreen.prototype.createAddBroScrollContainer = function(_dialog, _boxDiv)
+{
+    var self = this;
+    this.mPopupListContainer = _dialog.createList(2);
+    var scrollContainer = this.mPopupListContainer.findListScrollContainer();
+    _dialog.prepend(this.createFilterBar(scrollContainer));
+    MSU.iterateObject(this.mData.AllBrothers, $.proxy(function(_key, _unit){
+        if (this.mUsedBros.indexOf(_unit.ID) != -1)
+            return;
+        var row = this.addRow(scrollContainer, "", true);
+        var name = $('<div class="title-font-normal font-color-subtitle combat-simulator-entry-label">' + _unit.DisplayName +  '</div>')
+            .appendTo(row);
+        var addButtonContainer = $('<div class="combat-simulator-text-button-layout"/>')
+            .appendTo(row);
+        var addButton = addButtonContainer.createTextButton("Add", $.proxy(function(_button){
+            this.addBroToBox(_unit, _boxDiv);
+            row.remove();
+        }, self), "combat-simulator-text-button", 4);
+        
+    }, this))
+}
+
+CombatSimulatorScreen.prototype.addBroToBox = function(_unit, _boxDiv)
+{
+    var self = this;
+    this.addUsedBro(_unit.ID);
+    var row = this.addRow(_boxDiv, "", true)
+        .data("unitID", _unit.ID)
+        .data("unit", _unit)
+        .data("isBro", true)
+
+    var name = $('<div class="title-font-normal font-color-subtitle combat-simulator-entry-label">' + _unit.DisplayName +  '</div>')
+        .appendTo(row)
+        .bindTooltip({ contentType: 'msu-generic', modId: CombatSimulator.ModID, elementId: "Screen.Bros.Main.Type"});
+
+    var destroyButtonLayout = $('<div class="combatsim-delete-button-container"/>')
+        .appendTo(row);
+
+    var destroyButton = $('<img class="combatsim-delete-row-button"/>')
+        .appendTo(destroyButtonLayout)
+        .attr("src", Path.GFX + Asset.BUTTON_DISMISS_CHARACTER)
+        .click(function()
+        {
+            self.removeUsedBro(_unit.ID);
+            row.remove();
+        })
+        .bindTooltip({ contentType: 'msu-generic', modId: CombatSimulator.ModID, elementId: "Screen.Units.Main.Delete"})
+}
+
+CombatSimulatorScreen.prototype.addUsedBro = function(_id)
+{
+    this.mUsedBros.push(_id);
+    this.mSpectatorModeContainer.hide();
+}
+
+CombatSimulatorScreen.prototype.removeUsedBro = function(_id)
+{
+    var idx = this.mUsedBros.indexOf(_id);
+    if (idx !== -1 )
+        this.mUsedBros.splice(idx, 1)
+    if (this.mUsedBros.length == 0)
+        this.mSpectatorModeContainer.show();
+}
+
 CombatSimulatorScreen.prototype.setData = function (_data)
 {    
     this.mData = _data;
-    this.testThings()
+    // this.testThings()
 };
 
 CombatSimulatorScreen.prototype.initialiseValues = function ()
@@ -474,6 +552,7 @@ CombatSimulatorScreen.prototype.testThings = function ()
     };
     this.addSpawnlistToBox(randomProperty(this.mData.AllSpawnlists), this.mFactions["faction-0"].spawnlistScrollContainer)
     this.addSpawnlistToBox(randomProperty(this.mData.AllSpawnlists), this.mFactions["faction-1"].spawnlistScrollContainer)
+    this.addBroToBox(randomProperty(this.mData.AllBrothers), this.mFactions["faction-0"].unitsScrollContainer)
 }
 
 CombatSimulatorScreen.prototype.gatherData = function()
@@ -496,6 +575,7 @@ CombatSimulatorScreen.prototype.getFactionData = function(_ret, _div)
         ID : _div.data("id"),
         Spawnlists : [],
         Units : [],
+        Bros : [],
         ControlUnits : false,
     }
     var spawnlistRows = _div.spawnlistScrollContainer.find(".combat-simulator-row")
@@ -508,11 +588,21 @@ CombatSimulatorScreen.prototype.getFactionData = function(_ret, _div)
 
     var unitRows = _div.unitsScrollContainer.find(".combat-simulator-row")
     unitRows.each(function(_idx){
-        ret.Units.push({
-            Type : $(this).data("unitID"),
-            Num : $(this).data("amount").val(),
-            Champion : $(this).data("champion").prop("checked")
-        })
+        if ($(this).data("isBro") === true)
+        {
+            ret.Bros.push({
+                ID : $(this).data("unitID")
+            })
+        }
+        else
+        {
+            ret.Units.push({
+                Type : $(this).data("unitID"),
+                Num : $(this).data("amount").val(),
+                Champion : $(this).data("champion").prop("checked"),
+                IsBro : $(this).data("isBro") === true
+            })
+        }
     })
 
     if (_div.data("controlUnitsCheckbox").prop("checked"))

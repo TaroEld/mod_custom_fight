@@ -182,7 +182,7 @@
     width: 100%;
     height: 10%;
     display: flex;
-    flex-wrap: wrap;
+    justify-content: center;
 }
 
 .faction-button-container
