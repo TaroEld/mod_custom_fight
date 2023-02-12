@@ -222,7 +222,7 @@ CombatSimulatorSpawnScreen.prototype.createDragHandler = function(_row)
 CombatSimulatorSpawnScreen.prototype.addCheckboxSetting = function(_div, _id, _default, _name, _tooltip)
 {
     var self = this
-    var checkboxContainer = $('<div class="checkbox-container"/>');
+    var checkboxContainer = $('<div class="combatsim-checkbox-container"/>');
     _div.append(checkboxContainer)
     var checkbox = $('<input type="checkbox" id="' + _id + '" />').appendTo(checkboxContainer).iCheck({
         checkboxClass: 'icheckbox_flat-orange',

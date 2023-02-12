@@ -1,14 +1,12 @@
-.short-input,
 .short-input-container
 {
-    width: 10rem;
-    height: 4rem;
+    width: 5rem;
+    height: 3rem;
 }
-
-.short-input
+.short-input-container input
 {
-    background-size: 10.0rem 4.0rem !important;
-    background-repeat: no-repeat;
+    background-size: auto !important;
+    background-repeat: round !important;
 }
 
 .bottom-gold-line {
@@ -91,42 +89,69 @@
     height: 100%;
     display: flex;
     flex-direction: column;
+    align-items: center;
     background-image: url("coui://gfx/mods/msu/skin/generic_background_large_border.png");
     background-size: 100% 100%;
     background-repeat: no-repeat;
 }
 
-.setup-box .box-title,
-.setup-box .box-subtitle
+.setup-box .faction-header
 {
-    text-align: center;
-    padding-top: 1rem;
-    height: 5rem;
-    width: 30rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .setup-box .box-title
 {
+    height: 5rem;
+    width: 30rem;
     font-size: 2.4rem;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 20rem;
+}
+
+.control-unit-checkbox
+{
+    margin-left: auto !important;
+    width: 15rem !important;
 }
 
 .setup-box .box-subtitle
 {
+    height: 3rem;
+    width: 30rem;
+    text-align: center;
     font-size: 2.0rem;
+    border-bottom: 1px solid #DDA21F;
+}
+
+.setup-box .spawnlist-box,
+.setup-box .units-box
+{
+    width: 95%;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 1rem;
+    border: 2px solid black;
 }
 
 .setup-box .spawnlist-box
 {
-    width: 100%;
     height: 30%;
-    overflow: hidden;
 }
-
 .setup-box .units-box
 {
-    width: 100%;
     height: 60%;
-    overflow: hidden;
+    margin-top: 1rem;
 }
 
 .setup-box .spawnlist-box .list,
@@ -135,12 +160,21 @@
     height: 80%;
 }
 
-.setup-box .spawnlist-box .delete-button-container,
-.setup-box .units-box .delete-button-container
+.setup-box .spawnlist-box .combatsim-delete-button-container,
+.setup-box .units-box .combatsim-delete-button-container
 {
-    height: 4.3rem;
-    width: 9.8rem;
-    margin-left: auto;
+/*    margin-left: auto;*/
+    height: 3rem;
+    width: 3rem;
+}
+
+.combatsim-delete-button-container .combatsim-delete-row-button
+{
+}
+
+.combatsim-delete-button-container .combatsim-delete-row-button:hover
+{
+    border: 1px solid #DDA21F;
 }
 
 .setup-box .button-bar-box
@@ -179,7 +213,6 @@
 {
     width: 30rem;
     text-align: center;
-    /*border: 1px solid blue;*/
 }
 
 .generic-popup
@@ -193,8 +226,6 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-
-    /*border-image-width: 20px;*/
 }
 
 .generic-popup .header
@@ -209,7 +240,6 @@
 
 .generic-popup .content
 {
-    /*border: 1px solid red;*/
     max-height: 45rem;
 }
 
@@ -250,8 +280,12 @@
     padding-left: 2rem;
 }
 
+.combat-simulator-row.settings-header-row
+{
+    justify-content: center;
+}
 
-.checkbox-container
+.combatsim-checkbox-container
 {
     width: 24rem;
     height: 4.3rem;

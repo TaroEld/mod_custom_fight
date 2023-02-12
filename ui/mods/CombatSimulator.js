@@ -171,7 +171,7 @@ CombatSimulatorScreen.prototype.createSettingsDiv = function()
     var self = this;
     this.mSettingsBox = $('<div class="settings-box"/>');
     this.mDialogContentContainer.append(this.mSettingsBox);
-    this.addRow(this.mSettingsBox).append(this.getTextDiv("Settings", "label"));
+    this.addRow(this.mSettingsBox, "settings-header-row").append(this.getTextDiv("Settings", "label", true));
 
     var switchFactionRow = this.addRow(this.mSettingsBox)
     switchFactionRow.append(this.getTextDiv("Switch faction", "label"));
@@ -263,7 +263,7 @@ CombatSimulatorScreen.prototype.createArrayScrollContainer = function(_dialog, _
         if(_unit == "") return
         var row = this.addRow(scrollContainer, "", true);
 
-        var name = $('<div class="title-font-normal font-color-brother-name combat-simulator-entry-label">' + _unit +  '</div>');
+        var name = $('<div class="title-font-normal font-color-subtitle combat-simulator-entry-label">' + _unit +  '</div>');
         row.append(name);
 
 
@@ -285,25 +285,26 @@ CombatSimulatorScreen.prototype.createFactionDiv = function(_name, _id, _page)
 
     ret.data("id", _id);
     this.mDialogContentContainer.append(ret);
-    var headerRow = this.addRow(ret)
+    var headerRow = this.addRow(ret, "faction-header")
     headerRow.append(this.getTextDiv(_name, "box-title"));
 
-    var controlUnitsCheckbox = this.addCheckboxSetting(headerRow, "ControlUnits" + _id, null, "uncheck", "Control Units").checkbox;
-    ret.data("controlUnitsCheckbox", controlUnitsCheckbox);
-    controlUnitsCheckbox.on('ifChecked ifUnchecked', null, this, function (_event) {
+    var controlUnitsCheckbox = this.addCheckboxSetting(headerRow, "ControlUnits" + _id, null, "uncheck", "Control Units");
+    controlUnitsCheckbox.container.addClass("control-unit-checkbox");
+    ret.data("controlUnitsCheckbox", controlUnitsCheckbox.checkbox);
+    controlUnitsCheckbox.checkbox.on('ifChecked ifUnchecked', null, this, function (_event) {
         self.notifyBackendUpdateFactionProperty(_id, "ControlUnits", $(this).prop("checked"))
     });
 
-    var spawnlistBox = $('<div class="spawnlist-box bottom-gold-line-thick"/>');
-    ret.append(spawnlistBox);
-    this.addRow(spawnlistBox).append(this.getTextDiv("Spawnlist", "box-subtitle"));
+    var spawnlistBox = $('<div class="spawnlist-box bottom-gold-line-thick"/>')
+        .append(this.getTextDiv("Spawnlist", "box-subtitle", true))
+        .appendTo(ret);
 
     var spawnlistBoxList = spawnlistBox.createList(2);
     ret.spawnlistScrollContainer = spawnlistBoxList.findListScrollContainer();
 
-    var unitsBox = $('<div class="units-box"/>');
-    unitsBox.append(this.getTextDiv("Units", "box-subtitle"))
-    ret.append(unitsBox);
+    var unitsBox = $('<div class="units-box"/>')
+        .append(this.getTextDiv("Units", "box-subtitle", true))
+        .appendTo(ret);
 
     var unitsBoxList = unitsBox.createList(2);
     ret.unitsScrollContainer = unitsBoxList.findListScrollContainer();
@@ -337,7 +338,7 @@ CombatSimulatorScreen.prototype.createAddUnitScrollContainer = function(_dialog,
     MSU.iterateObject(this.mData.AllUnits, $.proxy(function(_key, _unit){
         var row = this.addRow(scrollContainer, "", true);
 
-        var name = $('<div class="title-font-normal font-color-brother-name combat-simulator-entry-label">' + _unit.DisplayName +  '</div>');
+        var name = $('<div class="title-font-normal font-color-subtitle combat-simulator-entry-label">' + _unit.DisplayName +  '</div>');
         row.append(name);
 
         var addButtonContainer = $('<div class="combat-simulator-text-button-layout"/>');
@@ -356,29 +357,32 @@ CombatSimulatorScreen.prototype.addUnitToBox = function(_unit, _side, _key)
     row.data("unitID", _key);
     row.data("unit", _unit);
 
-    var name = $('<div class="title-font-normal font-color-brother-name combat-simulator-entry-label">' + _unit.DisplayName +  '</div>');
+    var name = $('<div class="title-font-normal font-color-subtitle combat-simulator-entry-label">' + _unit.DisplayName +  '</div>');
     row.append(name);
     name.bindTooltip({ contentType: 'msu-generic', modId: CombatSimulator.ModID, elementId: "Screen.Units.Main.Type"});
 
     var amountInputLayout = $('<div class="short-input-container"/>');
     row.append(amountInputLayout);
-    var amountInput = $('<input type="text" class="title-font-normal font-color-brother-name short-input"/>');
+    var amountInput = $('<input type="text" class="title-font-normal font-color-subtitle short-input"/>');
     amountInputLayout.append(amountInput);
     amountInput.val(1);
     row.data("amount", amountInput);
     amountInput.bindTooltip({ contentType: 'msu-generic', modId: CombatSimulator.ModID, elementId: "Screen.Units.Main.Amount"});
 
+    var destroyButtonLayout = $('<div class="combatsim-delete-button-container"/>');
+    row.append(destroyButtonLayout);
+    var destroyButton = $('<img class="combatsim-delete-row-button"/>')
+        .attr("src", Path.GFX + Asset.BUTTON_DISMISS_CHARACTER)
+        .appendTo(destroyButtonLayout);
+    destroyButton.click(function()
+    {
+        row.remove();
+    })
+    destroyButton.bindTooltip({ contentType: 'msu-generic', modId: CombatSimulator.ModID, elementId: "Screen.Units.Main.Delete"});
+
     var checkbox = this.addCheckboxSetting(row, "champion-checkbox", null, "uncheck", "Champion");
     checkbox.container.bindTooltip({ contentType: 'msu-generic', modId: CombatSimulator.ModID, elementId: "Screen.Units.Main.Champion"})
     row.data("champion", checkbox.checkbox);
-
-    var destroyButtonLayout = $('<div class="delete-button-container"/>');
-    row.append(destroyButtonLayout);
-    var destroyButton = destroyButtonLayout.createTextButton("Delete", function()
-    {
-        row.remove();
-    }, '', 2);
-    destroyButton.bindTooltip({ contentType: 'msu-generic', modId: CombatSimulator.ModID, elementId: "Screen.Units.Main.Delete"});
 }
 
 CombatSimulatorScreen.prototype.createAddSpawnlistScrollContainer = function(_dialog, _boxDiv)
@@ -389,7 +393,7 @@ CombatSimulatorScreen.prototype.createAddSpawnlistScrollContainer = function(_di
     _dialog.prepend(this.createFilterBar(scrollContainer));
     MSU.iterateObject(this.mData.AllSpawnlists, $.proxy(function(_key, _unit){
         var row = this.addRow(scrollContainer, "", true);
-        var name = $('<div class="title-font-normal font-color-brother-name combat-simulator-entry-label">' + _unit.id +  '</div>');
+        var name = $('<div class="title-font-normal font-color-subtitle combat-simulator-entry-label">' + _unit.id +  '</div>');
         row.append(name);
         var addButtonContainer = $('<div class="combat-simulator-text-button-layout"/>');
         var addButton = addButtonContainer.createTextButton("Add", $.proxy(function(_button){
@@ -411,18 +415,21 @@ CombatSimulatorScreen.prototype.addSpawnlistToBox = function(_unit, _boxDiv)
 
     var amountInputLayout = $('<div class="short-input-container"/>');
     row.append(amountInputLayout);
-    var amountInput = $('<input type="text" class="title-font-normal font-color-brother-name short-input"/>');
+    var amountInput = $('<input type="text" class="title-font-normal font-color-subtitle short-input"/>');
     amountInputLayout.append(amountInput);
     amountInput.val(100);
     row.data("amount", amountInput);
     amountInput.bindTooltip({ contentType: 'msu-generic', modId: CombatSimulator.ModID, elementId: "Screen.Spawnlist.Main.Resources"});
 
-    var destroyButtonLayout = $('<div class="delete-button-container"/>');
+    var destroyButtonLayout = $('<div class="combatsim-delete-button-container"/>');
     row.append(destroyButtonLayout);
-    var destroyButton = destroyButtonLayout.createTextButton("Delete", function()
+    var destroyButton = $('<img class="combatsim-delete-row-button"/>')
+        .attr("src", Path.GFX + Asset.BUTTON_DISMISS_CHARACTER)
+        .appendTo(destroyButtonLayout);
+    destroyButton.click(function()
     {
         row.remove();
-    }, '', 2);
+    })
     destroyButton.bindTooltip({ contentType: 'msu-generic', modId: CombatSimulator.ModID, elementId: "Screen.Spawnlist.Main.Delete"});
 }
 
@@ -527,10 +534,10 @@ CombatSimulatorScreen.prototype.getIDCounter = function(_id)
 CombatSimulatorScreen.prototype.addCheckboxSetting = function(_div, _id, _settingKey, _default, _name)
 {
     var self = this
-    var checkboxContainer = $('<div class="checkbox-container"/>');
+    var checkboxContainer = $('<div class="combatsim-checkbox-container"/>')
+        .appendTo(_div);
     var id = this.getIDCounter(_id);
-    _div.append(checkboxContainer)
-    var checkbox = $('<input type="checkbox" id="' + id + '" />').appendTo(checkboxContainer).iCheck({
+    var checkbox = $('<input class="combatsim-checkbox" type="checkbox" id="' + id + '" />').appendTo(checkboxContainer).iCheck({
         checkboxClass: 'icheckbox_flat-orange',
         radioClass: 'iradio_flat-orange',
         increaseArea: '30%'
@@ -613,11 +620,14 @@ CombatSimulatorScreen.prototype.addRow = function(_div, _classes, _divider)
     return row;
 }
 
-CombatSimulatorScreen.prototype.getTextDiv = function(_text, _classes)
+CombatSimulatorScreen.prototype.getTextDiv = function(_text, _classes, _isTitle)
 {
-    var row = $('<div class="title-font-normal font-color-brother-name combat-simulator-entry-label"></div>')
-    row.html(_text);
-    if(_classes != undefined && _classes != null) row.addClass(_classes);
+    _classes = _classes || "";
+    var row = $('<div class="title-font-normal font-color-subtitle combat-simulator-entry-label"></div>')
+        .html(_text)
+        .addClass(_classes)
+    if (_isTitle === true)
+        row.removeClass("font-color-subtitle").addClass("font-color-brother-name")
     return row;
 }
 
