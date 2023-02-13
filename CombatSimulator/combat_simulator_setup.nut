@@ -112,6 +112,22 @@ this.combat_simulator_setup <- {
 
 	function setupFight(_data)
 	{
+		local spawnEntity = this.Tactical.spawnEntity;
+		this.Tactical.spawnEntity = function(_scriptOrBro, _x, _y)
+		{
+			::logInfo("aspawnEntity hook")
+			if (typeof _scriptOrBro == "string")
+				return spawnEntity(_scriptOrBro, _x, _y);
+			local bro = this.Tactical.getEntityByID(_scriptOrBro.BroID);
+			if (bro == null)
+			{
+				::logError("Bro is null for some reason")
+				return;
+			}
+			::logInfo("adding entity to map manually")
+			this.Tactical.addEntityToMap(bro, _x, _y);
+			return bro;
+		}
 		local p = this.Const.Tactical.CombatInfo.getClone();
 		p.Tile = this.World.State.getPlayer().getTile();
 		p.TerrainTemplate = _data.Settings.Terrain;
@@ -141,12 +157,12 @@ this.combat_simulator_setup <- {
 		p.IsFogOfWarVisible = !_data.Settings.SpectatorMode;
 		p.IsFleeingProhibited = _data.Settings.IsFleeingProhibited;
 
-		p.IsUsingSetPlayers = hasBroInPlayerFaction;
-		p.SpectatorMode <- _data.Settings.SpectatorMode;
+		p.IsUsingSetPlayers = true;
+		p.SpectatorMode <- true;
 		if (p.SpectatorMode)
 		{
-			this.getButton("UnlockCamera").setValue(true);
-			this.getButton("FOV").setValue(false);
+			::CombatSimulator.Screen.getButton("UnlockCamera").setValue(true);
+			::CombatSimulator.Screen.getButton("FOV").setValue(false);
 		}
 
 		p.StartEmptyMode <- true;
@@ -161,9 +177,12 @@ this.combat_simulator_setup <- {
 				this.Const.World.Common.addUnitsToCombat(p.Entities, this.Const.World.Spawn[spawnlist.ID], spawnlist.Resources.tointeger() , faction.getID());
 			}
 			this.addUnitsToCombat(_data.Factions[idx].Units, p.Entities, faction.getID());
-			this.addBrosToCombat(_data.Factions[idx].Bros, faction.m.CustomID == "faction-0" ? p.Players : p.Entities, faction.getID());
+			this.addBrosToCombat(_data.Factions[idx].Bros, p.Entities, faction.getID());
 		}
+		
+
 		this.World.State.startScriptedCombat(p, false, false, true);
+		//this.Tactical.spawnEntity = spawnEntity;
 	}
 
 	function setupFactions(_properties, _tacticalActive = false)
@@ -252,18 +271,35 @@ this.combat_simulator_setup <- {
 
 	function addBrosToCombat(_units, _into, _faction)
 	{
-		foreach (bro in _units)
+		foreach (brother in _units)
 		{
-			local bro = this.Tactical.getEntityByID(bro.ID);
-			_into.push(bro)
+			local bro = this.Tactical.getEntityByID(brother.ID);
+			local unit = {
+				Faction = _faction,
+				Type = "Player",
+				Variant = 0,
+				Strength = 0,
+				Num = 1,
+				BroID = brother.ID,
+				Row = 1,
+				NameList = ["abc"],
+				TitleList = null,
+			}
+			local unit2 = clone unit;
+			unit.Script <- unit2;
+			::MSU.Log.printData(unit)
+			::logInfo("broname " + bro.getName())
+			_into.push(unit)
 		}
 	}
 
 	function setupEntity(_e)
 	{
+		::logInfo("custom setupentity " +_e.getName());
 		local properties = this.Tactical.State.getStrategicProperties();
 		if (properties.CombatID != "CombatSimulator") return;
 		local faction = ::World.FactionManager.getFaction(_e.getFaction())
+		::logInfo("faction: " + faction)
 
 		if (faction.m.ControlUnits)
 		{
@@ -271,7 +307,7 @@ this.combat_simulator_setup <- {
 			{
 				_e.m.old_AIAgent <- _e.m.AIAgent;
 				_e.m.old_AIAgent.setActor(null);
-				_e.m.AIAgent = this.new("scripts/ai/tactical/player_agent");
+				_e.m.AIAgent = this.new("scripts/ai/tactical/agents/charmed_player_agent");
 				_e.m.AIAgent.setActor(_e);
 				_e.m.IsControlledByPlayer = true;
 				_e.isPlayerControlled = function()
@@ -293,6 +329,13 @@ this.combat_simulator_setup <- {
 				_e.m.AIAgent = _e.m.old_AIAgent;
 				_e.m.AIAgent.setActor(_e);
 				delete _e.m.old_AIAgent
+			}
+			if (::isKindOf(_e, "player"))
+			{
+				_e.m.old_AIAgent <- _e.m.AIAgent;
+				_e.m.old_AIAgent.setActor(null);
+				_e.m.AIAgent = this.new("scripts/ai/tactical/agents/charmed_player_agent");
+				_e.m.AIAgent.setActor(_e);
 			}
 			_e.m.IsControlledByPlayer <- false;
 			_e.m.IsGuest <- false;

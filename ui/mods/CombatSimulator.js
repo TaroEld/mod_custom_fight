@@ -499,7 +499,7 @@ CombatSimulatorScreen.prototype.addBroToBox = function(_unit, _boxDiv)
 CombatSimulatorScreen.prototype.addUsedBro = function(_id)
 {
     this.mUsedBros.push(_id);
-    this.mSpectatorModeContainer.hide();
+    // this.mSpectatorModeContainer.hide();
 }
 
 CombatSimulatorScreen.prototype.removeUsedBro = function(_id)
@@ -507,14 +507,14 @@ CombatSimulatorScreen.prototype.removeUsedBro = function(_id)
     var idx = this.mUsedBros.indexOf(_id);
     if (idx !== -1 )
         this.mUsedBros.splice(idx, 1)
-    if (this.mUsedBros.length == 0)
-        this.mSpectatorModeContainer.show();
+    // if (this.mUsedBros.length == 0)
+    //     this.mSpectatorModeContainer.show();
 }
 
 CombatSimulatorScreen.prototype.setData = function (_data)
 {    
     this.mData = _data;
-    // this.testThings()
+    this.testThings()
 };
 
 CombatSimulatorScreen.prototype.initialiseValues = function ()
@@ -550,9 +550,9 @@ CombatSimulatorScreen.prototype.testThings = function ()
         var keys = Object.keys(obj);
         return obj[keys[ keys.length * Math.random() << 0]];
     };
-    this.addSpawnlistToBox(randomProperty(this.mData.AllSpawnlists), this.mFactions["faction-0"].spawnlistScrollContainer)
-    this.addSpawnlistToBox(randomProperty(this.mData.AllSpawnlists), this.mFactions["faction-1"].spawnlistScrollContainer)
-    this.addBroToBox(randomProperty(this.mData.AllBrothers), this.mFactions["faction-0"].unitsScrollContainer)
+    // this.addSpawnlistToBox(randomProperty(this.mData.AllSpawnlists), this.mFactions["faction-0"].spawnlistScrollContainer)
+    // this.addSpawnlistToBox(randomProperty(this.mData.AllSpawnlists), this.mFactions["faction-1"].spawnlistScrollContainer)
+    this.addBroToBox(randomProperty(this.mData.AllBrothers), this.mFactions["faction-1"].unitsScrollContainer)
 }
 
 CombatSimulatorScreen.prototype.gatherData = function()

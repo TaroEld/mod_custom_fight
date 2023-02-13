@@ -106,6 +106,7 @@
 		local setupEntity = o.setupEntity;
 		o.setupEntity = function(_e, _t)
 		{
+			::logInfo("in hook?????? " + _e)
 			setupEntity(_e, _t);
 			local properties = this.Tactical.State.getStrategicProperties();
 			if (properties.CombatID == "CombatSimulator") ::CombatSimulator.Setup.setupEntity(_e);
