@@ -7,6 +7,16 @@
 
 ::mods_queue(::CombatSimulator.ID, "mod_msu(>=1.1.0)", function()
 {
+	::Const.World.TerrainTacticalTemplate.push("flat_grass_combatsimulator");
+	::Const.World.TerrainTacticalTemplate.push("flat_sand_combatsimulator");
+	::Const.World.TerrainTacticalTemplate.push("flat_snow_combatsimulator");
+	::Const.World.TerrainTacticalImage.push("engage/engage_grass");
+	::Const.World.TerrainTacticalImage.push("engage/engage_desert");
+	::Const.World.TerrainTacticalImage.push("engage/engage_snow");
+	::Const.World.TerrainTacticalType.flat_grass_combatsimulator <- ::Const.World.TerrainTacticalType.COUNT++;
+	::Const.World.TerrainTacticalType.flat_sand_combatsimulator <- ::Const.World.TerrainTacticalType.COUNT++;
+	::Const.World.TerrainTacticalType.flat_snow_combatsimulator <- ::Const.World.TerrainTacticalType.COUNT++;
+
 	::mods_registerJS("CombatSimulator.js");
 	::mods_registerCSS("CombatSimulator.css");
 	::mods_registerJS("CombatSimulatorSpawnScreen.js");
