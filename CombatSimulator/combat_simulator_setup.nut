@@ -197,18 +197,7 @@ this.combat_simulator_setup <- {
 			}
 		}
 	}
-
-	function checkControllingUnits(_properties)
-	{
-		local spectatorMode = true;
-		foreach (key, faction in _properties.CustomFactions)
-		{
-			if (faction.m.ControlUnits)
-				spectatorMode = false;
-		}
-		return spectatorMode;
-	}
-
+	
 	function setupFactions(_properties, _tacticalActive = false)
 	{
 		foreach(id, faction in this.m.CustomFactions)
