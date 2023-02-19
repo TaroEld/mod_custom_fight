@@ -287,28 +287,22 @@ this.combat_simulator_setup <- {
 			}
 			local unit2 = clone unit;
 			unit.Script <- unit2;
-			::MSU.Log.printData(unit)
-			::logInfo("broname " + bro.getName())
 			_into.push(unit)
 		}
 	}
 
 	function setupEntity(_e)
 	{
-		::logInfo("custom setupentity " +_e.getName());
-		local properties = this.Tactical.State.getStrategicProperties();
-		if (properties.CombatID != "CombatSimulator") return;
+		if (!::CombatSimulator.isCombatSimulatorFight())
+			return;
+		if (::isKindOf(_e, "player"))
+			return this.setupBro(_e);
 		local faction = ::World.FactionManager.getFaction(_e.getFaction())
-		::logInfo("faction: " + faction)
 
 		if (faction.m.ControlUnits)
 		{
 			if(!_e.m.IsControlledByPlayer)
 			{
-				_e.m.old_AIAgent <- _e.m.AIAgent;
-				_e.m.old_AIAgent.setActor(null);
-				_e.m.AIAgent = this.new("scripts/ai/tactical/agents/charmed_player_agent");
-				_e.m.AIAgent.setActor(_e);
 				_e.m.IsControlledByPlayer = true;
 				_e.isPlayerControlled = function()
 				{
@@ -324,19 +318,6 @@ this.combat_simulator_setup <- {
 		} 
 		else
 		{
-			if("old_AIAgent" in _e.m)
-			{
-				_e.m.AIAgent = _e.m.old_AIAgent;
-				_e.m.AIAgent.setActor(_e);
-				delete _e.m.old_AIAgent
-			}
-			if (::isKindOf(_e, "player"))
-			{
-				_e.m.old_AIAgent <- _e.m.AIAgent;
-				_e.m.old_AIAgent.setActor(null);
-				_e.m.AIAgent = this.new("scripts/ai/tactical/agents/charmed_player_agent");
-				_e.m.AIAgent.setActor(_e);
-			}
 			_e.m.IsControlledByPlayer <- false;
 			_e.m.IsGuest <- false;
 			_e.isPlayerControlled = function()
@@ -364,6 +345,85 @@ this.combat_simulator_setup <- {
 		}
 	}
 
+	function setupBro(_bro)
+	{
+		if (!::CombatSimulator.isCombatSimulatorFight())
+			return;
+		if (!this.Tactical.State.getStrategicProperties().IsUsingSetPlayers)
+			return;
+		local faction = ::World.FactionManager.getFaction(_bro.getFaction());
+		if (faction.m.ControlUnits)
+		{
+			this.removeCustomAIAgentFromBro(_bro);
+			this.addPlayerControlledToUnit(_bro);
+		}
+		else
+		{
+			this.addCustomAIAgentToBro(_bro);
+			this.removePlayerControlledFromUnit(_bro)
+			return;
+		}
+	}
+
+	function addCustomAIAgentToBro(_bro)
+	{
+		if ("combatsim_AIAgent" in _bro.m)
+			return;
+
+		_bro.m.combatsim_AIAgent <- _bro.m.AIAgent;
+		_bro.m.combatsim_AIAgent.setActor(null);
+		_bro.m.AIAgent = this.new("scripts/ai/tactical/agents/charmed_player_agent");
+		_bro.m.AIAgent.setActor(_bro);
+	}
+
+	function removeCustomAIAgentFromBro(_bro)
+	{
+		if (!("combatsim_AIAgent" in _bro.m))
+			return;
+
+		_bro.m.AIAgent = _bro.m.combatsim_AIAgent;
+		_bro.m.AIAgent.setActor(_bro);
+		_bro.m.combatsim_AIAgent.setActor(null);
+		delete _bro.m.combatsim_AIAgent;
+	}
+
+	function addPlayerControlledToUnit(_unit)
+	{
+		_unit.m.IsControlledByPlayer = true;
+		if ("combatsim_isPlayerControlled" in _unit)
+			return;
+		_unit.combatsim_isPlayerControlled <- _unit.isPlayerControlled;
+		_unit.isPlayerControlled = function()
+		{
+			return true;
+		}
+	}
+
+	function removePlayerControlledFromUnit(_unit)
+	{
+		_unit.m.IsControlledByPlayer = false;
+		if (!("combatsim_isPlayerControlled" in _unit))
+			return;
+		_unit.isPlayerControlled = _unit.combatsim_isPlayerControlled;
+		delete _unit.combatsim_isPlayerControlled;
+	}
+
+	function cleanUpBroAfterBattle(_bro)
+	{
+		_bro.setHitpointsPct(1);
+		local skills = _bro.getSkills();
+		skills.removeByType(::Const.SkillType.Injury);
+		foreach(item in _bro.getItems().getAllItems())
+		{
+		    if (item.getCondition() < item.getConditionMax()) 
+		    	item.setCondition(item.getConditionMax());
+		    if (item.isItemType(::Const.Items.ItemType.Ammo) && item.getAmmo() < item.getAmmoMax())
+		    	item.setAmmo(item.getAmmoMax());
+		}
+		_bro.setFaction(::Const.Faction.Player);
+		this.removeCustomAIAgentFromBro(_bro);
+		this.removePlayerControlledFromUnit(_bro);
+	}
 	function updateFactionProperty(_data)
 	{
 		local id = _data[0];
