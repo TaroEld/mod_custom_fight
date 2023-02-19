@@ -42,7 +42,7 @@ this.combat_simulator_setup <- {
 		foreach (id, unit in ::Const.World.Spawn.Troops)
 		{	
 			ret[id] <- clone unit;
-			ret[id].DisplayName <- ::Const.Strings.EntityName[unit.ID];
+			ret[id].DisplayName <- id;
 			ret[id].Icon <- ::Const.EntityIcon[unit.ID];
 		}
 		return ret;
