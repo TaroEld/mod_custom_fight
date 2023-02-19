@@ -135,7 +135,7 @@
 			if ("SetupEndCombat" in properties && !("UnpausedEndCombat" in properties))
 				return;
 
-			::CombatSimulator.Screen.getButton("Pause").onPressed(false, true);
+			::CombatSimulator.Screen.getButton("Pause").setValue(true);
 			local oldPause = this.setPause;
 			this.setPause = function( _f )
 			{
