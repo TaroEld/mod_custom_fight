@@ -440,4 +440,12 @@ this.combat_simulator_setup <- {
 			}
 		}
 	}
+
+	function cleanupAfterFight()
+	{
+		this.Tactical.spawnEntity = this.m.old_spawnEntity;
+		this.m.old_spawnEntity = null;
+		::CombatSimulator.Screen.resetButtonValues();		
+		this.removeFactions();
+	}
 }

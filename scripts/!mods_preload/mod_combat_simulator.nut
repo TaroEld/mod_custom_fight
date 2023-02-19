@@ -114,12 +114,11 @@
 			return setInputLocked(_bool);
 		}
 
-		local exitTactical = o.exitTactical;
-		o.exitTactical = function()
+		local onFinish = o.onFinish;
+		o.onFinish = function()
 		{
-			::CombatSimulator.Setup.removeFactions();
-			::CombatSimulator.Screen.resetButtonValues();		
-			return exitTactical();
+			onFinish();
+			::CombatSimulator.Setup.cleanupAfterFight();
 		}
 
 		local onBattleEnded = o.onBattleEnded;
@@ -169,6 +168,17 @@
 			connect();
 			if (::CombatSimulator.isCombatSimulatorFight() || ::CombatSimulator.Mod.ModSettings.getSetting("AllowSettings").getValue()) 
 				::CombatSimulator.Screen.setTopBarButtonsDisplay(true);
+		}
+	})
+	::mods_hookExactClass("entity/tactical/player", function(o)
+	{
+
+		local onCombatFinished = o.onCombatFinished;
+		o.onCombatFinished = function()
+		{
+			onCombatFinished();
+			if (::CombatSimulator.isCombatSimulatorFight())
+				::CombatSimulator.Setup.cleanUpBroAfterBattle(this);
 		}
 	})
 	::mods_hookExactClass("entity/tactical/actor", function(o)
