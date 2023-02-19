@@ -148,6 +148,13 @@
 			}
 			properties.SetupEndCombat <- true;
 		}
+
+		local turnsequencebar_onNextRound = o.turnsequencebar_onNextRound;
+		o.turnsequencebar_onNextRound = function(_round)
+		{
+			turnsequencebar_onNextRound(_round);
+			::CombatSimulator.Setup.updatePlayerVisibility();
+		} 
 	})
 
 	::mods_hookExactClass("ui/screens/tactical/modules/turn_sequence_bar/turn_sequence_bar", function(o){
