@@ -10,7 +10,7 @@ TacticalScreenTopbarOptionsModule.prototype.createDIV = function(_parentDiv)
         self.mContainer.append(_button.Layout);
         _button.Layout.css("left", idx + "rem");
         idx = idx - 4;
-        var gfx = Path.GFX + _button.Paths["false"];
+        var gfx = Path.GFX + _button.Paths[_button.Enabled.toString()];
         _button.Button = _button.Layout.createImageButton(gfx, function ()
         {
             Screens.CombatSimulatorScreen.notifyBackendTopBarButtonPressed(key);

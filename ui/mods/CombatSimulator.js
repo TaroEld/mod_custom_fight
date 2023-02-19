@@ -43,6 +43,7 @@ var CombatSimulatorScreen = function(_parent)
             ID : "Pause",
             Button : null,
             Layout : null,
+            Enabled : false,
             Paths : {
                 true : "mods/ui/buttons/pause_on.png",
                 false : "mods/ui/buttons/pause_off.png",
@@ -53,6 +54,7 @@ var CombatSimulatorScreen = function(_parent)
             ID : "ManualTurns",
             Button : null,
             Layout : null,
+            Enabled : false,
             Paths : {
                 true : "mods/ui/buttons/direct_control_on.png",
                 false : "mods/ui/buttons/direct_control_off.png",
@@ -63,6 +65,7 @@ var CombatSimulatorScreen = function(_parent)
             ID : "FOV",
             Button : null,
             Layout : null,
+            Enabled : true,
             Paths : {
                 true : "mods/ui/buttons/fov_off.png",
                 false : "mods/ui/buttons/fov_on.png",
@@ -73,6 +76,7 @@ var CombatSimulatorScreen = function(_parent)
             ID : "UnlockCamera",
             Button : null,
             Layout : null,
+            Enabled : false,
             Paths : {
                 true : "mods/ui/buttons/camera_on.png",
                 false : "mods/ui/buttons/camera_off.png",
@@ -83,6 +87,7 @@ var CombatSimulatorScreen = function(_parent)
             ID : "FinishFight",
             Button : null,
             Layout : null,
+            Enabled : false,
             Paths : {
                 true : 'ui/skin/icon_cross.png',
                 false : 'ui/skin/icon_cross.png',
