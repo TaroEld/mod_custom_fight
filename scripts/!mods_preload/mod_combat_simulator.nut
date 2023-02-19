@@ -49,16 +49,11 @@
 		{
 			if (!::CombatSimulator.isCombatSimulatorFight())
 				return checkCombatFinished(_forceFinish);
-			}
-			if (properties.StartEmptyMode)
-			{
-				return false;
-			}
 
-			if (!properties.SpectatorMode)
-			{
-				return checkCombatFinished(_forceFinish);
-			}
+			local properties = this.Tactical.State.getStrategicProperties();
+			if (properties.StartEmptyMode)
+				return false;
+
 			local oldResult = this.m.CombatResult;
 			local oldFinished = this.m.IsCombatFinished;
 			local ret = checkCombatFinished(_forceFinish);
