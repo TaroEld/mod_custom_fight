@@ -31,7 +31,7 @@ var CombatSimulatorScreen = function(_parent)
         Terrain : "tactical.plains",
         Map : "",
         MusicTrack : "BanditTracks",
-        SpectatorMode : false,
+        SpawnCompany : true,
         CutDownTrees : false,
         StartEmptyMode : true,
         IsFleeingProhibited : false,
@@ -228,9 +228,9 @@ CombatSimulatorScreen.prototype.createSettingsDiv = function()
     });
     this.mTrackButton.bindTooltip({ contentType: 'msu-generic', modId: CombatSimulator.ModID, elementId: "Screen.Settings.Music"});
 
-    var spectatorModeRow = this.addCheckboxSetting(this.addRow(this.mSettingsBox), "use-player-checkbox", "SpectatorMode", "uncheck", "Spectator Mode");
-    this.mSpectatorModeCheck = spectatorModeRow.checkbox;
-    this.mSpectatorModeContainer = spectatorModeRow.container
+    var SpawnCompanyRow = this.addCheckboxSetting(this.addRow(this.mSettingsBox), "use-player-checkbox", "SpawnCompany", "uncheck", "Spawn Company");
+    this.mSpawnCompanyCheck = SpawnCompanyRow.checkbox;
+    this.mSpawnCompanyContainer = SpawnCompanyRow.container
     this.mCutDownTreesCheck = this.addCheckboxSetting(this.addRow(this.mSettingsBox), "cut-down-trees-checkbox", "CutDownTrees", "uncheck", "Chop down trees").checkbox;
     this.mIsFleeingProhibitedCheck = this.addCheckboxSetting(this.addRow(this.mSettingsBox), "fleeing-prohibited-checkbox", "IsFleeingProhibited", "uncheck", "Disallow fleeing").checkbox;
     this.mFortificationCheck = this.addCheckboxSetting(this.addRow(this.mSettingsBox), "fortification-checkbox", "Fortification", "uncheck", "Add fortification").checkbox;
@@ -499,7 +499,11 @@ CombatSimulatorScreen.prototype.addBroToBox = function(_unit, _boxDiv)
 CombatSimulatorScreen.prototype.addUsedBro = function(_id)
 {
     this.mUsedBros.push(_id);
-    // this.mSpectatorModeContainer.hide();
+    this.mSpawnCompanyCheck.iCheck('uncheck');
+    this.mSpawnCompanyCheck.attr('disabled', true);
+    this.mSpawnCompanyContainer.attr('disabled', true);
+    this.mSettings.SpawnCompany = false;
+    // this.mSpawnCompanyContainer.hide();
 }
 
 CombatSimulatorScreen.prototype.removeUsedBro = function(_id)
@@ -507,8 +511,13 @@ CombatSimulatorScreen.prototype.removeUsedBro = function(_id)
     var idx = this.mUsedBros.indexOf(_id);
     if (idx !== -1 )
         this.mUsedBros.splice(idx, 1)
-    // if (this.mUsedBros.length == 0)
-    //     this.mSpectatorModeContainer.show();
+    if (this.mUsedBros.length == 0)
+    {
+        this.mSpawnCompanyCheck.iCheck('check');
+        this.mSpawnCompanyCheck.attr('disabled', false);
+        this.mSpawnCompanyContainer.attr('disabled', false);
+        this.mSettings.SpawnCompany = true;
+    }
 }
 
 CombatSimulatorScreen.prototype.setData = function (_data)
@@ -528,7 +537,7 @@ CombatSimulatorScreen.prototype.initialiseValues = function ()
     this.mMapButton.changeButtonText("");
     this.mSettings.Map = "";
 
-    this.mSpectatorModeCheck.iCheck('uncheck');
+    this.mSpawnCompanyCheck.iCheck('check');
     this.mCutDownTreesCheck.iCheck('uncheck');
     this.mIsFleeingProhibitedCheck.iCheck('uncheck');
     this.mFortificationCheck.iCheck('uncheck');
@@ -640,10 +649,11 @@ CombatSimulatorScreen.prototype.addCheckboxSetting = function(_div, _id, _settin
         });
     }
     
-    var label = $('<label class="text-font-normal font-color-subtitle bool-checkbox-label" for="' + id + '">' + _name + '</label>');
+    var label = $('<label class="bool-checkbox-label" for="' + id + '">' + _name + '</label>');
     checkboxContainer.append(label)
     label.click(function(){
-        checkbox.iCheck('toggle');
+        if (!checkbox.attr("disabled"))
+            checkbox.iCheck('toggle');
     })
     checkbox.iCheck(_default);
     if(_settingKey != null) checkboxContainer.bindTooltip({ contentType: 'msu-generic', modId: CombatSimulator.ModID, elementId: "Screen.Settings." + _settingKey});
