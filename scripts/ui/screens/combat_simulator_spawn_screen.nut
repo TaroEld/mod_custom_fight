@@ -5,8 +5,7 @@ this.combat_simulator_spawn_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 	
 	function show()
 	{
-		local properties = this.Tactical.State.getStrategicProperties();
-		if (properties.CombatID != "CombatSimulator" && ::CombatSimulator.Mod.ModSettings.getSetting("AllowSettings").getValue() == false) 
+		if (!::CombatSimulator.isCombatSimulatorFight() && ::CombatSimulator.Mod.ModSettings.getSetting("AllowSettings").getValue() == false) 
 			return false;
 
 		local activeState = ::MSU.Utils.getActiveState();
@@ -14,13 +13,13 @@ this.combat_simulator_spawn_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 		local previousPauseState = activeState.m.IsGamePaused;
 		if (!previousPauseState)
 		{
-			::CombatSimulator.Screen.getButton("Pause").onPressed(false);
+			::CombatSimulator.Screen.getButton("Pause").setValue(false);
 		}
 		activeState.m.MenuStack.push(function ()
 		{
 			if(!previousPauseState)
 			{
-				::CombatSimulator.Screen.getButton("Pause").onPressed(false);
+				::CombatSimulator.Screen.getButton("Pause").setValue(false);
 			}
 			::CombatSimulator.SpawnScreen.hide();
 		});

@@ -6,27 +6,40 @@ this.combat_simulator_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 			{
 				this.setValue(!this.CurrentValue);
 			}
-
 			function getValue()
 			{
 				return this.CurrentValue;
 			}
-
 			function setValue(_value)
 			{
 				this.CurrentValue = _value;
+				this.informBackend();
+				local state = ::MSU.Utils.getActiveState();
+				if (::MSU.Utils.getActiveState() != null && ::MSU.Utils.getActiveState().ClassName == "tactical_state")
+				{
+					this.logChange();
+					this.onAfterChange();
+				}
 			}
-
-			function onPressed(_manual = false)
+			function onAfterChange(){}
+			function logChange()
+			{
+				if(this.getValue())
+				{
+					this.Tactical.EventLog.log(format("[color=#1e468f]%s is now ", this.ID) +  this.getValue() + "[/color]");
+				}
+				else
+				{
+					this.Tactical.EventLog.log(format("[color=#8f1e1e]%s is now ", this.ID) +  this.getValue() + "[/color]");
+				}
+			}
+			function onPressed()
 			{
 				this.toggleSettingValue();
-				this.Tactical.EventLog.log(this.ID + " is now " + this.getValue());
-				this.informBackend(_manual);
 			}
-
-			function informBackend(_manual)
+			function informBackend()
 			{
-				::CombatSimulator.Screen.m.JSHandle.asyncCall("setTopBarButtonState", [this.ID, this.getValue(), _manual]);
+				::CombatSimulator.Screen.m.JSHandle.asyncCall("setTopBarButtonState", [this.ID, this.getValue()]);
 			}
 		},
 		Buttons = {
@@ -47,7 +60,7 @@ this.combat_simulator_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 				ID = "FinishFight",
 				DefaultValue = false,
 				CurrentValue = false,
-				onPressed = function(_manual = false)
+				onPressed = function()
 				{
 					local state = ::MSU.Utils.getState("tactical_state");
 					state.exitTactical();
@@ -58,14 +71,8 @@ this.combat_simulator_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 				ID = "Pause",
 				DefaultValue = false,
 				CurrentValue = false,
-				onPressed = function(_manual = false, _forceValue = null){
-					if (_forceValue != null)
-						this.setValue(_forceValue)
-					else
-						this.toggleSettingValue();
-					local state = ::MSU.Utils.getState("tactical_state")
-					state.setPause(this.getValue());
-					
+				function logChange()
+				{
 					if(this.getValue())
 					{
 						this.Tactical.EventLog.log("[color=#1e468f]Game is now paused.[/color]");
@@ -74,7 +81,11 @@ this.combat_simulator_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 					{
 						this.Tactical.EventLog.log("[color=#8f1e1e]Game is now unpaused.[/color]");
 					}
-					this.informBackend(_manual);
+				}
+				function onAfterChange()
+				{
+					::MSU.Utils.getState("tactical_state").setPause(this.getValue());
+	
 					return this.getValue();
 				},
 			},
@@ -83,34 +94,45 @@ this.combat_simulator_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 				ID = "FOV",
 				DefaultValue = true,
 				CurrentValue = true,
-				onPressed = function(_manual= false){
-					this.toggleSettingValue();
-					local state = ::MSU.Utils.getState("tactical_state");
-					state.m.IsFogOfWarVisible = this.getValue();
+				function logChange()
+				{
+					if(this.getValue())
+					{
+						this.Tactical.EventLog.log("[color=#1e468f]FOV is now visible.[/color]");
+					}
+					else
+					{
+						this.Tactical.EventLog.log("[color=#8f1e1e]FOV is no longer visible.[/color]");
+					}
+				}
+				function onAfterChange()
+				{
+					::MSU.Utils.getState("tactical_state").m.IsFogOfWarVisible = this.getValue();
 
 					if (this.getValue())
 					{
 						this.Tactical.fillVisibility(this.Const.Faction.Player, false);
-						local heroes = this.Tactical.Entities.getInstancesOfFaction(this.Const.Faction.Player);
-
-						foreach( i, hero in heroes )
+						foreach (idx, faction in this.Tactical.State.getStrategicProperties().CustomFactions)
 						{
-							hero.updateVisibilityForFaction();
+							local units = this.Tactical.Entities.getInstancesOfFaction(faction.getID());
+
+							foreach( i, unit in units )
+							{
+								unit.updateVisibilityForFaction();
+							}
 						}
 
 						if (this.Tactical.TurnSequenceBar.getActiveEntity() != null)
 						{
 							this.Tactical.TurnSequenceBar.getActiveEntity().updateVisibilityForFaction();
 						}
-						this.Tactical.EventLog.log("[color=#1e468f]FOV is now visible.[/color]");
+						::CombatSimulator.Setup.updatePlayerVisibility();
 					}
 					else
 					{
 						this.Tactical.fillVisibility(this.Const.Faction.Player, true);
-						this.Tactical.EventLog.log("[color=#1e468f]FOV is no longer visible.[/color]");
 					}
-					this.informBackend(_manual);
-					return state.m.IsFogOfWarVisible;
+					return this.getValue();
 				}
 			},
 		}
@@ -193,10 +215,9 @@ this.combat_simulator_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 	function onTopBarButtonPressed(_buttonType)
 	{
 		// manual is true when the button was clicked instead of hotkey
-		local properties = this.Tactical.State.getStrategicProperties();
-		if (properties.CombatID != "CombatSimulator" && ::CombatSimulator.Mod.ModSettings.getSetting("AllowSettings").getValue() == false)
+		if (!::CombatSimulator.isCombatSimulatorFight() && ::CombatSimulator.Mod.ModSettings.getSetting("AllowSettings").getValue() == false)
 			return
-		this.getButton(_buttonType).onPressed(true);
+		this.getButton(_buttonType).onPressed();
 	}
 
 	function setTopBarButtonsDisplay(_bool)
