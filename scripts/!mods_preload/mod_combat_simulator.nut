@@ -47,9 +47,7 @@
 		local checkCombatFinished = o.checkCombatFinished;
 		o.checkCombatFinished = function( _forceFinish = false )
 		{
-			local properties = this.Tactical.State.getStrategicProperties();
-			if (properties.CombatID != "CombatSimulator")
-			{
+			if (!::CombatSimulator.isCombatSimulatorFight())
 				return checkCombatFinished(_forceFinish);
 			}
 			if (properties.StartEmptyMode)
@@ -89,10 +87,9 @@
 		local setupEntity = o.setupEntity;
 		o.setupEntity = function(_e, _t)
 		{
-			::logInfo("in hook?????? " + _e)
 			setupEntity(_e, _t);
-			local properties = this.Tactical.State.getStrategicProperties();
-			if (properties.CombatID == "CombatSimulator") ::CombatSimulator.Setup.setupEntity(_e);
+			if (::CombatSimulator.isCombatSimulatorFight())
+				::CombatSimulator.Setup.setupEntity(_e);
 		}
 	})
 
@@ -128,9 +125,12 @@
 		local onBattleEnded = o.onBattleEnded;
 		o.onBattleEnded = function()
 		{
+			if (!::CombatSimulator.isCombatSimulatorFight())
+				return onBattleEnded();
+
 			local properties = this.Tactical.State.getStrategicProperties();
 
-			if (properties.CombatID != "CombatSimulator" || "UnpausedEndCombat" in properties)
+			if ("UnpausedEndCombat" in properties)
 				return onBattleEnded();
 
 			if ("SetupEndCombat" in properties && !("UnpausedEndCombat" in properties))
@@ -167,8 +167,7 @@
 		o.connect = function()
 		{
 			connect();
-			local properties = this.Tactical.State.getStrategicProperties();
-			if (properties.CombatID == "CombatSimulator" || ::CombatSimulator.Mod.ModSettings.getSetting("AllowSettings").getValue() == true) 
+			if (::CombatSimulator.isCombatSimulatorFight() || ::CombatSimulator.Mod.ModSettings.getSetting("AllowSettings").getValue()) 
 				::CombatSimulator.Screen.setTopBarButtonsDisplay(true);
 		}
 	})
