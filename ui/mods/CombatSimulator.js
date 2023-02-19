@@ -336,15 +336,12 @@ CombatSimulatorScreen.prototype.createFactionDiv = function(_name, _id, _page)
     }, this), "combat-simulator-text-button", 4);
     ret.buttons.addSpawnlistButton.bindTooltip({ contentType: 'msu-generic', modId: CombatSimulator.ModID, elementId: "Screen.Spawnlist.Main.Add"});
 
-    if (_id == "faction-0")
-    {
-        layout = $('<div class="combat-simulator-text-button-layout"/>');
-        buttonBar.append(layout);
-        ret.buttons.addBroButton = layout.createTextButton("Add Bro", $.proxy(function(_div){
-            this.createAddBroScrollContainer(this.createPopup('Add Bro','generic-popup', 'generic-popup-container'), ret.unitsScrollContainer);
-        }, this), "combat-simulator-text-button", 4);
-        ret.buttons.addBroButton.bindTooltip({ contentType: 'msu-generic', modId: CombatSimulator.ModID, elementId: "Screen.Bros.Main.Add"});
-    }
+    layout = $('<div class="combat-simulator-text-button-layout"/>');
+    buttonBar.append(layout);
+    ret.buttons.addBroButton = layout.createTextButton("Add Bro", $.proxy(function(_div){
+        this.createAddBroScrollContainer(this.createPopup('Add Bro','generic-popup', 'generic-popup-container'), ret.unitsScrollContainer);
+    }, this), "combat-simulator-text-button", 4);
+    ret.buttons.addBroButton.bindTooltip({ contentType: 'msu-generic', modId: CombatSimulator.ModID, elementId: "Screen.Bros.Main.Add"});
 }
 
 CombatSimulatorScreen.prototype.createAddUnitScrollContainer = function(_dialog, _side)
