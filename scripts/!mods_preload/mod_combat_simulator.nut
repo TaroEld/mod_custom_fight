@@ -171,4 +171,44 @@
 				::CombatSimulator.Screen.setTopBarButtonsDisplay(true);
 		}
 	})
+	::mods_hookExactClass("entity/tactical/actor", function(o)
+	{
+		local onTurnStart = o.onTurnStart;
+		o.onTurnStart = function()
+		{
+			local ret = onTurnStart();
+			this.combatsim_updateVisibilityForPlayer();
+			return ret;
+		}
+		local onTurnResumed = o.onTurnResumed;
+		o.onTurnResumed = function()
+		{
+			local ret = onTurnResumed();
+			this.combatsim_updateVisibilityForPlayer();
+			return ret;
+		}
+		local onMovementStep = o.onMovementStep;
+		o.onMovementStep = function( _tile, _levelDifference ) 
+		{
+			local ret = onMovementStep(_tile, _levelDifference);
+			this.combatsim_updateVisibilityForPlayer();
+			return ret;
+		}
+		local onMovementFinish = o.onMovementFinish;
+		o.onMovementFinish = function( _tile )
+		{
+			local ret = onMovementFinish(_tile);
+			this.combatsim_updateVisibilityForPlayer();
+			return ret;
+		}
+
+		o.combatsim_updateVisibilityForPlayer <- function()
+		{
+			if (!this.isAlive() || !::CombatSimulator.isCombatSimulatorFight() || !::MSU.Utils.getState("tactical_state").m.IsFogOfWarVisible)
+				return;
+			if (!this.isPlayerControlled())
+				return;
+			this.updateVisibility(this.getTile(), this.m.CurrentProperties.getVision(), this.Const.Faction.Player);
+		}
+	})
 })
