@@ -1,0 +1,2 @@
+local generalPage = ::CombatSimulator.Mod.ModSettings.addPage("General");
+generalPage.addBooleanSetting("AllowSettings", false, "Allow Settings", "Allow the topbar buttons and the spawner screen to work in normal fights, outside of Combat Simulators.");

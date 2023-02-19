@@ -1,74 +1,47 @@
 ::CombatSimulator <- {
-	ID = "mod_combat_simulator",
-	Name = "Combat Simulator",
+	ID = "mod_combat_simulator"
+	Name = "Combat Simulator"
 	Version = "0.9.3"
+	Const = {}
+	function isCombatSimulatorFight()
+	{
+		local state = this.Tactical.State;
+		if (state == null)
+			return false;
+		local properties = this.Tactical.State.getStrategicProperties();
+		if (properties.CombatID != "CombatSimulator") 
+			return false;
+		return true;
+	}
 }
 ::mods_registerMod(::CombatSimulator.ID, ::CombatSimulator.Version)
 
 ::mods_queue(::CombatSimulator.ID, "mod_msu(>=1.1.0)", function()
 {
-	::Const.World.TerrainTacticalTemplate.push("flat_grass_combatsimulator");
-	::Const.World.TerrainTacticalTemplate.push("flat_sand_combatsimulator");
-	::Const.World.TerrainTacticalTemplate.push("flat_snow_combatsimulator");
-	::Const.World.TerrainTacticalImage.push("engage/engage_grass");
-	::Const.World.TerrainTacticalImage.push("engage/engage_desert");
-	::Const.World.TerrainTacticalImage.push("engage/engage_snow");
-	::Const.World.TerrainTacticalType.flat_grass_combatsimulator <- ::Const.World.TerrainTacticalType.COUNT++;
-	::Const.World.TerrainTacticalType.flat_sand_combatsimulator <- ::Const.World.TerrainTacticalType.COUNT++;
-	::Const.World.TerrainTacticalType.flat_snow_combatsimulator <- ::Const.World.TerrainTacticalType.COUNT++;
-
 	::mods_registerJS("CombatSimulator.js");
 	::mods_registerCSS("CombatSimulator.css");
 	::mods_registerJS("CombatSimulatorSpawnScreen.js");
 	::mods_registerCSS("CombatSimulatorSpawnScreen.css");
 	::mods_registerJS("CombatSimulator_TacticalScreenTopbarOptionsModule.js");
 	::mods_registerCSS("CombatSimulator_TacticalScreenTopbarOptionsModule.css");
-	::include("CombatSimulator/combat_simulator_setup")
 
 	::CombatSimulator.Mod <- ::MSU.Class.Mod(::CombatSimulator.ID, ::CombatSimulator.Version, ::CombatSimulator.Name); 
 	::CombatSimulator.Screen <- this.new("scripts/ui/screens/combat_simulator_screen");
 	::CombatSimulator.SpawnScreen <- this.new("scripts/ui/screens/combat_simulator_spawn_screen");
+
+	::include("CombatSimulator/combat_simulator_setup")
 	::CombatSimulator.Setup <- this.new("CombatSimulator/combat_simulator_setup");
-	::CombatSimulator.Const <- {};
-	::include("CombatSimulator/const/track_list")
+	
 	::MSU.UI.registerConnection(::CombatSimulator.Screen);
 	::MSU.UI.registerConnection(::CombatSimulator.SpawnScreen);
-	::CombatSimulator.Mod.Keybinds.addSQKeybind("toggleCombatSimulatorSpawnScreen", "ctrl+s", ::MSU.Key.State.Tactical,  ::CombatSimulator.SpawnScreen.toggle.bindenv(::CombatSimulator.SpawnScreen), "Open tactical screen");
-	::CombatSimulator.Mod.Keybinds.addSQKeybind("toggleCombatSimulatorScreen", "ctrl+s", ::MSU.Key.State.World,  ::CombatSimulator.Screen.toggle.bindenv(::CombatSimulator.Screen), "Open worldmap screen");
-	::CombatSimulator.Mod.Keybinds.addSQKeybind("initNextTurn", "f", ::MSU.Key.State.Tactical, function(){
-		this.Tactical.TurnSequenceBar.initNextTurn(true);
-		return true;
-	}, "End turn");
-	::CombatSimulator.Mod.Keybinds.addSQKeybind("togglePauseTactical", "shift+p", ::MSU.Key.State.Tactical, function()
-	{
-		::CombatSimulator.Screen.getButton("Pause").onPressed(false);
-		return true;
-	}, "Toggle Pause")
-	::CombatSimulator.Mod.Keybinds.addSQKeybind("toggleFovTactical", "shift+f", ::MSU.Key.State.Tactical, function()
-	{
-		::CombatSimulator.Screen.getButton("FOV").onPressed(false);
-		return true;
-	}, "Toggle FOV")
+	
+	::include("CombatSimulator/tooltips");
+	::include("CombatSimulator/keybinds");
+	::include("CombatSimulator/modsettings");
 
-	::CombatSimulator.Mod.Keybinds.addSQKeybind("killHoveredUnit", "shift+k", ::MSU.Key.State.Tactical, function()
-	{
-		local activeState = ::MSU.Utils.getActiveState();
-		if (activeState.m.LastTileHovered != null && !activeState.m.LastTileHovered.IsEmpty)
-		{
-		  local entity = activeState.m.LastTileHovered.getEntity();
-		  if (entity != null && this.isKindOf(entity, "actor"))
-		  {
-		    if (entity == this.Tactical.TurnSequenceBar.getActiveEntity()) {activeState.cancelEntityPath(entity);}
-		    entity.kill();
-		  }
-		}
-	}, "Kill hovered unit")
-
-
-	local generalPage = ::CombatSimulator.Mod.ModSettings.addPage("General");
-	generalPage.addBooleanSetting("AllowSettings", false, "Allow Settings", "Allow the topbar buttons and the spawner screen to work in normal fights, outside of Combat Simulators.");
-	::include("CombatSimulator/tooltips")
-	::include("CombatSimulator/const/sprite_list")
+	::include("CombatSimulator/const/sprite_list");
+	::include("CombatSimulator/const/track_list");
+	::include("CombatSimulator/const/map_gen");
 
 	::mods_hookNewObject("entity/tactical/tactical_entity_manager", function(o){
 		local checkCombatFinished = o.checkCombatFinished;
