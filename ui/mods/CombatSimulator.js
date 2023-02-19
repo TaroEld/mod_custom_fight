@@ -752,9 +752,12 @@ CombatSimulatorScreen.prototype.notifyBackendTopBarButtonPressed = function (_bu
 CombatSimulatorScreen.prototype.setTopBarButtonState = function (_data)
 {
     var button = this.mTopBarButtons[_data[0]];
-    button.Button.changeButtonImage(Path.GFX + button.Paths[_data[1].toString()]);
-    // if the button was clicked, refresh tooltip
-    if(_data[2]) button.Button.trigger('update-tooltip' + TooltipModuleIdentifier.KeyEvent.Namespace)
+    button.Enabled = _data[1];
+    if (button.Button !== null)
+    {
+        button.Button.changeButtonImage(Path.GFX + button.Paths[_data[1].toString()]);
+        button.Button.trigger('update-tooltip' + TooltipModuleIdentifier.KeyEvent.Namespace) 
+    }
 };
 
 CombatSimulatorScreen.prototype.setTopBarButtonsDisplay = function (_bool)
