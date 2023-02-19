@@ -112,19 +112,15 @@ this.combat_simulator_setup <- {
 
 	function setupFight(_data)
 	{
-		local spawnEntity = this.Tactical.spawnEntity;
+		this.m.old_spawnEntity <- this.Tactical.spawnEntity;
 		this.Tactical.spawnEntity = function(_scriptOrBro, _x, _y)
 		{
-			::logInfo("aspawnEntity hook")
 			if (typeof _scriptOrBro == "string")
-				return spawnEntity(_scriptOrBro, _x, _y);
+				return ::CombatSimulator.Setup.m.old_spawnEntity.call(this.Tactical, _scriptOrBro, _x, _y);
 			local bro = this.Tactical.getEntityByID(_scriptOrBro.BroID);
 			if (bro == null)
-			{
-				::logError("Bro is null for some reason")
 				return;
-			}
-			::logInfo("adding entity to map manually")
+
 			this.Tactical.addEntityToMap(bro, _x, _y);
 			return bro;
 		}
