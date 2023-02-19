@@ -90,7 +90,6 @@ this.combat_simulator_setup <- {
 		return clone ::CombatSimulator.Const.TrackList
 	}
 
-
 	function queryTerrainLocations()
 	{
 		local ret = [];
@@ -137,36 +136,28 @@ this.combat_simulator_setup <- {
 			p.LocationTemplate.Fortification = _data.Settings.Fortification ? this.Const.Tactical.FortificationType.Palisade : this.Const.Tactical.FortificationType.None;
 		}
 		p.Entities = [];
-		p.CustomFactions <- {};
 		p.CombatID = "CombatSimulator";
 		p.Music = this.Const.Music[_data.Settings.MusicTrack];	
 
 		// Use noble factions so that noble units dont break when they look for banner
+		p.CustomFactions <- {};
 		this.setupFactions(p);
 
-		local hasBroInPlayerFaction = _data.Factions["faction-0"].Bros.len() > 0;
-		if (hasBroInPlayerFaction)
-			_data.Settings.SpectatorMode = false;
 		p.PlayerDeploymentType = this.Const.Tactical.DeploymentType.Line;
 		p.EnemyDeploymentType = this.Const.Tactical.DeploymentType.Line;
 		p.IsAutoAssigningBases = false;
-		p.IsFogOfWarVisible = !_data.Settings.SpectatorMode;
 		p.IsFleeingProhibited = _data.Settings.IsFleeingProhibited;
-
-		p.IsUsingSetPlayers = true;
-		p.SpectatorMode <- true;
-		if (p.SpectatorMode)
-		{
-			::CombatSimulator.Screen.getButton("UnlockCamera").setValue(true);
-			::CombatSimulator.Screen.getButton("FOV").setValue(false);
-		}
-
 		p.StartEmptyMode <- true;
+
+		local controlUnits = false;
+		local spawnedSingleBros = false;
 		foreach (idx, faction in p.CustomFactions)
 		{
-			if (_data.Factions[idx].Spawnlists.len() != 0 || _data.Factions[idx].Units.len() != 0 || _data.Factions[idx].Bros.len() != 0)
+			if (faction.m.ControlUnits)
+				controlUnits = true;
+			if (p.StartEmptyMode && _data.Factions[idx].Spawnlists.len() != 0 || _data.Factions[idx].Units.len() != 0 || _data.Factions[idx].Bros.len() != 0)
 			{
-				p.StartEmptyMode <- false;
+				p.StartEmptyMode = false;
 			}
 			foreach(spawnlist in _data.Factions[idx].Spawnlists)
 			{
@@ -174,11 +165,48 @@ this.combat_simulator_setup <- {
 			}
 			this.addUnitsToCombat(_data.Factions[idx].Units, p.Entities, faction.getID());
 			this.addBrosToCombat(_data.Factions[idx].Bros, p.Entities, faction.getID());
+			if (_data.Factions[idx].Bros.len() > 0)
+				spawnedSingleBros = true;
 		}
-		
-
+		p.IsUsingSetPlayers = spawnedSingleBros || !_data.Settings.SpawnCompany;
+		if (!controlUnits && !_data.Settings.SpawnCompany)
+		{
+			::CombatSimulator.Screen.getButton("UnlockCamera").setValue(true);
+			::CombatSimulator.Screen.getButton("FOV").setValue(false);
+			p.IsFogOfWarVisible = false;
+		}
 		this.World.State.startScriptedCombat(p, false, false, true);
-		//this.Tactical.spawnEntity = spawnEntity;
+	}
+
+	function updatePlayerVisibility()
+	{
+		if (!::CombatSimulator.isCombatSimulatorFight() || !::MSU.Utils.getState("tactical_state").m.IsFogOfWarVisible)
+			return;
+
+		this.Tactical.fillVisibility(this.Const.Faction.Player, false);
+		foreach (idx, faction in this.Tactical.State.getStrategicProperties().CustomFactions)
+		{
+			if (!faction.m.ControlUnits)
+				continue;
+			local units = this.Tactical.Entities.getInstancesOfFaction(faction.getID());
+
+			foreach( i, unit in units )
+			{
+				if (faction.m.ControlUnits)
+					unit.updateVisibility(unit.getTile(), unit.m.CurrentProperties.getVision(), this.Const.Faction.Player);
+			}
+		}
+	}
+
+	function checkControllingUnits(_properties)
+	{
+		local spectatorMode = true;
+		foreach (key, faction in _properties.CustomFactions)
+		{
+			if (faction.m.ControlUnits)
+				spectatorMode = false;
+		}
+		return spectatorMode;
 	}
 
 	function setupFactions(_properties, _tacticalActive = false)
@@ -420,6 +448,7 @@ this.combat_simulator_setup <- {
 		this.removeCustomAIAgentFromBro(_bro);
 		this.removePlayerControlledFromUnit(_bro);
 	}
+
 	function updateFactionProperty(_data)
 	{
 		local id = _data[0];
