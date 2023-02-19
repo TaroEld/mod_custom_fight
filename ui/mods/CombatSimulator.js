@@ -555,17 +555,6 @@ CombatSimulatorScreen.prototype.reset = function()
     })
 }
 
-CombatSimulatorScreen.prototype.testThings = function ()
-{  
-    var randomProperty = function (obj) {
-        var keys = Object.keys(obj);
-        return obj[keys[ keys.length * Math.random() << 0]];
-    };
-    // this.addSpawnlistToBox(randomProperty(this.mData.AllSpawnlists), this.mFactions["faction-0"].spawnlistScrollContainer)
-    // this.addSpawnlistToBox(randomProperty(this.mData.AllSpawnlists), this.mFactions["faction-1"].spawnlistScrollContainer)
-    this.addBroToBox(randomProperty(this.mData.AllBrothers), this.mFactions["faction-1"].unitsScrollContainer)
-}
-
 CombatSimulatorScreen.prototype.gatherData = function()
 {
     var self = this;
@@ -620,8 +609,6 @@ CombatSimulatorScreen.prototype.getFactionData = function(_ret, _div)
         ret.ControlUnits = true;    
 
     _ret.Factions[_div.data("id")] = ret;
-    // ret.unitsScrollContainer
-    // row.amount
 }
 
 CombatSimulatorScreen.prototype.getIDCounter = function(_id)
@@ -630,7 +617,6 @@ CombatSimulatorScreen.prototype.getIDCounter = function(_id)
         this.mSettingIDCounters[_id] = -1;
     return  (_id + ++this.mSettingIDCounters[_id]);
 }
-
 
 CombatSimulatorScreen.prototype.addCheckboxSetting = function(_div, _id, _settingKey, _default, _name)
 {
@@ -782,6 +768,18 @@ CombatSimulatorScreen.prototype.notifyBackendCancelButtonPressed = function ()
         SQ.call(this.mSQHandle, 'onCancelButtonPressed');
     }
 };
+
+CombatSimulatorScreen.prototype.testThings = function ()
+{  
+    var randomProperty = function (obj) {
+        var keys = Object.keys(obj);
+        return obj[keys[ keys.length * Math.random() << 0]];
+    };
+    // this.addSpawnlistToBox(randomProperty(this.mData.AllSpawnlists), this.mFactions["faction-0"].spawnlistScrollContainer)
+    // this.addSpawnlistToBox(randomProperty(this.mData.AllSpawnlists), this.mFactions["faction-1"].spawnlistScrollContainer)
+    this.addBroToBox(randomProperty(this.mData.AllBrothers), this.mFactions["faction-0"].unitsScrollContainer)
+    this.addBroToBox(randomProperty(this.mData.AllBrothers), this.mFactions["faction-1"].unitsScrollContainer)
+}
 
 registerScreen("CombatSimulatorScreen", new CombatSimulatorScreen());
 
