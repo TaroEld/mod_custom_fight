@@ -1,15 +1,33 @@
-.short-input-container
+.combatsim-short-input-container
 {
     width: 5rem;
     height: 3rem;
 }
-.short-input-container input
+.combatsim-filter-input-container
+{
+    flex: 1;
+    height: 2.5rem;
+}
+.combatsim-short-input-container input,
+.combatsim-filter-input-container input
 {
     background-size: auto !important;
     background-repeat: round !important;
 }
 
-.bottom-gold-line {
+.combatsim-filter-bar
+{
+    width: 95%;
+    margin-left: 1rem;
+    height: 4.3rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    display: flex;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid black;
+}
+
+.combatsim-bottom-gold-line {
     background-image: url("coui://gfx/ui/skin/line_gold.png");
     background-size: 90% 0.5rem;
     background-position: bottom center;
@@ -17,7 +35,7 @@
     padding-bottom: 0.5rem;
 }
 
-.bottom-gold-line-thick {
+.combatsim-bottom-gold-line-thick {
     background-image: url("coui://gfx/ui/skin/line_gold.png");
     background-size: 95% 1.0rem;
     background-position: bottom center;
@@ -26,7 +44,7 @@
 }
 
 
-.combat-simulator-container-layout .ui-control.dialog
+.combatsim-container-layout .ui-control.dialog
 {
     background-color: rgba(0, 0, 0, 0.3);
 
@@ -40,7 +58,7 @@
     z-index : 1;
 }
 
-.combat-simulator-container-layout
+.combatsim-container-layout
 {
     height: 100%;
     width: 100%;
@@ -50,23 +68,23 @@
     background-repeat: no-repeat;
 }
 
-.combat-simulator .dialog .footer
+.combatsim .dialog .footer
 {
     display: flex;
     justify-content: center;
 }
 
-.combat-simulator .dialog .footer .l-button-bar
+.combatsim .dialog .footer .l-button-bar
 {
     display: flex;
 }
 
-.combat-simulator-container-layout .content
+.combatsim-container-layout .content
 {
     display: flex;
 }
 
-.settings-box
+.combatsim-settings-box
 {
     width: 20%;
     height: 100%;
@@ -78,12 +96,12 @@
     background-repeat: no-repeat;
 }
 
-.settings-box .label
+.combatsim-settings-box .label
 {
     width: 20rem;
 }
 
-.setup-box
+.combatsim-setup-box
 {
     width: 40%;
     height: 100%;
@@ -95,14 +113,14 @@
     background-repeat: no-repeat;
 }
 
-.setup-box .faction-header
+.combatsim-setup-box .faction-header
 {
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-.setup-box .box-title
+.combatsim-setup-box .box-title
 {
     height: 5rem;
     width: 30rem;
@@ -120,7 +138,7 @@
     width: 15rem !important;
 }
 
-.setup-box .box-subtitle
+.combatsim-setup-box .box-subtitle
 {
     height: 3rem;
     width: 30rem;
@@ -129,8 +147,8 @@
     border-bottom: 1px solid #DDA21F;
 }
 
-.setup-box .spawnlist-box,
-.setup-box .units-box
+.combatsim-setup-box .spawnlist-box,
+.combatsim-setup-box .units-box
 {
     width: 95%;
 
@@ -144,24 +162,24 @@
     border: 2px solid black;
 }
 
-.setup-box .spawnlist-box
+.combatsim-setup-box .spawnlist-box
 {
     height: 30%;
 }
-.setup-box .units-box
+.combatsim-setup-box .units-box
 {
     height: 60%;
     margin-top: 1rem;
 }
 
-.setup-box .spawnlist-box .list,
-.setup-box .units-box .list
+.combatsim-setup-box .spawnlist-box .list,
+.combatsim-setup-box .units-box .list
 {
     height: 80%;
 }
 
-.setup-box .spawnlist-box .combatsim-delete-button-container,
-.setup-box .units-box .combatsim-delete-button-container
+.combatsim-setup-box .spawnlist-box .combatsim-delete-button-container,
+.combatsim-setup-box .units-box .combatsim-delete-button-container
 {
 /*    margin-left: auto;*/
     height: 3rem;
@@ -177,7 +195,7 @@
     border: 1px solid #DDA21F;
 }
 
-.setup-box .button-bar-box
+.combatsim-setup-box .button-bar-box
 {
     width: 100%;
     height: 10%;
@@ -185,7 +203,7 @@
     justify-content: center;
 }
 
-.faction-button-container
+.combatsim-faction-button-container
 {
     width: 15rem;
     height: 3.3rem;
@@ -193,7 +211,7 @@
     top: 0rem;
 }
 
-.faction-button-container .l-button
+.combatsim-faction-button-container .l-button
 {
     width: 4.2rem;
     height: 3.3rem;
@@ -201,21 +219,21 @@
     float: left;
 }
 
-.combat-simulator .combat-simulator-text-button-layout,
-.combat-simulator .combat-simulator-text-button
+.combatsim .combatsim-text-button-layout,
+.combatsim .combatsim-text-button
 {
     width: 23rem;
     height: 4.3rem;
     line-height: 3.6rem;
 }
 
-.combat-simulator-entry-label
+.combatsim-entry-label
 {
     width: 30rem;
     text-align: center;
 }
 
-.generic-popup
+.combatsim-generic-popup
 {
     width: 60.0rem;
     height: 60.0rem;
@@ -228,27 +246,27 @@
     justify-content: space-between;
 }
 
-.generic-popup .header
+.combatsim-generic-popup .header
 {
     max-height: 5rem;
 }
 
-.generic-popup .sub-header
+.combatsim-generic-popup .sub-header
 {
     max-height: 5rem;
 }
 
-.generic-popup .content
+.combatsim-generic-popup .content
 {
     max-height: 45rem;
 }
 
-.generic-popup .footer
+.combatsim-generic-popup .footer
 {
     max-height: 5rem;
 }
 
-.generic-popup-container
+.combatsim-generic-popup-container
 {
     max-height: 45rem;
     display: flex;
@@ -256,22 +274,12 @@
     justify-content: space-between;
 }
 
-.generic-popup-container .list
+.combatsim-generic-popup-container .list
 {
     margin-top: 2rem;
 }
 
-.generic-popup-container .filter-bar
-{
-    width: 100%;
-    height: 4.3rem;
-    padding-left: 1rem;
-    padding-right: 1rem;
-    display: flex;
-    justify-content: space-between;
-}
-
-.combat-simulator-row
+.combatsim-row
 {
     display: flex;
     align-items: center;
@@ -280,7 +288,7 @@
     padding-left: 2rem;
 }
 
-.combat-simulator-row.settings-header-row
+.combatsim-row.settings-header-row
 {
     justify-content: center;
 }

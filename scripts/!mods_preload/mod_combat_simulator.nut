@@ -173,25 +173,6 @@
 		}
 	})
 
-	::mods_hookExactClass("entity/tactical/player", function(o)
-	{
-		local isReallyKilled = o.isReallyKilled;
-		o.isReallyKilled = function(_fatalityType)
-		{
-			if (::CombatSimulator.isCombatSimulatorFight())
-				return false;
-			return isReallyKilled(_fatalityType);
-		}
-
-		local onCombatFinished = o.onCombatFinished;
-		o.onCombatFinished = function()
-		{
-			onCombatFinished();
-			if (::CombatSimulator.isCombatSimulatorFight())
-				::CombatSimulator.Setup.cleanUpBroAfterBattle(this);
-		}
-	})
-
 	::mods_hookExactClass("entity/tactical/actor", function(o)
 	{
 		local onTurnStart = o.onTurnStart;

@@ -1,4 +1,4 @@
-.combat-simulator-spawn
+.combatsim-spawn
 {
     height: 70%;
     width: 20%;
@@ -6,7 +6,7 @@
     z-index: 7000;
 }
 
-.combat-simulator-spawn-container-layout
+.combatsim-spawn-container-layout
 {
     height: 100%;
     width: 100%;
@@ -16,7 +16,7 @@
     background-repeat: no-repeat;
 }
 
-.combat-simulator-spawn-container-layout .ui-control.dialog
+.combatsim-spawn-container-layout .ui-control.dialog
 {
     top: 0;
     left: 0;
@@ -48,15 +48,6 @@
     height: 15%;
     margin-top: 2rem;
 }
-
-.filter-bar
-{
-    width: 100%;
-    height: 4.3rem;
-    display: flex;
-    justify-content: space-between;
-}
-
 
 .spawn-screen-units-div .row
 {

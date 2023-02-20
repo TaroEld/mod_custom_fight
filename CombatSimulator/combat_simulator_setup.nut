@@ -18,20 +18,22 @@ this.combat_simulator_setup <- {
 			    ControlUnits = false,
 			}
 		}
+		Roster = null
 	},
 
-	function queryData()
+	function getRoster()
 	{
-		local ret = {
-			AllUnits = this.querySpawnlistMaster(),
-			AllFactions =  this.queryFactions(),
-			AllBrothers =  this.queryBrothers(),
-			AllSpawnlists = this.querySpawnlists(),
-			AllBaseTerrains = this.queryTerrains(),
-			AllLocationTerrains = this.queryTerrainLocations(),
-			AllMusicTracks =this.queryTracklist(),
-		}
-		return ret;
+        while (this.m.Roster == null)
+        {
+            local id = ::Math.rand(10000, 10000000);
+            try {
+                local roster = ::World.getRoster(id);
+            }
+            catch(e) {
+                this.m.Roster = ::World.createRoster(id);
+            }
+        }
+		return this.m.Roster;
 	}
 
 	function querySpawnlistMaster()
@@ -61,7 +63,8 @@ this.combat_simulator_setup <- {
 		{
 			ret[bro.getID().tostring()] <- {
 				ID = bro.getID(),
-				DisplayName = bro.getName()
+				DisplayName = bro.getName(),
+				Icon = bro.getBackground().getIcon()
 			}
 		}
 		return ret;
@@ -116,12 +119,9 @@ this.combat_simulator_setup <- {
 		{
 			if (typeof _scriptOrBro == "string")
 				return ::CombatSimulator.Setup.m.old_spawnEntity.call(this.Tactical, _scriptOrBro, _x, _y);
-			local bro = this.Tactical.getEntityByID(_scriptOrBro.BroID);
-			if (bro == null)
-				return;
 
-			this.Tactical.addEntityToMap(bro, _x, _y);
-			return bro;
+			this.Tactical.addEntityToMap(_scriptOrBro, _x, _y);
+			return _scriptOrBro;
 		}
 		local p = this.Const.Tactical.CombatInfo.getClone();
 		p.Tile = this.World.State.getPlayer().getTile();
@@ -135,19 +135,24 @@ this.combat_simulator_setup <- {
 			p.LocationTemplate.CutDownTrees <- _data.Settings.CutDownTrees;
 			p.LocationTemplate.Fortification = _data.Settings.Fortification ? this.Const.Tactical.FortificationType.Palisade : this.Const.Tactical.FortificationType.None;
 		}
-		p.Entities = [];
 		p.CombatID = "CombatSimulator";
 		p.Music = this.Const.Music[_data.Settings.MusicTrack];	
-
-		// Use noble factions so that noble units dont break when they look for banner
-		p.CustomFactions <- {};
-		this.setupFactions(p);
-
 		p.PlayerDeploymentType = this.Const.Tactical.DeploymentType.Line;
 		p.EnemyDeploymentType = this.Const.Tactical.DeploymentType.Line;
 		p.IsAutoAssigningBases = false;
 		p.IsFleeingProhibited = _data.Settings.IsFleeingProhibited;
 		p.StartEmptyMode <- true;
+		p.IsUsingSetPlayers = true;
+
+
+		// Use noble factions so that noble units dont break when they look for banner
+		p.CustomFactions <- {};
+		this.setupFactions(p);
+
+		if (_data.Settings.SpawnCompany)
+		{
+			this.addCompanyToBattle(_data.Factions["faction-0"].Bros);
+		}
 
 		local controlUnits = false;
 		local spawnedSingleBros = false;
@@ -168,14 +173,34 @@ this.combat_simulator_setup <- {
 			if (_data.Factions[idx].Bros.len() > 0)
 				spawnedSingleBros = true;
 		}
-		p.IsUsingSetPlayers = spawnedSingleBros || !_data.Settings.SpawnCompany;
-		if (!controlUnits && !_data.Settings.SpawnCompany)
+		
+		if (!controlUnits)
 		{
 			::CombatSimulator.Screen.getButton("UnlockCamera").setValue(true);
 			::CombatSimulator.Screen.getButton("FOV").setValue(false);
 			p.IsFogOfWarVisible = false;
 		}
 		this.World.State.startScriptedCombat(p, false, false, true);
+	}
+
+	function addCompanyToBattle(_broArray)
+	{
+		local num = 0;
+		foreach( bro in ::World.getPlayerRoster().getAll() )
+		{
+			if (bro.getPlaceInFormation() > 17)
+			{
+				continue;
+			}
+			_broArray.push({
+				ID = bro.getID(),
+				Num = 1
+			});
+			if (++num >= this.World.Assets.getBrothersMaxInCombat())
+			{
+				break;
+			}
+		}
 	}
 
 	function updatePlayerVisibility()
@@ -286,22 +311,39 @@ this.combat_simulator_setup <- {
 	{
 		foreach (brother in _units)
 		{
-			local bro = this.Tactical.getEntityByID(brother.ID);
-			local unit = {
-				Faction = _faction,
-				Type = "Player",
-				Variant = 0,
-				Strength = 0,
-				Num = 1,
-				BroID = brother.ID,
-				Row = 1,
-				NameList = ["abc"],
-				TitleList = null,
+			for (local i = 0; i < brother.Num.tointeger(); ++i)
+			{
+				local broClone = this.cloneBro(this.Tactical.getEntityByID(brother.ID));
+				local unit = {
+					Faction = _faction,
+					Type = "CombatSimBroClone",
+					Variant = 0,
+					Strength = 0,
+					Num = 1,
+					Row = 1,
+					NameList = ["abc"],
+					TitleList = null,
+				}
+				unit.Script <- broClone;
+				_into.push(unit)	
 			}
-			local unit2 = clone unit;
-			unit.Script <- unit2;
-			_into.push(unit)
 		}
+	}
+
+	function cloneBro(_bro)
+	{
+		local roster = this.getRoster();
+		local broClone = roster.create("scripts/entity/tactical/player_clone");
+
+		local flags = ::new("scripts/tools/tag_collection")
+		local serEm = ::CombatSimulator.Mod.Serialization.getSerializationEmulator("abc", flags)
+		_bro.onSerialize(serEm);
+		local deSerEm = ::CombatSimulator.Mod.Serialization.getDeserializationEmulator("abc", flags)
+		deSerEm.loadDataFromFlagContainer();
+		broClone.onDeserialize(deSerEm);
+
+		broClone.getBackground().setAppearance();
+		return broClone;
 	}
 
 	function setupEntity(_e)
@@ -360,82 +402,10 @@ this.combat_simulator_setup <- {
 
 	function setupBro(_bro)
 	{
-		if (!::CombatSimulator.isCombatSimulatorFight())
-			return;
 		if (!this.Tactical.State.getStrategicProperties().IsUsingSetPlayers)
 			return;
 		local faction = ::World.FactionManager.getFaction(_bro.getFaction());
-		if (faction.m.ControlUnits)
-		{
-			this.removeCustomAIAgentFromBro(_bro);
-			this.addPlayerControlledToUnit(_bro);
-		}
-		else
-		{
-			this.addCustomAIAgentToBro(_bro);
-			this.removePlayerControlledFromUnit(_bro)
-			return;
-		}
-	}
-
-	function addCustomAIAgentToBro(_bro)
-	{
-		if ("combatsim_AIAgent" in _bro.m)
-			return;
-
-		_bro.m.combatsim_AIAgent <- _bro.m.AIAgent;
-		_bro.m.combatsim_AIAgent.setActor(null);
-		_bro.m.AIAgent = this.new("scripts/ai/tactical/agents/charmed_player_agent");
-		_bro.m.AIAgent.setActor(_bro);
-	}
-
-	function removeCustomAIAgentFromBro(_bro)
-	{
-		if (!("combatsim_AIAgent" in _bro.m))
-			return;
-
-		_bro.m.AIAgent = _bro.m.combatsim_AIAgent;
-		_bro.m.AIAgent.setActor(_bro);
-		_bro.m.combatsim_AIAgent.setActor(null);
-		delete _bro.m.combatsim_AIAgent;
-	}
-
-	function addPlayerControlledToUnit(_unit)
-	{
-		_unit.m.IsControlledByPlayer = true;
-		if ("combatsim_isPlayerControlled" in _unit)
-			return;
-		_unit.combatsim_isPlayerControlled <- _unit.isPlayerControlled;
-		_unit.isPlayerControlled = function()
-		{
-			return true;
-		}
-	}
-
-	function removePlayerControlledFromUnit(_unit)
-	{
-		_unit.m.IsControlledByPlayer = false;
-		if (!("combatsim_isPlayerControlled" in _unit))
-			return;
-		_unit.isPlayerControlled = _unit.combatsim_isPlayerControlled;
-		delete _unit.combatsim_isPlayerControlled;
-	}
-
-	function cleanUpBroAfterBattle(_bro)
-	{
-		_bro.setHitpointsPct(1);
-		local skills = _bro.getSkills();
-		skills.removeByType(::Const.SkillType.Injury);
-		foreach(item in _bro.getItems().getAllItems())
-		{
-		    if (item.getCondition() < item.getConditionMax()) 
-		    	item.setCondition(item.getConditionMax());
-		    if (item.isItemType(::Const.Items.ItemType.Ammo) && item.getAmmo() < item.getAmmoMax())
-		    	item.setAmmo(item.getAmmoMax());
-		}
-		_bro.setFaction(::Const.Faction.Player);
-		this.removeCustomAIAgentFromBro(_bro);
-		this.removePlayerControlledFromUnit(_bro);
+		_bro.m.IsControlledByPlayer = faction.m.ControlUnits;
 	}
 
 	function updateFactionProperty(_data)
@@ -461,5 +431,7 @@ this.combat_simulator_setup <- {
 		this.m.old_spawnEntity = null;
 		::CombatSimulator.Screen.resetButtonValues();		
 		this.removeFactions();
+		if (this.m.Roster != null)
+			this.m.Roster.clear();
 	}
 }

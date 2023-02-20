@@ -6,7 +6,7 @@ TacticalScreenTopbarOptionsModule.prototype.createDIV = function(_parentDiv)
     var buttons = Screens.CombatSimulatorScreen.mTopBarButtons;
     var idx = -5;
     MSU.iterateObject(buttons, function(key, _button){
-        _button.Layout = $('<div class="l-combat-simulator-button display-none"/>');
+        _button.Layout = $('<div class="l-combatsim-button display-none"/>');
         self.mContainer.append(_button.Layout);
         _button.Layout.css("left", idx + "rem");
         idx = idx - 4;

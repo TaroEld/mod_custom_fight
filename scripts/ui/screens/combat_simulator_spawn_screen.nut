@@ -54,6 +54,7 @@ this.combat_simulator_spawn_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 	{
 		local ret = {
 			AllUnits = ::CombatSimulator.Setup.querySpawnlistMaster(),
+			AllBrothers =  ::CombatSimulator.Setup.queryBrothers(),
 		}
 		local properties = this.Tactical.State.getStrategicProperties();
 		if(!("CustomFactions" in properties))
@@ -67,6 +68,8 @@ this.combat_simulator_spawn_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 
 	function spawnUnit(_data)
 	{
+		if(_data.IsBro)
+			return this.spawnBro(_data);
 		local unit = _data.Unit;
 		local faction = _data.Faction;
 		local settings = _data.Settings;
@@ -84,6 +87,32 @@ this.combat_simulator_spawn_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 		}
 		local entity = this.Tactical.spawnEntity(unit.Script, tile.Coords.X, tile.Coords.Y);
 		this.Tactical.Entities.setupEntity(entity, unit);
+	}
+
+	function spawnBro(_data)
+	{
+		local properties = this.Tactical.State.getStrategicProperties();
+		local tile = this.Tactical.getTile(this.Tactical.screenToTile(::Cursor.getX(), ::Cursor.getY()));
+		local id = _data.Unit.ID;
+		local bro = this.Tactical.getEntityByID(id);
+		local broClone = ::CombatSimulator.Setup.cloneBro(bro);
+		local factionID = _data.Faction;
+		local faction = properties.CustomFactions[factionID].getID()
+
+		local unit = {
+			Faction = faction,
+			Type = "CombatSimBroClone",
+			Variant = 0,
+			Strength = 0,
+			Num = 1,
+			Row = 1,
+			NameList = ["abc"],
+			TitleList = null,
+			Script = broClone
+		}
+		this.Tactical.Entities.setupEntity(broClone, unit);
+
+		this.Tactical.addEntityToMap(broClone, tile.Coords.X, tile.Coords.Y);
 	}
 
 	function onCancelButtonPressed()

@@ -144,6 +144,21 @@ this.combat_simulator_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 		foreach(key, button in this.m.Buttons) button.setdelegate(this.m.ButtonDelegate)
 	}
 
+
+	function queryData()
+	{
+		local ret = {
+			AllUnits = ::CombatSimulator.Setup.querySpawnlistMaster(),
+			AllFactions =  ::CombatSimulator.Setup.queryFactions(),
+			AllBrothers =  ::CombatSimulator.Setup.queryBrothers(),
+			AllSpawnlists = ::CombatSimulator.Setup.querySpawnlists(),
+			AllBaseTerrains = ::CombatSimulator.Setup.queryTerrains(),
+			AllLocationTerrains = ::CombatSimulator.Setup.queryTerrainLocations(),
+			AllMusicTracks =::CombatSimulator.Setup.queryTracklist(),
+		}
+		return ret;
+	}
+
 	function show()
 	{
 		local activeState = ::MSU.Utils.getActiveState();
@@ -170,7 +185,7 @@ this.combat_simulator_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 				break;
 		}
 		this.Tooltip.hide();
-		this.m.JSHandle.asyncCall("setData", ::CombatSimulator.Setup.queryData());
+		this.m.JSHandle.asyncCall("setData", this.queryData());
 		this.m.JSHandle.asyncCall("show", null);
 		return false;
 	}
