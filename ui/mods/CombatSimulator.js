@@ -465,7 +465,6 @@ CombatSimulatorScreen.prototype.createAddBroScrollContainer = function(_dialog, 
             .appendTo(row);
         var addButton = addButtonContainer.createTextButton("Add", $.proxy(function(_button){
             this.addBroToBox(_unit, _boxDiv);
-            row.remove();
         }, self), "combatsim-text-button", 4);
         
     }, this))
@@ -500,34 +499,9 @@ CombatSimulatorScreen.prototype.addBroToBox = function(_unit, _boxDiv)
         .attr("src", Path.GFX + Asset.BUTTON_DISMISS_CHARACTER)
         .click(function()
         {
-            self.removeUsedBro(_unit.ID);
             row.remove();
         })
         .bindTooltip({ contentType: 'msu-generic', modId: CombatSimulator.ModID, elementId: "Screen.Units.Main.Delete"})
-}
-
-CombatSimulatorScreen.prototype.addUsedBro = function(_id)
-{
-    this.mUsedBros.push(_id);
-    this.mSpawnCompanyCheck.iCheck('uncheck');
-    this.mSpawnCompanyCheck.attr('disabled', true);
-    this.mSpawnCompanyContainer.attr('disabled', true);
-    this.mSettings.SpawnCompany = false;
-    // this.mSpawnCompanyContainer.hide();
-}
-
-CombatSimulatorScreen.prototype.removeUsedBro = function(_id)
-{
-    var idx = this.mUsedBros.indexOf(_id);
-    if (idx !== -1 )
-        this.mUsedBros.splice(idx, 1)
-    if (this.mUsedBros.length == 0)
-    {
-        this.mSpawnCompanyCheck.iCheck('check');
-        this.mSpawnCompanyCheck.attr('disabled', false);
-        this.mSpawnCompanyContainer.attr('disabled', false);
-        this.mSettings.SpawnCompany = true;
-    }
 }
 
 CombatSimulatorScreen.prototype.setData = function (_data)
