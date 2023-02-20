@@ -233,7 +233,7 @@ CombatSimulatorScreen.prototype.createSettingsDiv = function()
     });
     this.mTrackButton.bindTooltip({ contentType: 'msu-generic', modId: CombatSimulator.ModID, elementId: "Screen.Settings.Music"});
 
-    var SpawnCompanyRow = this.addCheckboxSetting(this.addRow(this.mSettingsBox), "use-player-checkbox", "SpawnCompany", "uncheck", "Spawn Company");
+    var SpawnCompanyRow = this.addCheckboxSetting(this.addRow(this.mSettingsBox), "use-player-checkbox", "SpawnCompany", "check", "Spawn Company");
     this.mSpawnCompanyCheck = SpawnCompanyRow.checkbox;
     this.mSpawnCompanyContainer = SpawnCompanyRow.container
     this.mCutDownTreesCheck = this.addCheckboxSetting(this.addRow(this.mSettingsBox), "cut-down-trees-checkbox", "CutDownTrees", "uncheck", "Chop down trees").checkbox;
