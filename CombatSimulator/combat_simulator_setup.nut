@@ -155,7 +155,6 @@ this.combat_simulator_setup <- {
 		}
 
 		local controlUnits = false;
-		local spawnedSingleBros = false;
 		foreach (idx, faction in p.CustomFactions)
 		{
 			if (faction.m.ControlUnits)
@@ -170,8 +169,6 @@ this.combat_simulator_setup <- {
 			}
 			this.addUnitsToCombat(_data.Factions[idx].Units, p.Entities, faction.getID());
 			this.addBrosToCombat(_data.Factions[idx].Bros, p.Entities, faction.getID());
-			if (_data.Factions[idx].Bros.len() > 0)
-				spawnedSingleBros = true;
 		}
 		
 		if (!controlUnits)
@@ -369,16 +366,19 @@ this.combat_simulator_setup <- {
 				}
 				
 				_e.onCombatStart <- function(){};
+				this.addPlayerAgentToEntity(_e);
 			}
 		} 
 		else
 		{
+			::logInfo("setupEntity NOT ControlUnits")
 			_e.m.IsControlledByPlayer <- false;
 			_e.m.IsGuest <- false;
 			_e.isPlayerControlled = function()
 			{
 				return this.getFaction() == this.Const.Faction.Player && this.m.IsControlledByPlayer;
 			}
+			this.removePlayerAgentFromEntity(_e);
 		}
 		// if("Tail" in _e.m)
 		// {
@@ -400,12 +400,45 @@ this.combat_simulator_setup <- {
 		}
 	}
 
+	function addPlayerAgentToEntity(_entity)
+	{
+		if ("combatsim_AIAgent" in _entity.m)
+			return;
+
+		_entity.m.combatsim_AIAgent <- _entity.m.AIAgent;
+		_entity.m.combatsim_AIAgent.setActor(null);
+		_entity.m.AIAgent = this.new("scripts/ai/tactical/player_agent");
+		_entity.m.AIAgent.setActor(_entity);
+	}
+
+	function removePlayerAgentFromEntity(_entity)
+	{
+		if (!("combatsim_AIAgent" in _entity.m))
+			return;
+
+		_entity.m.AIAgent = _entity.m.combatsim_AIAgent;
+		_entity.m.AIAgent.setActor(_entity);
+		_entity.m.combatsim_AIAgent.setActor(null);
+		delete _entity.m.combatsim_AIAgent;
+	}
+
 	function setupBro(_bro)
 	{
 		if (!this.Tactical.State.getStrategicProperties().IsUsingSetPlayers)
 			return;
 		local faction = ::World.FactionManager.getFaction(_bro.getFaction());
-		_bro.m.IsControlledByPlayer = faction.m.ControlUnits;
+		if(faction.m.ControlUnits)
+		{
+			_bro.m.IsControlledByPlayer = true;
+			_bro.m.AIAgent = this.new("scripts/ai/tactical/player_agent");
+			_bro.m.AIAgent.setActor(_bro);
+		}
+		else
+		{
+			_bro.m.IsControlledByPlayer = false;
+			_bro.m.AIAgent = this.new("scripts/ai/tactical/agents/charmed_player_agent");
+			_bro.m.AIAgent.setActor(_bro);
+		}
 	}
 
 	function updateFactionProperty(_data)
