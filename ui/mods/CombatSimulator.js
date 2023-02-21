@@ -507,6 +507,7 @@ CombatSimulatorScreen.prototype.addBroToBox = function(_unit, _boxDiv)
 CombatSimulatorScreen.prototype.setData = function (_data)
 {    
     this.mData = _data;
+    this.resetBros();
     // this.testThings()
 };
 
@@ -534,6 +535,32 @@ CombatSimulatorScreen.prototype.reset = function()
     MSU.iterateObject(this.mFactions, function(_id, _faction){
         _faction.spawnlistScrollContainer.empty();
         _faction.unitsScrollContainer.empty();
+    })
+}
+
+CombatSimulatorScreen.prototype.resetBros = function()
+{
+    var self = this;
+    var broIDs = [];
+    $.each(this.mData.AllBrothers, function(_idx, _bro){
+        broIDs.push(_bro.ID)
+    })
+    var findID = function(_id)
+    {
+        var hasID = false;
+        $.each(broIDs, function(_idx, _value){
+            if (_value === _id)
+                hasID = true;
+        })
+        return hasID;
+    }
+    MSU.iterateObject(this.mFactions, function(_id, _faction){
+        var unitRows = _faction.unitsScrollContainer.find(".combatsim-row")
+        unitRows.each(function(_idx){
+            var unitID = $(this).data("unitID");
+            if ($(this).data("isBro") === true && !findID($(this).data("unitID")))
+                $(this).remove();
+        })
     })
 }
 
