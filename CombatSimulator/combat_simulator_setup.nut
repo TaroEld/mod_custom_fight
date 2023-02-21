@@ -23,16 +23,8 @@ this.combat_simulator_setup <- {
 
 	function getRoster()
 	{
-        while (this.m.Roster == null)
-        {
-            local id = ::Math.rand(10000, 10000000);
-            try {
-                local roster = ::World.getRoster(id);
-            }
-            catch(e) {
-                this.m.Roster = ::World.createRoster(id);
-            }
-        }
+        if (this.m.Roster == null)
+        	this.m.Roster = ::World.createRoster(::Math.abs(toHash(::CombatSimulator.ID)));
 		return this.m.Roster;
 	}
 
@@ -114,11 +106,11 @@ this.combat_simulator_setup <- {
 
 	function setupFight(_data)
 	{
-		this.m.old_spawnEntity <- this.Tactical.spawnEntity;
+		local old_spawnEntity = this.Tactical.spawnEntity;
 		this.Tactical.spawnEntity = function(_scriptOrBro, _x, _y)
 		{
 			if (typeof _scriptOrBro == "string")
-				return ::CombatSimulator.Setup.m.old_spawnEntity.call(this.Tactical, _scriptOrBro, _x, _y);
+				return old_spawnEntity(_scriptOrBro, _x, _y);
 
 			this.Tactical.addEntityToMap(_scriptOrBro, _x, _y);
 			return _scriptOrBro;
@@ -259,6 +251,9 @@ this.combat_simulator_setup <- {
 
 	function removeFactions()
 	{
+		if (this.World == null || this.World.FactionManager == null)
+			return;
+
 		for(local idx = this.World.FactionManager.m.Factions.len()-1; idx != 0; idx--)
 		{
 			local faction = this.World.FactionManager.m.Factions[idx];
@@ -460,11 +455,9 @@ this.combat_simulator_setup <- {
 
 	function cleanupAfterFight()
 	{
-		this.Tactical.spawnEntity = this.m.old_spawnEntity;
-		this.m.old_spawnEntity = null;
 		::CombatSimulator.Screen.resetButtonValues();		
 		this.removeFactions();
 		if (this.m.Roster != null)
-			this.m.Roster.clear();
+			::World.deleteRoster(::Math.abs(toHash(::CombatSimulator.ID)));
 	}
 }

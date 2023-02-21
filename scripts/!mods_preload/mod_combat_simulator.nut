@@ -109,13 +109,6 @@
 			return setInputLocked(_bool);
 		}
 
-		local onFinish = o.onFinish;
-		o.onFinish = function()
-		{
-			onFinish();
-			::CombatSimulator.Setup.cleanupAfterFight();
-		}
-
 		local onBattleEnded = o.onBattleEnded;
 		o.onBattleEnded = function()
 		{
@@ -150,6 +143,15 @@
 			turnsequencebar_onNextRound(_round);
 			::CombatSimulator.Setup.updatePlayerVisibility();
 		} 
+	})
+
+	::mods_hookExactClass("states/world_state", function(o){
+		local onReturnedFromTactical = o.onReturnedFromTactical;
+		o.onReturnedFromTactical = function()
+		{
+			onReturnedFromTactical();
+			::CombatSimulator.Setup.cleanupAfterFight();
+		}
 	})
 
 	::mods_hookExactClass("ui/screens/tactical/modules/turn_sequence_bar/turn_sequence_bar", function(o){
