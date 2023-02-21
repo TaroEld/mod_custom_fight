@@ -305,7 +305,13 @@ this.combat_simulator_setup <- {
 		{
 			for (local i = 0; i < brother.Num.tointeger(); ++i)
 			{
-				local broClone = this.cloneBro(this.Tactical.getEntityByID(brother.ID));
+				local bro = this.Tactical.getEntityByID(brother.ID);
+				if (bro == null)
+				{
+					::logError("CombatSimulator: failed to find bro with ID " + brother.ID);
+					continue;
+				}
+				local broClone = this.cloneBro(bro);
 				local unit = {
 					Faction = _faction,
 					Type = "CombatSimBroClone",
