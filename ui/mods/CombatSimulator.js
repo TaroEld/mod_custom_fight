@@ -22,8 +22,6 @@ var CombatSimulatorScreen = function(_parent)
     this.mFactionsIdx = 0;
 
     this.mSettingIDCounters = {};
-
-    this.mUsedBros = [];
     
 
     this.mData = null;
@@ -456,8 +454,6 @@ CombatSimulatorScreen.prototype.createAddBroScrollContainer = function(_dialog, 
     var scrollContainer = this.mPopupListContainer.findListScrollContainer();
     _dialog.prepend(this.createFilterBar(scrollContainer));
     MSU.iterateObject(this.mData.AllBrothers, $.proxy(function(_key, _unit){
-        if (this.mUsedBros.indexOf(_unit.ID) != -1)
-            return;
         var row = this.addRow(scrollContainer, "", true);
         var name = $('<div class="title-font-normal font-color-subtitle combatsim-entry-label">' + _unit.DisplayName +  '</div>')
             .appendTo(row);
