@@ -62,4 +62,8 @@ this.player_clone <- this.inherit("scripts/entity/tactical/player", {
 			}
 		}
 	}
+
+	function assignRandomEquipment()
+	{
+	}
 })
