@@ -96,11 +96,9 @@ this.combat_simulator_spawn_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 		local id = _data.Unit.ID;
 		local bro = this.Tactical.getEntityByID(id);
 		local broClone = ::CombatSimulator.Setup.cloneBro(bro);
-		local factionID = _data.Faction;
-		local faction = properties.CustomFactions[factionID].getID()
 
 		local unit = {
-			Faction = faction,
+			Faction = properties.CustomFactions[_data.Faction].getID(),
 			Type = "CombatSimBroClone",
 			Variant = 0,
 			Strength = 0,
@@ -110,9 +108,8 @@ this.combat_simulator_spawn_screen <- ::inherit("scripts/mods/msu/ui_screen", {
 			TitleList = null,
 			Script = broClone
 		}
-		this.Tactical.Entities.setupEntity(broClone, unit);
-
 		this.Tactical.addEntityToMap(broClone, tile.Coords.X, tile.Coords.Y);
+		this.Tactical.Entities.setupEntity(broClone, unit);
 	}
 
 	function onCancelButtonPressed()

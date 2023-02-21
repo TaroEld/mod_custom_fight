@@ -406,8 +406,8 @@ this.combat_simulator_setup <- {
 		if ("combatsim_AIAgent" in _entity.m)
 			return;
 
-		_entity.m.combatsim_AIAgent <- _entity.m.AIAgent;
-		_entity.m.combatsim_AIAgent.setActor(null);
+		_entity.m.combatsim_AIAgent <- _entity.m.AIAgent.ClassNameHash;
+		_entity.m.AIAgent.m.Actor = null;
 		_entity.m.AIAgent = this.new("scripts/ai/tactical/player_agent");
 		_entity.m.AIAgent.setActor(_entity);
 	}
@@ -417,9 +417,8 @@ this.combat_simulator_setup <- {
 		if (!("combatsim_AIAgent" in _entity.m))
 			return;
 
-		_entity.m.AIAgent = _entity.m.combatsim_AIAgent;
+		_entity.m.AIAgent = ::new(this.IO.scriptFilenameByHash(_entity.m.combatsim_AIAgent));
 		_entity.m.AIAgent.setActor(_entity);
-		_entity.m.combatsim_AIAgent.setActor(null);
 		delete _entity.m.combatsim_AIAgent;
 	}
 
