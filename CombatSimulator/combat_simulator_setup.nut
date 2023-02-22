@@ -374,7 +374,6 @@ this.combat_simulator_setup <- {
 		} 
 		else
 		{
-			::logInfo("setupEntity NOT ControlUnits")
 			_e.m.IsControlledByPlayer <- false;
 			_e.m.IsGuest <- false;
 			_e.isPlayerControlled = function()
