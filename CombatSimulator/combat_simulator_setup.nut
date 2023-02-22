@@ -77,7 +77,9 @@ this.combat_simulator_setup <- {
 
 	function queryTerrains()
 	{
-		return clone ::Const.World.TerrainTacticalTemplate
+		local ret = ["flat_sand_combatsimulator", "flat_snow_combatsimulator", "flat_grass_combatsimulator"];
+		ret.extend(clone ::Const.World.TerrainTacticalTemplate);
+		return ret;
 	}
 
 	function queryTracklist()
