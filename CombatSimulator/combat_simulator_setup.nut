@@ -432,12 +432,16 @@ this.combat_simulator_setup <- {
 		if(faction.m.ControlUnits)
 		{
 			_bro.m.IsControlledByPlayer = true;
+			if (_bro.m.AIAgent != null)
+				_bro.m.AIAgent.m.Actor = null;
 			_bro.m.AIAgent = this.new("scripts/ai/tactical/player_agent");
 			_bro.m.AIAgent.setActor(_bro);
 		}
 		else
 		{
 			_bro.m.IsControlledByPlayer = false;
+			if (_bro.m.AIAgent != null)
+				_bro.m.AIAgent.m.Actor = null;
 			_bro.m.AIAgent = this.new("scripts/ai/tactical/agents/charmed_player_agent");
 			_bro.m.AIAgent.setActor(_bro);
 		}
