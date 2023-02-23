@@ -41,7 +41,6 @@
 
 	::include("CombatSimulator/const/sprite_list");
 	::include("CombatSimulator/const/track_list");
-	::include("CombatSimulator/const/map_gen");
 
 	::mods_hookNewObject("entity/tactical/tactical_entity_manager", function(o){
 		local checkCombatFinished = o.checkCombatFinished;
