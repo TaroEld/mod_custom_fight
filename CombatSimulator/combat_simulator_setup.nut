@@ -18,13 +18,18 @@ this.combat_simulator_setup <- {
 			    ControlUnits = false,
 			}
 		}
+		RosterID = ::Math.abs(toHash(::CombatSimulator.ID))
 		Roster = null
 	},
 
+	function createRoster()
+	{
+		::World.deleteRoster(this.m.RosterID);
+		this.m.Roster = ::World.createRoster(this.m.RosterID);
+	}
+
 	function getRoster()
 	{
-        if (this.m.Roster == null)
-        	this.m.Roster = ::World.createRoster(::Math.abs(toHash(::CombatSimulator.ID)));
 		return this.m.Roster;
 	}
 
@@ -108,6 +113,7 @@ this.combat_simulator_setup <- {
 
 	function setupFight(_data)
 	{
+		this.createRoster();
 		local old_spawnEntity = this.Tactical.spawnEntity;
 		this.Tactical.spawnEntity = function(_scriptOrBro, _x, _y)
 		{
@@ -179,18 +185,16 @@ this.combat_simulator_setup <- {
 		local num = 0;
 		foreach( bro in ::World.getPlayerRoster().getAll() )
 		{
+			if (num++ >= this.World.Assets.getBrothersMaxInCombat())
+				break;
+
 			if (bro.getPlaceInFormation() > 17)
-			{
 				continue;
-			}
+
 			_broArray.push({
 				ID = bro.getID(),
 				Num = 1
 			});
-			if (++num >= this.World.Assets.getBrothersMaxInCombat())
-			{
-				break;
-			}
 		}
 	}
 
@@ -334,7 +338,6 @@ this.combat_simulator_setup <- {
 	{
 		local roster = this.getRoster();
 		local broClone = roster.create("scripts/entity/tactical/player_clone");
-
 		local flags = ::new("scripts/tools/tag_collection")
 		local serEm = ::CombatSimulator.Mod.Serialization.getSerializationEmulator("abc", flags)
 		_bro.onSerialize(serEm);
@@ -468,6 +471,6 @@ this.combat_simulator_setup <- {
 		::CombatSimulator.Screen.resetButtonValues();		
 		this.removeFactions();
 		if (this.m.Roster != null)
-			::World.deleteRoster(::Math.abs(toHash(::CombatSimulator.ID)));
+			this.m.Roster.clear();
 	}
 }
