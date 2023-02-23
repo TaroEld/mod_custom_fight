@@ -238,6 +238,18 @@ CombatSimulatorScreen.prototype.createSettingsDiv = function()
     this.mIsFleeingProhibitedCheck = this.addCheckboxSetting(this.addRow(this.mSettingsBox), "fleeing-prohibited-checkbox", "IsFleeingProhibited", "uncheck", "Disallow fleeing").checkbox;
     this.mFortificationCheck = this.addCheckboxSetting(this.addRow(this.mSettingsBox), "fortification-checkbox", "Fortification", "uncheck", "Add fortification").checkbox;
 
+    var copyRow = this.addRow(this.mSettingsBox);
+    copyRow.append(this.getTextDiv("Copy Setup", "label")); 
+    this.mCopyButton = copyRow.createTextButton("Copy", function(_div){
+        self.copyData(self.gatherData());
+    }, "combatsim-text-button", 4)
+
+    var pasteRow = this.addRow(this.mSettingsBox);
+    pasteRow.append(this.getTextDiv("Paste Setup", "label")); 
+    this.mPasteButton = pasteRow.createTextButton("Paste", function(_div){
+        self.setFromString(self.pasteData());
+    }, "combatsim-text-button", 4)
+
 }
 CombatSimulatorScreen.prototype.switchFaction = function(_idx)
 {
@@ -377,6 +389,7 @@ CombatSimulatorScreen.prototype.addUnitToBox = function(_unit, _side, _key)
 
     var amountInputLayout = $('<div class="combatsim-short-input-container"/>');
     row.append(amountInputLayout);
+
     var amountInput = $('<input type="text" class="title-font-normal font-color-subtitle short-input"/>');
     amountInputLayout.append(amountInput);
     amountInput.val(1);
@@ -397,6 +410,7 @@ CombatSimulatorScreen.prototype.addUnitToBox = function(_unit, _side, _key)
     var checkbox = this.addCheckboxSetting(row, "champion-checkbox", null, "uncheck", "Champion");
     checkbox.container.bindTooltip({ contentType: 'msu-generic', modId: CombatSimulator.ModID, elementId: "Screen.Units.Main.Champion"})
     row.data("champion", checkbox.checkbox);
+    return row;
 }
 
 CombatSimulatorScreen.prototype.createAddSpawnlistScrollContainer = function(_dialog, _boxDiv)
@@ -445,6 +459,7 @@ CombatSimulatorScreen.prototype.addSpawnlistToBox = function(_unit, _boxDiv)
         row.remove();
     })
     destroyButton.bindTooltip({ contentType: 'msu-generic', modId: CombatSimulator.ModID, elementId: "Screen.Spawnlist.Main.Delete"});
+    return row;
 }
 
 CombatSimulatorScreen.prototype.createAddBroScrollContainer = function(_dialog, _boxDiv)
@@ -498,6 +513,7 @@ CombatSimulatorScreen.prototype.addBroToBox = function(_unit, _boxDiv)
             row.remove();
         })
         .bindTooltip({ contentType: 'msu-generic', modId: CombatSimulator.ModID, elementId: "Screen.Units.Main.Delete"})
+    return row;
 }
 
 CombatSimulatorScreen.prototype.setData = function (_data)
@@ -571,6 +587,86 @@ CombatSimulatorScreen.prototype.gatherData = function()
     MSU.iterateObject(this.mFactions, function(_id, _faction){
         self.getFactionData(ret, _faction);
     })
+    this.copyData(ret);
+    return ret;
+}
+
+CombatSimulatorScreen.prototype.setFromString = function(_string)
+{
+    var self = this;
+    this.reset();
+    var data = JSON.parse(_string);
+    var setCheckboxFromBool = function(_checkbox, _bool)
+    {
+        if (_bool === true)
+            _checkbox.iCheck("check")
+        else _checkbox.iCheck("false")
+    }
+    this.mSettings.AllBaseTerrains = data.Settings.AllBaseTerrains;
+    this.mSettings.AllLocationTerrains = data.Settings.AllLocationTerrains;
+    this.mSettings.AllMusicTracks = data.Settings.AllMusicTracks;
+    this.mTerrainButton.changeButtonText(data.Settings.AllBaseTerrains);
+    this.mMapButton.changeButtonText(data.Settings.AllLocationTerrains);
+    this.mTrackButton.changeButtonText(data.Settings.AllMusicTracks);
+    setCheckboxFromBool(this.mSpawnCompanyCheck, data.Settings.SpawnCompany);
+    setCheckboxFromBool(this.mCutDownTreesCheck, data.Settings.CutDownTrees);
+    setCheckboxFromBool(this.mIsFleeingProhibitedCheck, data.Settings.IsFleeingProhibited);
+    setCheckboxFromBool(this.mFortificationCheck, data.Settings.Fortification);
+    $.each(data.Factions, function(_factionKey, _faction)
+    {
+        var factionDiv = self.mFactions[_faction.ID];
+        var spawnlistDiv = factionDiv.spawnlistScrollContainer;
+        var unitsDiv = factionDiv.unitsScrollContainer;
+
+        if (_faction.ControlUnits)
+            factionDiv.data("controlUnitsCheckbox").iCheck('check')
+
+        $.each(_faction.Spawnlists, function(_idx, _entry){
+            var spawnlist = self.mData.AllSpawnlists[_entry.ID];
+            if (spawnlist != null)
+            {
+                var row = self.addSpawnlistToBox(spawnlist, spawnlistDiv);
+                row.data("amount").val(_entry.Resources)
+            }
+        })
+        $.each(_faction.Units, function(_idx, _entry){
+            var unit = self.mData.AllUnits[_entry.Type];
+            if (unit != null)
+            {
+                var row = self.addUnitToBox(unit, unitsDiv);
+                row.data("amount").val(_entry.Num)
+            }
+        })
+        $.each(_faction.Bros, function(_idx, _entry){
+            var bro = self.mData.AllBrothers[_entry.ID];
+            if (bro != null)
+            {
+                var row = self.addBroToBox(bro, unitsDiv);
+                row.data("amount").val(_entry.Num)
+            }
+        })
+    })
+}
+
+CombatSimulatorScreen.prototype.copyData = function(_obj)
+{
+    var str = JSON.stringify(_obj);
+    var input = $('<input type="text"/>').appendTo($(".combatsim-container-layout"));
+    input.val(str);
+    input.select();
+    input.focus();
+    document.execCommand('copy');
+    input.remove();
+}
+
+CombatSimulatorScreen.prototype.pasteData = function()
+{
+    var input = $('<input type="text"/>').appendTo($(".combatsim-container-layout"));
+    input.select();
+    input.focus();
+    document.execCommand('paste');
+    var ret = input.val();
+    input.remove();
     return ret;
 }
 
