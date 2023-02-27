@@ -377,10 +377,10 @@ CombatSimulatorScreen.prototype.createAddUnitScrollContainer = function(_dialog,
     }, this))
 }
 
-CombatSimulatorScreen.prototype.addUnitToBox = function(_unit, _side, _key)
+CombatSimulatorScreen.prototype.addUnitToBox = function(_unit, _side)
 {
     var row = this.addRow(_side, "", true);
-    row.data("unitID", _key);
+    row.data("unitID", _unit.Key);
     row.data("unit", _unit);
 
     var name = $('<div class="title-font-normal font-color-subtitle combatsim-entry-label">' + _unit.DisplayName +  '</div>');
@@ -600,14 +600,14 @@ CombatSimulatorScreen.prototype.setFromString = function(_string)
     {
         if (_bool === true)
             _checkbox.iCheck("check")
-        else _checkbox.iCheck("false")
+        else _checkbox.iCheck("uncheck")
     }
-    this.mSettings.AllBaseTerrains = data.Settings.AllBaseTerrains;
-    this.mSettings.AllLocationTerrains = data.Settings.AllLocationTerrains;
-    this.mSettings.AllMusicTracks = data.Settings.AllMusicTracks;
-    this.mTerrainButton.changeButtonText(data.Settings.AllBaseTerrains);
-    this.mMapButton.changeButtonText(data.Settings.AllLocationTerrains);
-    this.mTrackButton.changeButtonText(data.Settings.AllMusicTracks);
+    this.mSettings.Terrain = data.Settings.Terrain;
+    this.mSettings.Map = data.Settings.Map;
+    this.mSettings.MusicTrack = data.Settings.MusicTrack;
+    this.mTerrainButton.changeButtonText(this.mSettings.Terrain);
+    this.mMapButton.changeButtonText(this.mSettings.Map);
+    this.mTrackButton.changeButtonText(this.mSettings.MusicTrack);
     setCheckboxFromBool(this.mSpawnCompanyCheck, data.Settings.SpawnCompany);
     setCheckboxFromBool(this.mCutDownTreesCheck, data.Settings.CutDownTrees);
     setCheckboxFromBool(this.mIsFleeingProhibitedCheck, data.Settings.IsFleeingProhibited);
@@ -617,7 +617,6 @@ CombatSimulatorScreen.prototype.setFromString = function(_string)
         var factionDiv = self.mFactions[_faction.ID];
         var spawnlistDiv = factionDiv.spawnlistScrollContainer;
         var unitsDiv = factionDiv.unitsScrollContainer;
-
         if (_faction.ControlUnits)
             factionDiv.data("controlUnitsCheckbox").iCheck('check')
 
