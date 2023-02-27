@@ -22,6 +22,8 @@ var CombatSimulatorScreen = function(_parent)
     this.mFactionsIdx = 0;
 
     this.mSettingIDCounters = {};
+
+    this.mActiveFilterBar = null;
     
 
     this.mData = null;
@@ -293,6 +295,7 @@ CombatSimulatorScreen.prototype.createArrayScrollContainer = function(_dialog, _
         }, this), "combatsim-text-button", 4);
         row.append(addButtonContainer);
     }, this))
+    this.focusActiveFilterBar();
 }
 
 CombatSimulatorScreen.prototype.createFactionDiv = function(_name, _id, _page)
@@ -370,11 +373,13 @@ CombatSimulatorScreen.prototype.createAddUnitScrollContainer = function(_dialog,
         var addButtonContainer = $('<div class="combatsim-text-button-layout"/>');
         var addButton = addButtonContainer.createTextButton("Add", $.proxy(function(_button){
             this.addUnitToBox(_unit, _side, _key);
+            this.focusActiveFilterBar();
         }, self), "combatsim-text-button", 4);
         addButton.bindTooltip({ contentType: 'msu-generic', modId: CombatSimulator.ModID, elementId: "Screen.Units.Main.Add"});
 
         row.append(addButtonContainer);
     }, this))
+    this.focusActiveFilterBar();
 }
 
 CombatSimulatorScreen.prototype.addUnitToBox = function(_unit, _side)
@@ -426,9 +431,11 @@ CombatSimulatorScreen.prototype.createAddSpawnlistScrollContainer = function(_di
         var addButtonContainer = $('<div class="combatsim-text-button-layout"/>');
         var addButton = addButtonContainer.createTextButton("Add", $.proxy(function(_button){
             this.addSpawnlistToBox(_unit, _boxDiv);
+            this.focusActiveFilterBar();
         }, self), "combatsim-text-button", 4);
         row.append(addButtonContainer);
     }, this))
+    this.focusActiveFilterBar();
 }
 
 CombatSimulatorScreen.prototype.addSpawnlistToBox = function(_unit, _boxDiv)
@@ -476,9 +483,11 @@ CombatSimulatorScreen.prototype.createAddBroScrollContainer = function(_dialog, 
             .appendTo(row);
         var addButton = addButtonContainer.createTextButton("Add", $.proxy(function(_button){
             this.addBroToBox(_unit, _boxDiv);
+            this.focusActiveFilterBar();
         }, self), "combatsim-text-button", 4);
         
     }, this))
+    this.focusActiveFilterBar();
 }
 
 CombatSimulatorScreen.prototype.addBroToBox = function(_unit, _boxDiv)
@@ -768,7 +777,16 @@ CombatSimulatorScreen.prototype.createFilterBar = function(_scrollContainer)
                 }
             })
         })
+    this.mActiveFilterBar = filterInput;
     return row;
+}
+
+CombatSimulatorScreen.prototype.focusActiveFilterBar = function()
+{
+    if (this.mActiveFilterBar === undefined || this.mActiveFilterBar === null || this.mActiveFilterBar.length === 0)
+        return;
+    this.mActiveFilterBar.focus();
+    this.mActiveFilterBar.select()
 }
 
 CombatSimulatorScreen.prototype.addRow = function(_div, _classes, _divider)
