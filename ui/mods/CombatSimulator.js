@@ -647,28 +647,6 @@ CombatSimulatorScreen.prototype.setFromString = function(_string)
     })
 }
 
-CombatSimulatorScreen.prototype.copyData = function(_obj)
-{
-    var str = JSON.stringify(_obj);
-    var input = $('<input type="text"/>').appendTo($(".combatsim-container-layout"));
-    input.val(str);
-    input.select();
-    input.focus();
-    document.execCommand('copy');
-    input.remove();
-}
-
-CombatSimulatorScreen.prototype.pasteData = function()
-{
-    var input = $('<input type="text"/>').appendTo($(".combatsim-container-layout"));
-    input.select();
-    input.focus();
-    document.execCommand('paste');
-    var ret = input.val();
-    input.remove();
-    return ret;
-}
-
 CombatSimulatorScreen.prototype.getFactionData = function(_ret, _div)
 {
     var ret = {
@@ -868,6 +846,28 @@ CombatSimulatorScreen.prototype.notifyBackendCancelButtonPressed = function ()
         SQ.call(this.mSQHandle, 'onCancelButtonPressed');
     }
 };
+
+CombatSimulatorScreen.prototype.copyData = function(_obj)
+{
+    var str = JSON.stringify(_obj);
+    var input = $('<input type="text"/>').appendTo($(".combatsim-container-layout"));
+    input.val(str);
+    input.select();
+    input.focus();
+    document.execCommand('copy');
+    input.remove();
+}
+
+CombatSimulatorScreen.prototype.pasteData = function()
+{
+    var input = $('<input type="text"/>').appendTo($(".combatsim-container-layout"));
+    input.select();
+    input.focus();
+    document.execCommand('paste');
+    var ret = input.val();
+    input.remove();
+    return ret;
+}
 
 CombatSimulatorScreen.prototype.testThings = function ()
 {  
