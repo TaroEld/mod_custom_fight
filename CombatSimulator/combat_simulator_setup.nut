@@ -152,7 +152,7 @@ this.combat_simulator_setup <- {
 
 		if (_data.Settings.SpawnCompany)
 		{
-			this.addCompanyToBattle(_data.Factions["faction-0"].Bros);
+			this.addCompanyToBattle(p.Players);
 		}
 
 		local controlUnits = false;
@@ -186,16 +186,13 @@ this.combat_simulator_setup <- {
 		local num = 0;
 		foreach( bro in ::World.getPlayerRoster().getAll() )
 		{
-			if (num++ >= this.World.Assets.getBrothersMaxInCombat())
-				break;
-
 			if (bro.getPlaceInFormation() > 17)
 				continue;
 
-			_broArray.push({
-				ID = bro.getID(),
-				Num = 1
-			});
+			if (num++ >= this.World.Assets.getBrothersMaxInCombat())
+				break;
+
+			_broArray.push(this.cloneBro(bro));
 		}
 	}
 
@@ -325,7 +322,7 @@ this.combat_simulator_setup <- {
 					Variant = 0,
 					Strength = 0,
 					Num = 1,
-					Row = 1,
+					Row = bro.getPlaceInFormation() > 9 ? 1 : 0,
 					NameList = ["abc"],
 					TitleList = null,
 				}
