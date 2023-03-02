@@ -1,7 +1,7 @@
 ::CombatSimulator <- {
 	ID = "mod_combat_simulator"
 	Name = "Combat Simulator"
-	Version = "0.9.3"
+	Version = "1.0.0"
 	Const = {}
 	function isCombatSimulatorFight()
 	{
