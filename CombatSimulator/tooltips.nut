@@ -4,6 +4,8 @@
 			Start = ::MSU.Class.BasicTooltip("Start Fight", "Start the fight with the chosen setup."),
 			Cancel = ::MSU.Class.BasicTooltip("Cancel", "Return to menu."),
 			Reset = ::MSU.Class.BasicTooltip("Reset", "Reset all settings."),
+			Copy = ::MSU.Class.BasicTooltip("Copy Setup", "Copy the current setup to the clipboard."),
+			Paste = ::MSU.Class.BasicTooltip("Paste Setup", "Paste the current setup from the clipboard."),
 		}
 		Settings = {
 			Terrain = ::MSU.Class.BasicTooltip("Choose Terrain", function(_data){

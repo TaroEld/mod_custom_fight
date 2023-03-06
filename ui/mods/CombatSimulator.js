@@ -245,12 +245,14 @@ CombatSimulatorScreen.prototype.createSettingsDiv = function()
     this.mCopyButton = copyRow.createTextButton("Copy", function(_div){
         self.copyData(self.gatherData());
     }, "combatsim-text-button", 4)
+    this.mCopyButton.bindTooltip({ contentType: 'msu-generic', modId: CombatSimulator.ModID, elementId: "Screen.Main.Copy"});
 
     var pasteRow = this.addRow(this.mSettingsBox);
     pasteRow.append(this.getTextDiv("Paste Setup", "label")); 
     this.mPasteButton = pasteRow.createTextButton("Paste", function(_div){
         self.setFromString(self.pasteData());
     }, "combatsim-text-button", 4)
+    this.mPasteButton.bindTooltip({ contentType: 'msu-generic', modId: CombatSimulator.ModID, elementId: "Screen.Main.Paste"});
 
 }
 CombatSimulatorScreen.prototype.switchFaction = function(_idx)
