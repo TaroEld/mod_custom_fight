@@ -152,7 +152,8 @@ this.combat_simulator_setup <- {
 
 		if (_data.Settings.SpawnCompany)
 		{
-			this.addCompanyToBattle(p.Players);
+			this.addCompanyToBattle(p.Players, p.CustomFactions["faction-0"]);
+			p.StartEmptyMode = false;
 		}
 
 		local controlUnits = false;
