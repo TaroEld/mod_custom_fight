@@ -182,7 +182,7 @@ this.combat_simulator_setup <- {
 		this.World.State.startScriptedCombat(p, false, false, true);
 	}
 
-	function addCompanyToBattle(_broArray)
+	function addCompanyToBattle(_broArray, _faction)
 	{
 		local num = 0;
 		foreach( bro in ::World.getPlayerRoster().getAll() )
@@ -193,27 +193,10 @@ this.combat_simulator_setup <- {
 			if (num++ >= this.World.Assets.getBrothersMaxInCombat())
 				break;
 
-			_broArray.push(this.cloneBro(bro));
-		}
-	}
-
-	function updatePlayerVisibility()
-	{
-		if (!::CombatSimulator.isCombatSimulatorFight() || !::MSU.Utils.getState("tactical_state").m.IsFogOfWarVisible)
-			return;
-
-		this.Tactical.fillVisibility(this.Const.Faction.Player, false);
-		foreach (idx, faction in this.Tactical.State.getStrategicProperties().CustomFactions)
-		{
-			if (!faction.m.ControlUnits)
-				continue;
-			local units = this.Tactical.Entities.getInstancesOfFaction(faction.getID());
-
-			foreach( i, unit in units )
-			{
-				if (faction.m.ControlUnits)
-					unit.updateVisibility(unit.getTile(), unit.m.CurrentProperties.getVision(), this.Const.Faction.Player);
-			}
+			local broClone = this.cloneBro(bro);
+			broClone.setFaction(_faction.getID())
+			this.setupBro(broClone);
+			_broArray.push(broClone);
 		}
 	}
 	
@@ -352,7 +335,7 @@ this.combat_simulator_setup <- {
 	{
 		if (!::CombatSimulator.isCombatSimulatorFight())
 			return;
-		if (::isKindOf(_e, "player"))
+		if (::isKindOf(_e, "player_clone"))
 			return this.setupBro(_e);
 		local faction = ::World.FactionManager.getFaction(_e.getFaction())
 
@@ -427,8 +410,6 @@ this.combat_simulator_setup <- {
 
 	function setupBro(_bro)
 	{
-		if (!this.Tactical.State.getStrategicProperties().IsUsingSetPlayers)
-			return;
 		local faction = ::World.FactionManager.getFaction(_bro.getFaction());
 		if(faction.m.ControlUnits)
 		{
@@ -445,6 +426,27 @@ this.combat_simulator_setup <- {
 				_bro.m.AIAgent.m.Actor = null;
 			_bro.m.AIAgent = this.new("scripts/ai/tactical/agents/charmed_player_agent");
 			_bro.m.AIAgent.setActor(_bro);
+		}
+		return _bro;
+	}
+
+	function updatePlayerVisibility()
+	{
+		if (!::CombatSimulator.isCombatSimulatorFight() || !::MSU.Utils.getState("tactical_state").m.IsFogOfWarVisible)
+			return;
+
+		this.Tactical.fillVisibility(this.Const.Faction.Player, false);
+		foreach (idx, faction in this.Tactical.State.getStrategicProperties().CustomFactions)
+		{
+			if (!faction.m.ControlUnits)
+				continue;
+			local units = this.Tactical.Entities.getInstancesOfFaction(faction.getID());
+
+			foreach( i, unit in units )
+			{
+				if (faction.m.ControlUnits)
+					unit.updateVisibility(unit.getTile(), unit.m.CurrentProperties.getVision(), this.Const.Faction.Player);
+			}
 		}
 	}
 
