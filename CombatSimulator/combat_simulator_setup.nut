@@ -116,7 +116,7 @@ this.combat_simulator_setup <- {
 	{
 		this.createRoster();
 		local old_spawnEntity = this.Tactical.spawnEntity;
-		this.Tactical.spawnEntity = function(_scriptOrBro, _x, _y, _id = null)
+		this.Tactical.spawnEntity = function(_scriptOrBro, _x = null, _y = null, _id = null)
 		{
 			if (typeof _scriptOrBro == "string")
 				return old_spawnEntity(_scriptOrBro, _x, _y, _id);
