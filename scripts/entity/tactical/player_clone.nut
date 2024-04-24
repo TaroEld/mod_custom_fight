@@ -165,4 +165,30 @@ this.player_clone <- this.inherit("scripts/entity/tactical/player", {
 	function assignRandomEquipment()
 	{
 	}
+
+	function getTooltip( _targetedWithSkill = null )
+	{
+		local ret = this.player.getTooltip(_targetedWithSkill);
+		if (!this.isPlacedOnMap() || !this.isAlive() || this.isDying())
+		{
+			return ret;
+		}
+
+		if (_targetedWithSkill != null && this.isKindOf(_targetedWithSkill, "skill") && (ret.len() > 1 && ret[1].icon != "ui/icons/hitchance.png"))
+		{
+			local tile = this.getTile();
+
+			if (tile.IsVisibleForEntity && _targetedWithSkill.isUsableOn(this.getTile()))
+			{
+				ret.insert(1, {
+					id = 3,
+					type = "headerText",
+					icon = "ui/icons/hitchance.png",
+					text = "[color=" + this.Const.UI.Color.PositiveValue + "]" + _targetedWithSkill.getHitchance(this) + "%[/color] chance to hit",
+					children = _targetedWithSkill.getHitFactors(tile)
+				});
+			}
+		}
+		return ret;
+	}
 })

@@ -42,6 +42,38 @@
 	::include("CombatSimulator/const/sprite_list");
 	::include("CombatSimulator/const/track_list");
 
+	::mods_hookNewObject("ui/screens/tooltip/tooltip_events", function(o)
+	{
+		local tactical_helper_getEntityTooltip = o.tactical_helper_getEntityTooltip;
+		o.tactical_helper_getEntityTooltip = function( _targetedEntity, _activeEntity, _isTileEntity )
+		{
+			local ret = tactical_helper_getEntityTooltip( _targetedEntity, _activeEntity, _isTileEntity );
+			if (ret != null || !::CombatSimulator.isCombatSimulatorFight())
+				return null
+			if (this.Tactical.State != null && this.Tactical.State.getCurrentActionState() == this.Const.Tactical.ActionState.SkillSelected)
+			{
+				if (_activeEntity != null && this.isKindOf(_targetedEntity, "actor") && _activeEntity.isPlayerControlled() && _targetedEntity != null && _targetedEntity.getFaction() != _activeEntity.getFaction())
+				{
+					local skill = _activeEntity.getSkills().getSkillByID(this.Tactical.State.getSelectedSkillID());
+
+					if (skill != null)
+					{
+						return this.tactical_helper_addContentTypeToTooltip(_targetedEntity, _targetedEntity.getTooltip(skill), _isTileEntity);
+					}
+				}
+
+				return null;
+			}
+
+			if (this.isKindOf(_targetedEntity, "entity"))
+			{
+				return this.tactical_helper_addContentTypeToTooltip(_targetedEntity, _targetedEntity.getTooltip(), _isTileEntity);
+			}
+
+			return null;
+		}
+	})
+
 	::mods_hookNewObject("entity/tactical/tactical_entity_manager", function(o){
 		local checkCombatFinished = o.checkCombatFinished;
 		o.checkCombatFinished = function( _forceFinish = false )
