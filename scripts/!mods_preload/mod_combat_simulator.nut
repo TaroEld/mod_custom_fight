@@ -112,12 +112,14 @@
 			local activeEntity = this.Tactical.TurnSequenceBar.getActiveEntity();
 			local activeEntityFaction = activeEntity.getFaction();
 			if (activeEntityFaction ==this.Const.Faction.Player)
+			if (activeEntityFaction == this.Const.Faction.Player)
 				return ret;
 
 			local units = this.Tactical.Entities.getInstancesOfFaction(activeEntityFaction);
 			foreach( i, unit in units )
 			{
 				if (unit.isPlayerControlled())
+				if (unit.ClassName == "player_clone")
 					extraUnits.push(this.UIDataHelper.convertEntityToUIData(unit, activeEntity));
 			}
 			if (ret != null)
