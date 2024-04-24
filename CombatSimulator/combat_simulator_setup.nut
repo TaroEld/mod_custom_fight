@@ -116,13 +116,16 @@ this.combat_simulator_setup <- {
 	{
 		this.createRoster();
 		local old_spawnEntity = this.Tactical.spawnEntity;
-		this.Tactical.spawnEntity = function(_scriptOrBro, _x = null, _y = null, _id = null)
+		this.Tactical.spawnEntity = function(...)
 		{
-			if (typeof _scriptOrBro == "string")
-				return old_spawnEntity(_scriptOrBro, _x, _y, _id);
+			if (typeof vargv[0] == "string")
+			{
+				vargv.insert(0, this);
+				return old_spawnEntity.acall(vargv);
+			}
 
-			this.Tactical.addEntityToMap(_scriptOrBro, _x, _y);
-			return _scriptOrBro;
+			this.Tactical.addEntityToMap(vargv[0], vargv[1], vargv[2]);
+			return vargv[0];
 		}
 		local p = this.Const.Tactical.CombatInfo.getClone();
 		p.Tile = this.World.State.getPlayer().getTile();
