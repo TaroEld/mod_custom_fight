@@ -21,6 +21,7 @@ this.combat_simulator_setup <- {
 		}
 		RosterID = ::Math.abs(toHash(::CombatSimulator.ID))
 		Roster = null
+		SpawnEntityWrapper = null
 	},
 
 	function createRoster()
@@ -148,17 +149,22 @@ this.combat_simulator_setup <- {
 	function setupFight(_data)
 	{
 		this.createRoster();
-		local old_spawnEntity = this.Tactical.spawnEntity;
-		this.Tactical.spawnEntity = function(...)
+		// wrap only once, otherwise every fight nests another wrapper around the previous one
+		if (this.m.SpawnEntityWrapper == null || this.Tactical.spawnEntity != this.m.SpawnEntityWrapper)
 		{
-			if (typeof vargv[0] == "string")
+			local old_spawnEntity = this.Tactical.spawnEntity;
+			this.m.SpawnEntityWrapper = function(...)
 			{
-				vargv.insert(0, this);
-				return old_spawnEntity.acall(vargv);
-			}
+				if (typeof vargv[0] == "string")
+				{
+					vargv.insert(0, this);
+					return old_spawnEntity.acall(vargv);
+				}
 
-			this.Tactical.addEntityToMap(vargv[0], vargv[1], vargv[2]);
-			return vargv[0];
+				this.Tactical.addEntityToMap(vargv[0], vargv[1], vargv[2]);
+				return vargv[0];
+			}
+			this.Tactical.spawnEntity = this.m.SpawnEntityWrapper;
 		}
 		local p = this.Const.Tactical.CombatInfo.getClone();
 		p.Tile = this.World.State.getPlayer().getTile();
