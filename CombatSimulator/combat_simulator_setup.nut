@@ -1,5 +1,6 @@
 this.combat_simulator_setup <- {
 	m = {
+		SpritesToCopy = ["head", "body", "hair", "beard", "beard_top", "injury_body", "tattoo_body", "tattoo_head", "scar_body", "scar_head", "socket", "miniboss"],
 		CustomFactions = {
 			"faction-0" : {
 			    ID = "faction-0",
@@ -365,8 +366,45 @@ this.combat_simulator_setup <- {
 		deSerEm.loadDataFromFlagContainer();
 		broClone.onDeserialize(deSerEm);
 
-		broClone.getBackground().setAppearance();
+		// Sprites aren't part of onSerialize (the engine saves them natively), so copy them from the original
+		this.copyAppearance(_bro, broClone);
 		return broClone;
+	}
+
+	function copyAppearance( _from, _to )
+	{
+		foreach (spriteName in this.m.SpritesToCopy)
+		{
+			if (_from.hasSprite(spriteName) && _to.hasSprite(spriteName))
+				this.copySprite(_from.getSprite(spriteName), _to.getSprite(spriteName));
+		}
+		_to.setDirty(true);
+	}
+
+	function copySprite( _from, _to )
+	{
+		if (_from.HasBrush)
+			_to.setBrush(_from.getBrush().Name);
+		else
+			_to.resetBrush();
+
+		foreach (k, _ in _from.__setTable)
+		{
+			if (k == "Color" || k == "Highlight")
+			{
+				// Build a new color instead of sharing the original's native object
+				local color = ::createColor("#ffffff");
+				foreach (k2, _ in _from[k].__setTable)
+				{
+					color[k2] = _from[k][k2];
+				}
+				_to[k] = color;
+			}
+			else
+			{
+				_to[k] = _from[k];
+			}
+		}
 	}
 
 	function setupEntity(_e)
