@@ -87,6 +87,10 @@
 			if (!::CombatSimulator.isCombatSimulatorFight())
 				return checkCombatFinished(_forceFinish);
 
+			// same early outs as vanilla; this runs every frame via update()
+			if (this.m.IsCombatFinished || this.m.Busy)
+				return;
+
 			local properties = this.Tactical.State.getStrategicProperties();
 			if (properties.StartEmptyMode)
 				return false;
