@@ -902,6 +902,8 @@ CombatSimulatorScreen.prototype.copyData = function(_obj)
     input.select();
     input.focus();
     document.execCommand('copy');
+    // removing a still-focused input leaves Coherent in a state where every later UI update is several times slower
+    input.blur();
     input.remove();
 }
 
@@ -912,6 +914,7 @@ CombatSimulatorScreen.prototype.pasteData = function()
     input.focus();
     document.execCommand('paste');
     var ret = input.val();
+    input.blur();
     input.remove();
     return ret;
 }
