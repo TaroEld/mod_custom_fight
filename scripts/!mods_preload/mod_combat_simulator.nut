@@ -9,10 +9,21 @@
 	}
 	function isCombatSimulatorFight()
 	{
-		if (::Tactical.State.isScenarioMode()) return false;
+		// In a combat, ask the combat itself. The flag can be stale: it is cleared only when a simulator fight ends
+		// normally, but the game autosaves at the start of every combat, so closing the game during a simulator fight
+		// leaves it set in that save, and every normal fight from it would be set up as a simulator fight.
+		if ("State" in ::Tactical && ::Tactical.State != null)
+		{
+			if (::Tactical.State.isScenarioMode()) return false;
 
+			// null briefly while the combat starts: tactical_state.onInit runs before setStrategicProperties
+			local properties = ::Tactical.State.getStrategicProperties();
+			if (properties != null)
+				return properties.CombatID == "CombatSimulator";
+		}
+
+		// On the world map: set from starting a simulator fight until the combat starts and ends
 		return ::World.Flags.get("isCombatSimulatorFight");
-
 	}
 }
 ::mods_registerMod(::CombatSimulator.ID, ::CombatSimulator.Version)
@@ -200,6 +211,15 @@
 		{
 			onReturnedFromTactical();
 			::CombatSimulator.Setup.cleanupAfterFight();
+		}
+
+		// A loaded campaign is never in a simulator fight. Clears a flag left set in a save, e.g. the combat autosave
+		// of a simulator fight during which the game was closed.
+		local onDeserialize = o.onDeserialize;
+		o.onDeserialize = function( _in )
+		{
+			onDeserialize(_in);
+			::CombatSimulator.setCombatSimulatorFightFlag(false);
 		}
 	})
 
